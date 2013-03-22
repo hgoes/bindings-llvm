@@ -163,19 +163,33 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "CompositeType"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "Type" []
+                                                 , ftName = "getTypeAtIndex"
+                                                 , ftArgs = [(False,normalT unsigned)]
+                                                 , ftOverloaded = True
+                                                 },GenHS,"compositeTypeGetTypeAtIndex_")
+                                     ,(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "indexValid"
+                                                 , ftArgs = [(False,normalT unsigned)]
+                                                 , ftOverloaded = True
+                                                 },GenHS,"compositeTypeIndexValid_")]
                   }
        ,ClassSpec { cspecHeader = "llvm/DerivedTypes.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "SequentialType"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "Type" []
+                                                 , ftName = "getElementType"
+                                                 , ftOverloaded = True
+                                                 },GenHS,"sequentialTypeGetElementType_")]
                   }
        ,ClassSpec { cspecHeader = "llvm/DerivedTypes.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "ArrayType"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT uint64_t
+                                                 , ftName = "getNumElements"
+                                                 },GenHS,"arrayTypeGetNumElements_")]
                   }
        ,ClassSpec { cspecHeader = "llvm/DerivedTypes.h"
                   , cspecNS = ["llvm"]
@@ -195,7 +209,16 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "VectorType"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT unsigned
+                                                 , ftName = "getNumElements"
+                                                 },GenHS,"vectorTypeGetNumElements_")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "VectorType" []
+                                                 , ftName = "get"
+                                                 , ftArgs = [(True,normalT $ ptr $ NamedType ["llvm"] "Type" [])
+                                                            ,(False,normalT unsigned)]
+                                                 , ftStatic = True
+                                                 },GenHS,"vectorTypeGet_")
+                                     ]
                   }
        ,ClassSpec { cspecHeader = "llvm/DerivedTypes.h"
                   , cspecNS = ["llvm"]
@@ -224,17 +247,17 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecTemplateArgs = []
                   , cspecFunctions = [(memberFun { ftReturnType = normalT bool
                                                  , ftName = "isVarArg"
-                                                 },GenHS,"isVarArg")
+                                                 },GenHS,"functionTypeIsVarArg")
                                      ,(memberFun { ftReturnType = normalT unsigned
                                                  , ftName = "getNumParams"
-                                                 },GenHS,"getNumParams_")
+                                                 },GenHS,"functionTypeGetNumParams_")
                                      ,(memberFun { ftReturnType = normalT (ptr $ NamedType ["llvm"] "Type" [])
                                                  , ftName = "getParamType"
                                                  , ftArgs = [(False,normalT unsigned)]
-                                                 },GenHS,"getParamType_")
+                                                 },GenHS,"functionTypeGetParamType_")
                                      ,(memberFun { ftReturnType = normalT (ptr $ NamedType ["llvm"] "Type" [])
                                                  , ftName = "getReturnType"
-                                                 },GenHS,"getReturnType")
+                                                 },GenHS,"functionTypeGetReturnType")
                                      ]
                   }
        ,ClassSpec { cspecHeader = "llvm/Value.h"

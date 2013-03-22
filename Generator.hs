@@ -105,6 +105,7 @@ size_t = NamedType [] "size_t" []
 bool = NamedType [] "bool" []
 unsigned = NamedType [] "unsigned" []
 int = NamedType [] "int" []
+uint64_t = NamedType [] "uint64_t" []
 ptr = PtrType
 ref = RefType
 
@@ -127,6 +128,7 @@ isCType (NamedType [] name []) = case name of
   "size_t" -> True
   "int" -> True
   "int64_t" -> True
+  "uint64_t" -> True
   "bool" -> True
   "unsigned" -> True
   _ -> False
@@ -168,6 +170,7 @@ toHaskellType addP False (Type q c) = toHSType (not addP) c
       "size_t" -> HsTyCon $ UnQual $ HsIdent "CSize"
       "int" -> HsTyCon $ UnQual $ HsIdent "CInt"
       "int64_t" -> HsTyCon $ UnQual $ HsIdent "Int64"
+      "uint64_t" -> HsTyCon $ UnQual $ HsIdent "Word64"
       "bool" -> HsTyCon $ UnQual $ HsIdent "Bool"
       "unsigned" -> HsTyCon $ UnQual $ HsIdent "CUInt"
       _ -> (if isP

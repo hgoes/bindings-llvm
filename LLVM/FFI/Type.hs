@@ -1,39 +1,56 @@
 module LLVM.FFI.Type
-       (Type() 
-       ,TypeC()
-       ,IntegerType()
-       ,FunctionType()
-       ,CompositeType()
-       ,CompositeTypeC()
-       ,StructType()
-       ,SequentialType()
-       ,SequentialTypeC()
-       ,ArrayType()
-       ,PointerType()
-       ,VectorType()
-       ,isVoidType
-       ,isHalfType
-       ,isFloatType
-       ,isDoubleType
-       ,isX86_FP80Type
-       ,isFP128Type
-       ,isPPC_FP128Type
-       ,isFloatingPointType
-       ,isX86_MMXType
-       ,isLabelType
-       ,typeDump 
-       ,getBitWidth
-       ,getIntegerType
-       ,isVarArg
-       ,getReturnType
-       ,structTypeIsPacked
-       ,structTypeHasName
-       ,structTypeGetName
-       ,structTypeGetNumElements
-       ,structTypeGetElementType
-       ,pointerTypeGet
-       ,pointerTypeGetAddressSpace
-       ) where
+       ( -- * Types
+         Type() 
+        ,TypeC()
+        ,isVoidType
+        ,isHalfType
+        ,isFloatType
+        ,isDoubleType
+        ,isX86_FP80Type
+        ,isFP128Type
+        ,isPPC_FP128Type
+        ,isFloatingPointType
+        ,isX86_MMXType
+        ,isLabelType
+        ,typeDump 
+         -- ** Integer Type
+        ,IntegerType()
+        ,getBitWidth
+        ,getIntegerType
+         -- ** Function Type
+        ,FunctionType()
+        ,functionTypeIsVarArg
+        ,functionTypeGetReturnType
+        ,functionTypeGetNumParams
+        ,functionTypeGetParamType
+         -- ** Composite Types
+        ,CompositeType()
+        ,CompositeTypeC()
+        ,compositeTypeGetTypeAtIndex
+        ,compositeTypeIndexValid
+         -- *** Struct Type
+        ,StructType()
+        ,structTypeIsPacked
+        ,structTypeHasName
+        ,structTypeGetName
+        ,structTypeGetNumElements
+        ,structTypeGetElementType
+         -- *** Sequential Types
+        ,SequentialType()
+        ,SequentialTypeC()
+        ,sequentialTypeGetElementType
+         -- **** Array Type
+        ,ArrayType()
+        ,arrayTypeGetNumElements
+         -- **** Pointer Type
+        ,PointerType()
+        ,pointerTypeGet
+        ,pointerTypeGetAddressSpace
+         -- **** Vector Type
+        ,VectorType()
+        ,vectorTypeGet
+        ,vectorTypeGetNumElements
+        ) where
 
 import LLVM.FFI.OOP
 import LLVM.FFI.Context
@@ -74,11 +91,11 @@ getBitWidth ptr = fmap fromIntegral (getBitWidth_ ptr)
 getIntegerType :: Ptr LLVMContext -> Integer -> IO (Ptr IntegerType)
 getIntegerType ctx bw = getIntegerType_ ctx (fromIntegral bw)
 
-getNumParams :: Ptr FunctionType -> IO Integer
-getNumParams ptr = fmap fromIntegral (getNumParams_ ptr)
+functionTypeGetNumParams :: Ptr FunctionType -> IO Integer
+functionTypeGetNumParams ptr = fmap fromIntegral (functionTypeGetNumParams_ ptr)
 
-getParamType :: Ptr FunctionType -> Integer -> IO (Ptr Type)
-getParamType ptr i = getParamType_ ptr (fromIntegral i)
+functionTypeGetParamType :: Ptr FunctionType -> Integer -> IO (Ptr Type)
+functionTypeGetParamType ptr i = functionTypeGetParamType_ ptr (fromIntegral i)
 
 isVoidType :: TypeC t => Ptr t -> Bool
 isVoidType = isVoidTy_
@@ -121,3 +138,21 @@ pointerTypeGetAddressSpace ptr = fmap toInteger (pointerTypeGetAddressSpace_ ptr
 
 pointerTypeGet :: TypeC t => Ptr t -> Integer -> IO (Ptr PointerType)
 pointerTypeGet ptr addr = pointerTypeGet_ ptr (fromInteger addr)
+
+sequentialTypeGetElementType :: SequentialTypeC t => Ptr t -> IO (Ptr Type)
+sequentialTypeGetElementType = sequentialTypeGetElementType_
+
+arrayTypeGetNumElements :: Ptr ArrayType -> IO Integer
+arrayTypeGetNumElements ptr = fmap toInteger $ arrayTypeGetNumElements_ ptr
+
+compositeTypeGetTypeAtIndex :: CompositeTypeC t => Ptr t -> Integer -> IO (Ptr Type)
+compositeTypeGetTypeAtIndex ptr idx = compositeTypeGetTypeAtIndex_ ptr (fromInteger idx)
+
+compositeTypeIndexValid :: CompositeTypeC t => Ptr t -> Integer -> IO Bool
+compositeTypeIndexValid ptr idx = compositeTypeIndexValid_ ptr (fromInteger idx)
+
+vectorTypeGetNumElements :: Ptr VectorType -> IO Integer
+vectorTypeGetNumElements ptr = fmap toInteger (vectorTypeGetNumElements_ ptr)
+
+vectorTypeGet :: TypeC t => Ptr t -> Integer -> IO (Ptr VectorType)
+vectorTypeGet tp num = vectorTypeGet_ tp (fromInteger num)
