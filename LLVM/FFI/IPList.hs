@@ -1,4 +1,11 @@
-module LLVM.FFI.IPList where
+module LLVM.FFI.IPList 
+       (Iplist(),
+        IPListC(..),
+        ipListSize,
+        ipListToList,
+        Ilist_iterator(),
+        IListIteratorC(..)
+       ) where
 
 import LLVM.FFI.Interface
 import Foreign
