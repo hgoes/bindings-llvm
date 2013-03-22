@@ -1,0 +1,45 @@
+name:           bindings-llvm
+version:        0.1
+author:         Henning Günther
+cabal-version:  >= 1.2
+build-type:     Custom
+
+library
+  build-tools:    cpphs
+  build-depends: base,tagged>=0.4
+  includes:             
+    --wrapper/llvm_proxy.h
+    wrapper/extra.h
+  include-dirs:         wrapper .
+  extra-libraries:      stdc++
+  c-sources:
+    --wrapper/llvm_wrap.cxx
+    wrapper/extra.cpp
+  ghc-options: -cpp -pgmPcpphs -optP--cpp
+  extensions:
+    ForeignFunctionInterface
+    CApiFFI
+    MultiParamTypeClasses
+    FlexibleInstances
+    TypeFamilies
+  exposed-modules:
+    LLVM.FFI.StringRef
+    LLVM.FFI.ErrorCode
+    LLVM.FFI.OOP
+    LLVM.FFI.Type
+    LLVM.FFI.Context
+    LLVM.FFI.Module
+    LLVM.FFI.MemoryBuffer
+    LLVM.FFI.OwningPtr
+    LLVM.FFI.SMDiagnostic
+    LLVM.FFI.Value
+    LLVM.FFI.User
+    LLVM.FFI.IPList
+    LLVM.FFI.Function
+    LLVM.FFI.BasicBlock
+    LLVM.FFI.Instruction
+    LLVM.FFI.Constant
+    LLVM.FFI.ArrayRef
+    LLVM.FFI.DebugLoc
+  other-modules:
+    LLVM.FFI.Interface
