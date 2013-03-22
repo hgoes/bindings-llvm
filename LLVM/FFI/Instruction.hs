@@ -1,59 +1,107 @@
 module LLVM.FFI.Instruction 
-       (Instruction(),
-        AtomicCmpXchgInst(),
-        AtomicRMWInst(),
-        BinaryOperator(),
-        CallInst(),
-        CmpInst(),
-        FCmpInst(),
-        ICmpInst(),
-        ExtractElementInst(),
-        FenceInst(),
-        GetElementPtrInst(),
-        InsertElementInst(),
-        InsertValueInst(),
-        LandingPadInst(),
-        PHINode(),
-        SelectInst(),
-        ShuffleVectorInst(),
-        StoreInst(),
-        TerminatorInst(),
-        BranchInst(),
-        IndirectBrInst(),
-        InvokeInst(),
-        ResumeInst(),
-        ReturnInst(),
-        SwitchInst(),
-        UnreachableInst(),
-        UnaryInstruction(),
-        AllocaInst(),
-        CastInst(),
-        BitCastInst(),
-        FPExtInst(),
-        FPToUIInst(),
-        FPTruncInst(),
-        IntToPtrInst(),
-        PtrToIntInst(),
-        SExtInst(),
-        SIToFPInst(),
-        TruncInst(),
-        UIToFPInst(),
-        ZExtInst(),
-        ExtractValueInst(),
-        LoadInst(),
-        VAArgInst(),
-        instructionGetParent,
-        instructionGetDebugLoc,
-        BinOpType(..),
-        binOpGetOpCode,
-        callInstIsTailCall,
-        callInstGetNumArgOperands,
-        callInstGetArgOperand,
-        callInstGetCalledValue,
-        FCmpOp(..),
-        getFCmpOp,
-        ICmpOp(..),
-        getICmpOp
+       (-- * Instructions
+         Instruction(),
+         InstructionC(),
+         instructionGetParent,
+         instructionGetDebugLoc,
+         -- ** Atomic Compare & Exchange Instruction
+         AtomicCmpXchgInst(),
+         -- ** Atomic Read & Modify & Write Instruction
+         AtomicRMWInst(),
+         -- ** Binary Operator
+         BinaryOperator(),
+         BinOpType(..),
+         binOpGetOpCode,
+         -- ** Call Instructions
+         CallInst(),
+         callInstIsTailCall,
+         callInstGetNumArgOperands,
+         callInstGetArgOperand,
+         callInstGetCalledValue,
+         -- ** Compare Instructions
+         CmpInst(),
+         CmpInstC(),
+         -- *** Float Compare Instruction
+         FCmpInst(),
+         FCmpOp(..),
+         getFCmpOp,
+         -- *** Integer Compare Instruction
+         ICmpInst(),
+         ICmpOp(..),
+         getICmpOp,
+         -- ** Extract Element Instruction
+         ExtractElementInst(),
+         -- ** Fence Instruction
+         FenceInst(),
+         -- ** Get Element Pointer Instruction
+         GetElementPtrInst(),
+         -- ** Insert Element Instruction
+         InsertElementInst(),
+         -- ** Insert Value Instruction
+         InsertValueInst(),
+         -- ** Landing Pad Instruction
+         LandingPadInst(),
+         -- ** PHI-Node
+         PHINode(),
+         -- ** Selection Instruction
+         SelectInst(),
+         -- ** Shuffle Vector Instruction
+         ShuffleVectorInst(),
+         -- ** Store Instruction
+         StoreInst(),
+         -- ** Terminator Instructions
+         TerminatorInst(),
+         TerminatorInstC(),
+         -- *** Branch Instruction
+         BranchInst(),
+         -- *** Indirect Branch Instruction
+         IndirectBrInst(),
+         -- *** Invoke Instruction
+         InvokeInst(),
+         -- *** Resume Instruction
+         ResumeInst(),
+         -- *** Return Instruction
+         ReturnInst(),
+         -- *** Switch Instruction
+         SwitchInst(),
+         -- *** Unreachable Instruction
+         UnreachableInst(),
+         -- ** Unary Instructions
+         UnaryInstruction(),
+         UnaryInstructionC(),
+         -- *** Allocation Instruction
+         AllocaInst(),
+         -- *** Casting Instructions
+         CastInst(),
+         CastInstC(),
+         -- **** Bitcasting Instruction
+         BitCastInst(),
+         -- **** Floating Point Extend Instruction
+         FPExtInst(),
+         -- **** Floating Point to Unsigned Integer Instruction
+         FPToUIInst(),
+         -- **** Floatting Point Truncation Instruction
+         FPTruncInst(),
+         -- **** Integer to Pointer Instruction
+         IntToPtrInst(),
+         -- **** Pointer to Integer Instruction
+         PtrToIntInst(),
+         -- **** Signed Extend Instruction
+         SExtInst(),
+         -- **** Signed Integer to Floating Point Instruction
+         SIToFPInst(),
+         -- **** Truncation Instruction
+         TruncInst(),
+         -- **** Unsigned Integer to Floating Point Instruction
+         UIToFPInst(),
+         -- **** Zero Extend Instrruction
+         ZExtInst(),
+         -- *** ExtractValue Instruction
+         ExtractValueInst(),
+         -- *** Loading Instruction
+         LoadInst(),
+         -- *** VarArg Instruction
+         VAArgInst()
        ) where
 
 import LLVM.FFI.Interface
