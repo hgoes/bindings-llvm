@@ -776,7 +776,17 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "PHINode"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT unsigned
+                                                 , ftName = "getNumIncomingValues"
+                                                 },GenHS,"phiNodeGetNumIncomingValues_")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "Value" []
+                                                 , ftName = "getIncomingValue"
+                                                 , ftArgs = [(False,normalT unsigned)]
+                                                 },GenHS,"phiNodeGetIncomingValue_")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "BasicBlock" []
+                                                 , ftName = "getIncomingBlock"
+                                                 , ftArgs = [(False,normalT unsigned)]
+                                                 },GenHS,"phiNodeGetIncomingBlock_")]
                   }
        ,ClassSpec { cspecHeader = "llvm/Instructions.h"
                   , cspecNS = ["llvm"]

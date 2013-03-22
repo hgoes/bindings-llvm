@@ -43,6 +43,9 @@ module LLVM.FFI.Instruction
          LandingPadInst(),
          -- ** PHI-Node
          PHINode(),
+         phiNodeGetNumIncomingValues,
+         phiNodeGetIncomingValue,
+         phiNodeGetIncomingBlock,
          -- ** Selection Instruction
          SelectInst(),
          -- ** Shuffle Vector Instruction
@@ -116,6 +119,15 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+phiNodeGetNumIncomingValues :: Ptr PHINode -> IO Integer
+phiNodeGetNumIncomingValues ptr = fmap toInteger (phiNodeGetNumIncomingValues_ ptr)
+
+phiNodeGetIncomingValue :: Ptr PHINode -> Integer -> IO (Ptr Value)
+phiNodeGetIncomingValue ptr idx = phiNodeGetIncomingValue_ ptr (fromInteger idx)
+
+phiNodeGetIncomingBlock :: Ptr PHINode -> Integer -> IO (Ptr BasicBlock)
+phiNodeGetIncomingBlock ptr idx = phiNodeGetIncomingBlock_ ptr (fromInteger idx)
 
 data BinOpType =
 #define HANDLE_BINARY_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
