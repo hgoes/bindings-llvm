@@ -949,7 +949,16 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecTemplateArgs = []
                   , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "PointerType" []
                                                  , ftName = "getType"
-                                                 },GenHS,"allocaInstGetType")]
+                                                 },GenHS,"allocaInstGetType")
+                                     ,(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "isArrayAllocation"
+                                                 },GenHS,"allocaInstIsArrayAllocation")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getArraySize"
+                                                 },GenHS,"allocaInstGetArraySize")
+                                     ,(memberFun { ftReturnType = normalT unsigned
+                                                 , ftName = "getAlignment"
+                                                 },GenHS,"allocaInstGetAlignment_")]
                   }
        ,ClassSpec { cspecHeader = "llvm/Instructions.h"
                   , cspecNS = ["llvm"]
@@ -1033,7 +1042,16 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "LoadInst"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "isVolatile"
+                                                 },GenHS,"loadInstIsVolatile")
+                                     ,(memberFun { ftReturnType = normalT unsigned
+                                                 , ftName = "getAlignment"
+                                                 },GenHS,"loadInstGetAlignment_")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getPointerOperand"
+                                                 },GenHS,"loadInstGetPointerOperand")
+                                     ]
                   }
        ,ClassSpec { cspecHeader = "llvm/Instructions.h"
                   , cspecNS = ["llvm"]

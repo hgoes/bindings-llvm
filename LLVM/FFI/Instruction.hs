@@ -100,6 +100,9 @@ module LLVM.FFI.Instruction
          UnaryInstructionC(),
          -- *** Allocation Instruction
          AllocaInst(),
+         allocaInstIsArrayAllocation,
+         allocaInstGetArraySize,
+         allocaInstGetAlignment,
          -- *** Casting Instructions
          CastInst(),
          CastInstC(),
@@ -129,6 +132,9 @@ module LLVM.FFI.Instruction
          ExtractValueInst(),
          -- *** Loading Instruction
          LoadInst(),
+         loadInstIsVolatile,
+         loadInstGetAlignment,
+         loadInstGetPointerOperand,
          -- *** VarArg Instruction
          VAArgInst()
        ) where
@@ -145,6 +151,12 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+loadInstGetAlignment :: Ptr LoadInst -> IO Integer
+loadInstGetAlignment ptr = fmap toInteger (loadInstGetAlignment_ ptr)
+
+allocaInstGetAlignment :: Ptr AllocaInst -> IO Integer
+allocaInstGetAlignment ptr = fmap toInteger (allocaInstGetAlignment_ ptr)
 
 storeInstGetAlignment :: Ptr StoreInst -> IO Integer
 storeInstGetAlignment ptr = fmap toInteger (storeInstGetAlignment_ ptr)
