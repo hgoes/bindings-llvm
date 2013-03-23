@@ -35,6 +35,10 @@ module LLVM.FFI.Instruction
          FenceInst(),
          -- ** Get Element Pointer Instruction
          GetElementPtrInst(),
+         getElementPtrInstGetPointerOperand,
+         getElementPtrInstIdxBegin,
+         getElementPtrInstIdxEnd,
+         getElementPtrInstIsInBounds,
          -- ** Insert Element Instruction
          InsertElementInst(),
          -- ** Insert Value Instruction
@@ -48,15 +52,26 @@ module LLVM.FFI.Instruction
          phiNodeGetIncomingBlock,
          -- ** Selection Instruction
          SelectInst(),
+         selectInstGetCondition,
+         selectInstGetTrueValue,
+         selectInstGetFalseValue,
          -- ** Shuffle Vector Instruction
          ShuffleVectorInst(),
          -- ** Store Instruction
          StoreInst(),
+         storeInstIsVolatile,
+         storeInstGetAlignment,
+         storeInstGetValueOperand,
+         storeInstGetPointerOperand,
          -- ** Terminator Instructions
          TerminatorInst(),
          TerminatorInstC(),
+         terminatorInstGetNumSuccessors,
+         terminatorInstGetSuccessor,
          -- *** Branch Instruction
          BranchInst(),
+         branchInstIsConditional,
+         branchInstGetCondition,
          -- *** Indirect Branch Instruction
          IndirectBrInst(),
          -- *** Invoke Instruction
@@ -65,8 +80,19 @@ module LLVM.FFI.Instruction
          ResumeInst(),
          -- *** Return Instruction
          ReturnInst(),
+         returnInstGetReturnValue,
          -- *** Switch Instruction
          SwitchInst(),
+         CaseIt(),
+         switchInstGetCondition,
+         switchInstCaseBegin,
+         switchInstCaseEnd,
+         switchInstCaseDefault,
+         caseItNext,
+         caseItPrev,
+         caseItEq,
+         caseItGetCaseValue,
+         caseItGetCaseSuccessor,
          -- *** Unreachable Instruction
          UnreachableInst(),
          -- ** Unary Instructions
@@ -119,6 +145,15 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+storeInstGetAlignment :: Ptr StoreInst -> IO Integer
+storeInstGetAlignment ptr = fmap toInteger (storeInstGetAlignment_ ptr)
+
+terminatorInstGetNumSuccessors :: TerminatorInstC t => Ptr t -> IO Integer
+terminatorInstGetNumSuccessors ptr = fmap toInteger $ terminatorInstGetNumSuccessors_ ptr
+
+terminatorInstGetSuccessor :: TerminatorInstC t => Ptr t -> Integer -> IO (Ptr BasicBlock)
+terminatorInstGetSuccessor ptr idx = terminatorInstGetSuccessor_ ptr (fromInteger idx)
 
 phiNodeGetNumIncomingValues :: Ptr PHINode -> IO Integer
 phiNodeGetNumIncomingValues ptr = fmap toInteger (phiNodeGetNumIncomingValues_ ptr)

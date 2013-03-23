@@ -750,7 +750,20 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecTemplateArgs = []
                   , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "PointerType" []
                                                  , ftName = "getType"
-                                                 },GenHS,"getElementPtrInstGetType")]
+                                                 },GenHS,"getElementPtrInstGetType")
+                                     ,(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "isInBounds"
+                                                 },GenHS,"getElementPtrInstIsInBounds")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getPointerOperand"
+                                                 },GenHS,"getElementPtrInstGetPointerOperand")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Use"
+                                                 , ftName = "idx_begin"
+                                                 },GenHS,"getElementPtrInstIdxBegin")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Use"
+                                                 , ftName = "idx_end"
+                                                 },GenHS,"getElementPtrInstIdxEnd")
+                                     ]
                   }
        ,ClassSpec { cspecHeader = "llvm/Instructions.h"
                   , cspecNS = ["llvm"]
@@ -792,7 +805,16 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "SelectInst"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getCondition"
+                                                 },GenHS,"selectInstGetCondition")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getTrueValue"
+                                                 },GenHS,"selectInstGetTrueValue")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getFalseValue"
+                                                 },GenHS,"selectInstGetFalseValue")
+                                     ]
                   }
        ,ClassSpec { cspecHeader = "llvm/Instructions.h"
                   , cspecNS = ["llvm"]
@@ -806,19 +828,44 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "StoreInst"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "isVolatile"
+                                                 },GenHS,"storeInstIsVolatile")
+                                     ,(memberFun { ftReturnType = normalT unsigned
+                                                 , ftName = "getAlignment"
+                                                 },GenHS,"storeInstGetAlignment_")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getValueOperand"
+                                                 },GenHS,"storeInstGetValueOperand")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getPointerOperand"
+                                                 },GenHS,"storeInstGetPointerOperand")
+                                     ]
                   }
        ,ClassSpec { cspecHeader = "llvm/InstrTypes.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "TerminatorInst"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT unsigned
+                                                 , ftName = "getNumSuccessors"
+                                                 , ftOverloaded = True
+                                                 },GenHS,"terminatorInstGetNumSuccessors_")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                                 , ftName = "getSuccessor"
+                                                 , ftArgs = [(False,normalT unsigned)]
+                                                 , ftOverloaded = True
+                                                 },GenHS,"terminatorInstGetSuccessor_")]
                   }
        ,ClassSpec { cspecHeader = "llvm/InstrTypes.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "BranchInst"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "isConditional"
+                                                 },GenHS,"branchInstIsConditional")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getCondition"
+                                                 },GenHS,"branchInstGetCondition")]
                   }
        ,ClassSpec { cspecHeader = "llvm/InstrTypes.h"
                   , cspecNS = ["llvm"]
@@ -842,13 +889,47 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "ReturnInst"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getReturnValue"
+                                                 },GenHS,"returnInstGetReturnValue")]
                   }
        ,ClassSpec { cspecHeader = "llvm/InstrTypes.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "SwitchInst"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "getCondition"
+                                                 },GenHS,"switchInstGetCondition")
+                                     ,(memberFun { ftReturnType = normalT $ NamedType ["llvm","SwitchInst"] "CaseIt" []
+                                                 , ftName = "case_begin"
+                                                 },GenHS,"switchInstCaseBegin")
+                                     ,(memberFun { ftReturnType = normalT $ NamedType ["llvm","SwitchInst"] "CaseIt" []
+                                                 , ftName = "case_end"
+                                                 },GenHS,"switchInstCaseEnd")
+                                     ,(memberFun { ftReturnType = normalT $ NamedType ["llvm","SwitchInst"] "CaseIt" []
+                                                 , ftName = "case_default"
+                                                 },GenHS,"switchInstCaseDefault")]
+                  }
+       ,ClassSpec { cspecHeader = "llvm/InstrTypes.h"
+                  , cspecNS = ["llvm","SwitchInst"]
+                  , cspecClassName = "CaseIt"
+                  , cspecTemplateArgs = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ NamedType ["llvm","SwitchInst"] "CaseIt" []
+                                                 , ftName = "operator++"
+                                                 },GenHS,"caseItNext")
+                                     ,(memberFun { ftReturnType = normalT $ NamedType ["llvm","SwitchInst"] "CaseIt" []
+                                                 , ftName = "operator--"
+                                                 },GenHS,"caseItPrev")
+                                     ,(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "operator=="
+                                                 , ftArgs = [(False,constT $ ref $ NamedType ["llvm","SwitchInst"] "CaseIt" [])]
+                                                 },GenHS,"caseItEq")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
+                                                 , ftName = "getCaseValue"
+                                                 },GenHS,"caseItGetCaseValue")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                                 , ftName = "getCaseSuccessor"
+                                                 },GenHS,"caseItGetCaseSuccessor")]
                   }
        ,ClassSpec { cspecHeader = "llvm/Instructions.h"
                   , cspecNS = ["llvm"]
