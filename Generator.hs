@@ -108,6 +108,7 @@ int = NamedType [] "int" []
 uint64_t = NamedType [] "uint64_t" []
 ptr = PtrType
 ref = RefType
+llvmType name = NamedType ["llvm"] name []
 
 toPtr :: Type -> Type
 toPtr (Type qual tp) = Type qual (ptr tp)

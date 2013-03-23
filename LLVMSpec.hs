@@ -980,4 +980,19 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecTemplateArgs = []
                   , cspecFunctions = []
                   }
+       ,ClassSpec { cspecHeader = "llvm/Use.h"
+                  , cspecNS = ["llvm"]
+                  , cspecClassName = "Use"
+                  , cspecTemplateArgs = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                                 , ftName = "get"
+                                                 },GenHS,"useGet")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Use"
+                                                 , ftName = "getNext"
+                                                 },GenHS,"useGetNext")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "User"
+                                                 , ftName = "getUser"
+                                                 },GenHS,"useGetUser")]
+
+                  }
        ]

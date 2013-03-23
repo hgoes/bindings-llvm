@@ -41,5 +41,6 @@ library
     LLVM.FFI.Constant
     LLVM.FFI.ArrayRef
     LLVM.FFI.DebugLoc
+    LLVM.FFI.Use
   other-modules:
     LLVM.FFI.Interface
