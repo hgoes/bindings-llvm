@@ -106,6 +106,7 @@ bool = NamedType [] "bool" []
 unsigned = NamedType [] "unsigned" []
 int = NamedType [] "int" []
 uint64_t = NamedType [] "uint64_t" []
+double = NamedType [] "double" []
 ptr = PtrType
 ref = RefType
 llvmType name = NamedType ["llvm"] name []
@@ -132,6 +133,7 @@ isCType (NamedType [] name []) = case name of
   "uint64_t" -> True
   "bool" -> True
   "unsigned" -> True
+  "double" -> True
   _ -> False
 isCType (PtrType tp) = isCType tp
 isCType _ = False
@@ -174,6 +176,7 @@ toHaskellType addP False (Type q c) = toHSType (not addP) c
       "uint64_t" -> HsTyCon $ UnQual $ HsIdent "Word64"
       "bool" -> HsTyCon $ UnQual $ HsIdent "Bool"
       "unsigned" -> HsTyCon $ UnQual $ HsIdent "CUInt"
+      "double" -> HsTyCon $ UnQual $ HsIdent "CDouble"
       _ -> (if isP
             then id 
             else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")

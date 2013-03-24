@@ -100,7 +100,15 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
               | tp <- ["Function","Instruction","BasicBlock"]
               , let rtp = Type [] (NamedType ["llvm"] tp [])
               ]++
-       [ClassSpec { cspecHeader = "llvm/Support/DebugLoc.h"
+       [ClassSpec { cspecHeader = "llvm/ADT/APFloat.h"
+                  , cspecNS = ["llvm"]
+                  , cspecClassName = "APFloat"
+                  , cspecTemplateArgs = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT double
+                                                 , ftName = "convertToDouble"
+                                                 },GenHS,"apFloatConvertToDouble")]
+                  }
+       ,ClassSpec { cspecHeader = "llvm/Support/DebugLoc.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "DebugLoc"
                   , cspecTemplateArgs = []
@@ -338,7 +346,11 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "BlockAddress"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                                 , ftName = "getAggregateElement"
+                                                 , ftArgs = [(False,normalT unsigned)]
+                                                 , ftOverloaded = True
+                                                 },GenHS,"constantGetAggregateElement_")]
                   }
        ,ClassSpec { cspecHeader = "llvm/Constants.h"
                   , cspecNS = ["llvm"]
@@ -377,13 +389,17 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "ConstantExpr"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [] --[(memberFun { ftReturnType = normalT $ ptr $ llvmType "Instruction"
+                                        --            , ftName = "getAsInstruction"
+                                        --            },GenHS,"constantExprGetAsInstruction")]
                   }
        ,ClassSpec { cspecHeader = "llvm/Constants.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "ConstantFP"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = constT $ ref $ llvmType "APFloat"
+                                                 , ftName = "getValueAPF"
+                                                 },GenHS,"constantFPGetValueAPF")]
                   }
        ,ClassSpec { cspecHeader = "llvm/Constants.h"
                   , cspecNS = ["llvm"]
@@ -436,7 +452,16 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "GlobalVariable"
                   , cspecTemplateArgs = []
-                  , cspecFunctions = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "isConstant"
+                                                 },GenHS,"globalVariableIsConstant")
+                                     ,(memberFun { ftReturnType = normalT bool
+                                                 , ftName = "isThreadLocal"
+                                                 },GenHS,"globalVariableIsThreadLocal")
+                                     ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                                 , ftName = "getInitializer"
+                                                 },GenHS,"globalVariableGetInitializer")
+                                     ]
                   }
        ,ClassSpec { cspecHeader = "llvm/Function.h"
                   , cspecNS = ["llvm"]

@@ -42,5 +42,6 @@ library
     LLVM.FFI.ArrayRef
     LLVM.FFI.DebugLoc
     LLVM.FFI.Use
+    LLVM.FFI.APFloat
   other-modules:
     LLVM.FFI.Interface

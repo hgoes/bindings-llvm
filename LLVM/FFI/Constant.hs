@@ -1,6 +1,6 @@
-{-# OPTIONS -cpp -pgmPcpphs -optP--cpp #-}
 module LLVM.FFI.Constant 
        (Constant(),ConstantC(),
+        constantGetAggregateElement,
         BlockAddress(),
         ConstantAggregateZero(),
         ConstantArray(),
@@ -8,6 +8,7 @@ module LLVM.FFI.Constant
         ConstantDataArray(),
         ConstantDataVector(),
         ConstantExpr(),
+        --constantExprGetAsInstruction,
         {-BinaryConstantExpr(),
         CompareConstantExpr(),
         ExtractElementConstantExpr(),
@@ -18,6 +19,7 @@ module LLVM.FFI.Constant
         ShuffleVectorConstantExpr(),
         UnaryConstantExpr(),-}
         ConstantFP(),
+        constantFPGetValueAPF,
         ConstantInt(),
         ConstantPointerNull(),
         ConstantStruct(),
@@ -26,6 +28,9 @@ module LLVM.FFI.Constant
         Function(),
         GlobalAlias(),
         GlobalVariable(),
+        globalVariableIsConstant,
+        globalVariableIsThreadLocal,
+        globalVariableGetInitializer,
         UndefValue(),
 #if HS_LLVM_VERSION > 301
         isNullValue,
@@ -45,6 +50,9 @@ import Foreign
 import Foreign.C
 
 #include "Helper.h"
+
+constantGetAggregateElement :: ConstantC t => Ptr t -> Integer -> IO (Ptr Constant)
+constantGetAggregateElement ptr idx = constantGetAggregateElement_ ptr (fromInteger idx)
 
 TYPE(Constant)
 SUBTYPE2(Value,User,Constant)
