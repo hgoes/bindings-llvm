@@ -106,6 +106,7 @@ bool = NamedType [] "bool" []
 unsigned = NamedType [] "unsigned" []
 int = NamedType [] "int" []
 uint64_t = NamedType [] "uint64_t" []
+int64_t = NamedType [] "int64_t" []
 double = NamedType [] "double" []
 ptr = PtrType
 ref = RefType

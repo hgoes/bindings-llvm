@@ -108,6 +108,20 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                                                  , ftName = "convertToDouble"
                                                  },GenHS,"apFloatConvertToDouble")]
                   }
+       ,ClassSpec { cspecHeader = "llvm/ADT/APInt.h"
+                  , cspecNS = ["llvm"]
+                  , cspecClassName = "APInt"
+                  , cspecTemplateArgs = []
+                  , cspecFunctions = [(memberFun { ftReturnType = normalT unsigned
+                                                 , ftName = "getBitWidth"
+                                                 },GenHS,"apIntGetBitWidth_")
+                                     ,(memberFun { ftReturnType = normalT uint64_t
+                                                 , ftName = "getZExtValue"
+                                                 },GenHS,"apIntGetZExtValue")
+                                     ,(memberFun { ftReturnType = normalT int64_t
+                                                 , ftName = "getSExtValue"
+                                                 },GenHS,"apIntGetSExtValue")]
+                  }
        ,ClassSpec { cspecHeader = "llvm/Support/DebugLoc.h"
                   , cspecNS = ["llvm"]
                   , cspecClassName = "DebugLoc"
