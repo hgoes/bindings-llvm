@@ -421,7 +421,10 @@ llvm = [ClassSpec { cspecHeader = "llvm/ADT/StringRef.h"
                   , cspecTemplateArgs = []
                   , cspecFunctions = [(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "IntegerType" []
                                                  , ftName = "getType"
-                                                 },GenHS,"constantIntGetType")]
+                                                 },GenHS,"constantIntGetType")
+                                     ,(memberFun { ftReturnType = constT $ ref $ llvmType "APInt"
+                                                 , ftName = "getValue"
+                                                 },GenHS,"constantIntGetValue")]
                   }
        ,ClassSpec { cspecHeader = "llvm/Constants.h"
                   , cspecNS = ["llvm"]

@@ -21,6 +21,7 @@ module LLVM.FFI.Constant
         ConstantFP(),
         constantFPGetValueAPF,
         ConstantInt(),
+        constantIntGetValue,
         ConstantPointerNull(),
         ConstantStruct(),
         ConstantVector(),
