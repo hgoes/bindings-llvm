@@ -44,5 +44,20 @@ library
     LLVM.FFI.Use
     LLVM.FFI.APFloat
     LLVM.FFI.APInt
+    LLVM.Target.Alpha
+    LLVM.Target.ARM
+    LLVM.Target.Blackfin
+    LLVM.Target.CBackend
+    LLVM.Target.CellSPU
+    LLVM.Target.CppBackend
+    LLVM.Target.Mips
+    LLVM.Target.MSP430
+    LLVM.Target.Native
+    LLVM.Target.PIC16
+    LLVM.Target.PowerPC
+    LLVM.Target.Sparc
+    LLVM.Target.SystemZ
+    LLVM.Target.X86
+    LLVM.Target.XCore
   other-modules:
     LLVM.FFI.Interface
