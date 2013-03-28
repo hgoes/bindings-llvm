@@ -44,6 +44,8 @@ library
     LLVM.FFI.Use
     LLVM.FFI.APFloat
     LLVM.FFI.APInt
+    LLVM.FFI.PassManager
+    LLVM.FFI.Pass
     LLVM.Target.Alpha
     LLVM.Target.ARM
     LLVM.Target.Blackfin
@@ -59,5 +61,6 @@ library
     LLVM.Target.SystemZ
     LLVM.Target.X86
     LLVM.Target.XCore
+    LLVM.FFI.Transforms.Scalar
   other-modules:
     LLVM.FFI.Interface

@@ -8,24 +8,31 @@ import Data.Char
 import System.FilePath
 import Data.Ord
 
-data ClassSpec
-  = ClassSpec { cspecHeader :: String
-              , cspecNS :: NS
-              , cspecClassName :: String
-              , cspecTemplateArgs :: [Type]
-              , cspecFunctions :: [(FunSpec,GenSpec,String)]
-              }
+data Spec
+  = Spec { specHeader :: String
+         , specNS :: NS
+         , specName :: String
+         , specTemplateArgs :: [Type]
+         , specType :: SpecType
+         }
+
+data SpecType
+  = ClassSpec { cspecFuns :: [(FunSpec,GenSpec,String)] }
+  | GlobalFunSpec { gfunReturnType :: Type
+                  , gfunArgs :: [(Bool,Type)]
+                  , gfunHSName :: String
+                  }
 
 data GenSpec = GenOnlyC
              | GenHS
 
-className :: ClassSpec -> String
-className cs = renderNS (cspecNS cs) ++
-               cspecClassName cs ++
-               renderTempl (cspecTemplateArgs cs)
+specFullName :: Spec -> String
+specFullName cs = renderNS (specNS cs) ++
+                  specName cs ++
+                  renderTempl (specTemplateArgs cs)
 
-classType :: ClassSpec -> Type
-classType cs = Type [] (NamedType (cspecNS cs) (cspecClassName cs) (cspecTemplateArgs cs))
+specFullType :: Spec -> Type
+specFullType cs = Type [] (NamedType (specNS cs) (specName cs) (specTemplateArgs cs))
 
 data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                            }
@@ -188,7 +195,7 @@ toHaskellType addP False (Type q c) = toHSType (not addP) c
          else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
         ) $ foldl HsTyApp (toHSType True (NamedType ns name [])) (fmap (toHaskellType False False) tmpl)
 
-writeWrapper :: String -> [ClassSpec] -> String -> String -> String -> [String] -> IO ()
+writeWrapper :: String -> [Spec] -> String -> String -> String -> [String] -> IO ()
 writeWrapper inc_sym spec build_path header_f wrapper_f ffi_f = do
   let (hcont,wcont) = generateWrapper inc_sym spec
   writeFile (build_path </> header_f) hcont
@@ -196,11 +203,11 @@ writeWrapper inc_sym spec build_path header_f wrapper_f ffi_f = do
   writeFile (build_path </> joinPath ffi_f <.> "hs") 
     (generateFFI ffi_f header_f spec)
 
-generateWrapper :: String -> [ClassSpec] -> (String,String)
+generateWrapper :: String -> [Spec] -> (String,String)
 generateWrapper inc_sym spec
-  = let includes = ["#include <"++cs++">" | cs <- nub $ fmap cspecHeader spec]
-        all_cont = concat [ fmap (generateWrapperFunction cs) (cspecFunctions cs)
-                          | cs <- spec ]
+  = let includes = ["#include <"++cs++">" | cs <- nub $ fmap specHeader spec]
+        all_cont = concat [ fmap (generateWrapperFunction cs) funs
+                          | cs@Spec { specType = ClassSpec funs } <- spec ]
         header_cont = unlines $ ["#ifndef "++inc_sym
                                 ,"#define "++inc_sym
                                 ,"#include <stdint.h>"
@@ -211,7 +218,25 @@ generateWrapper inc_sym spec
                        concat (fmap snd all_cont) ++ ["}"]
     in (header_cont,wrapper_cont)
   where
-    generateWrapperFunction :: ClassSpec -> (FunSpec,GenSpec,String) -> ([String],[String])
+    generateWrapperFunction' :: Type -> String -> [(Type,String)] -> ([(Type,String)] -> ([String],String)) -> ([String],[String])
+    generateWrapperFunction' rtp name args body
+      = let sig = renderType rtp'++" "++name++
+                  "("++(paramList $ fmap (\(tp,n,_) -> (tp,n)) args')++")"
+            (rtp',outC,_) = toCType rtp
+            (args',cmds) = unzip $ fmap (\(tp,name) -> let (tp',_,inC) = toCType tp
+                                                           (cmds,res) = inC name
+                                                       in ((tp',name,res),cmds)
+                                        ) args
+            (act,res1) = body $ fmap (\(tp,_,n) -> (tp,n)) args'
+            (conv,res2) = outC res1
+        in ([sig++";"],[sig++" {"]++
+                       concat cmds++
+                       act++
+                       conv++
+                       ["  return "++res2++";"
+                       ,"}"])
+    
+    generateWrapperFunction :: Spec -> (FunSpec,GenSpec,String) -> ([String],[String])
     generateWrapperFunction cls (fun,_,as)
       = let args = case fun of
               Constructor args -> mkArgs $ fmap snd args
@@ -220,7 +245,7 @@ generateWrapper inc_sym spec
                         , ftStatic = stat } -> (if stat
                                                 then id
                                                 else ((self_ptr,"self"):)) (mkArgs $ fmap snd $ args)
-            self_ptr = toPtr (classType cls)
+            self_ptr = toPtr (specFullType cls)
             (args',cmds) = unzip $ fmap (\(tp,name) -> let (tp',_,inC) = toCType tp
                                                            (cmds,res) = inC name
                                                        in ((tp',name,res),cmds)
@@ -229,31 +254,27 @@ generateWrapper inc_sym spec
               Constructor _ -> normalT $ ptr void
               Destructor _ -> normalT void
               MemberFun { ftReturnType = tp } -> tp
-            (rt',outC,_) = toCType rt
-            sig = renderType rt'++" "++as++"("++(paramList [ (tp,name) | (tp,name,_) <- args'])++")"
             body = case fun of
-              Constructor _ -> ["  return (void*) new "++className cls++"("++argList [ (tp,name) | (tp,_,name) <- args' ]++");"]
-              Destructor _ -> ["  "++className cls++"* rself = ("++className cls++"*)self;"
-                            ,"  delete rself;"]
+              Constructor _ -> \args' -> ([],"new "++specFullName cls++"("++argList args'++")")
+              Destructor _ -> \[(_,n)] -> (["delete "++n++";"],"")
               MemberFun { ftName = name 
                         , ftStatic = stat 
                         , ftTemplArgs = tmpl } 
-                -> let rself = "(("++className cls++"*)self)"
-                       rargs = if stat
-                               then args'
-                               else tail args'
-                       targs = case tmpl of
-                         [] -> ""
-                         _ -> "<"++concat (intersperse "," (fmap renderType tmpl))++">"
-                       (conv,res) = outC $ (if stat
-                                            then className cls ++ "::"
-                                            else rself++"->")++name++targs++
-                                    "("++argList [(tp,name) | (tp,_,name) <- rargs]++")"
-                   in conv++
-                      ["  return "++res++";"]
-        in ([sig++";"],[sig++" {"]++concat cmds++body++["}"])
+                -> \args' -> let rself = snd $ head args'
+                                 rargs = if stat
+                                         then args'
+                                         else tail args'
+                                 targs = case tmpl of
+                                   [] -> ""
+                                   _ -> "<"++concat (intersperse "," (fmap renderType tmpl))++">"
+                                 call = (if stat
+                                         then specFullName cls ++ "::"
+                                         else "("++rself++")->")++name++targs++
+                                              "("++argList rargs++")"
+                             in ([],call)
+        in generateWrapperFunction' rt as args body
 
-generateFFI :: [String] -> String -> [ClassSpec] -> String
+generateFFI :: [String] -> String -> [Spec] -> String
 generateFFI mname header specs 
   = unlines (["module "++concat (intersperse "." mname)++" where"
              ,""
@@ -261,36 +282,53 @@ generateFFI mname header specs
              ,"import Foreign.C"
              ,""]++dts++fns)
   where
-    dts = [ "data "++hsName (cspecClassName cs) ++
-            concat (fmap (\(_,i) -> " a"++show i) (zip (cspecTemplateArgs cs) [0..]))++
-            " = "++hsName (cspecClassName cs)
-          | cs <- nubBy (\x y -> cspecClassName x == cspecClassName y) specs
+    dts = [ "data "++hsName (specName cs) ++
+            concat (fmap (\(_,i) -> " a"++show i) (zip (specTemplateArgs cs) [0..]))++
+            " = "++hsName (specName cs)
+          | cs@Spec { specType = ClassSpec {} } <- nubBy (\x y -> specName x == specName y) specs
           ]
     fns = concat [ [""
                    ,"foreign import capi \""++header++" "++c_name++"\""
                    ,"  "++c_name++" :: "++sig]
                  | cs <- specs
-                 , (fun,GenHS,c_name) <- cspecFunctions cs
+                 , (tps,rtp,c_name) <- case specType cs of
+                   ClassSpec { cspecFuns = funs } 
+                     -> fmap (\(fun,_,cname) 
+                              -> case fun of
+                                MemberFun { ftArgs = r
+                                          , ftOverloaded = isO 
+                                          , ftPure = isP 
+                                          , ftStatic = isS
+                                          , ftReturnType = rtp }
+                                  -> ((if isS
+                                       then id
+                                       else ((toHaskellType True isO $ toPtr $ specFullType cs):))
+                                      (fmap (uncurry (toHaskellType True)) r),
+                                      (if isP
+                                       then id
+                                       else HsTyApp (HsTyCon $ UnQual $ HsIdent "IO"))
+                                      (toHaskellType True False rtp),
+                                      cname)
+                                Constructor { ftConArgs = r }
+                                  -> (fmap (uncurry $ toHaskellType True) r,
+                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
+                                      toHaskellType True False $ toPtr $ specFullType cs,
+                                      cname)
+                                Destructor { ftOverloadedDestructor = isO }
+                                  -> ([toHaskellType True isO $ toPtr $ specFullType cs],
+                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
+                                      toHaskellType True False $ normalT void,
+                                      cname)
+                             ) funs
+                   GlobalFunSpec { gfunReturnType = rtp
+                                 , gfunArgs = args
+                                 , gfunHSName = hsname } -> [(fmap (uncurry $ toHaskellType True) args,
+                                                              toHaskellType True False rtp,
+                                                              hsname)]
                  , let sig = (concat [ prettyPrint tp ++ " -> " 
-                                     | tp <- case fun of
-                                       MemberFun { ftArgs = r 
-                                                 , ftStatic = False 
-                                                 , ftOverloaded = isO } -> (toHaskellType True isO $toPtr $ classType cs)
-                                                                           :fmap (uncurry (toHaskellType True)) r
-                                       MemberFun { ftArgs = r
-                                                 , ftStatic = True } -> fmap (uncurry (toHaskellType True)) r
-                                       Constructor r -> fmap (uncurry $ toHaskellType True) r
-                                       Destructor over -> [toHaskellType True over $ toPtr $ classType cs]
+                                     | tp <- tps
                                      ]) ++
-                             prettyPrint ((case fun of
-                                             MemberFun { ftPure = True }
-                                               -> id
-                                             _ -> HsTyApp (HsTyCon $ UnQual $ HsIdent "IO"))
-                                          (toHaskellType True False $ case fun of
-                                              MemberFun { ftReturnType = t } -> t
-                                              Constructor _ -> toPtr $ classType cs
-                                              Destructor _ -> normalT void
-                                          ))
+                             prettyPrint rtp
                  ]
 
 hsName :: String -> String
