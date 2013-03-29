@@ -1214,6 +1214,23 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"passManagerRun")
                           ]
              }
+       ,Spec { specHeader = "llvm/PassManager.h"
+             , specNS = ["llvm"]
+             , specName = "FunctionPassManager"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [(False,normalT $ ptr $ llvmType "Module")],GenHS,"newFunctionPassManager")
+                          ,(Destructor False,GenHS,"deleteFunctionPassManager")
+                          ,(memberFun { ftReturnType = normalT void
+                                      , ftName = "add"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Pass")]
+                                      },GenHS,"functionPassManagerAdd_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "run"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "Function")]
+                                      },GenHS,"functionPassManagerRun")
+                          ]
+             }
        ,Spec { specHeader = "llvm/Pass.h"
              , specNS = ["llvm"]
              , specName = "Pass"
@@ -1225,6 +1242,43 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
              , specName = "FunctionPass"
              , specTemplateArgs = []
              , specType = ClassSpec []
+             }
+       ,Spec { specHeader = "llvm/Transforms/IPO/PassManagerBuilder.h"
+             , specNS = ["llvm"]
+             , specName = "PassManagerBuilder"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [],GenHS,"newPassManagerBuilder")
+                          ,(Destructor False,GenHS,"deletePassManagerBuilder")
+                          ,(memberFun { ftName = "populateFunctionPassManager"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "FunctionPassManager")
+                                                 ]
+                                      },GenHS,"populateFunctionPassManager")
+                          ,(Setter { ftSetVar = "OptLevel"
+                                   , ftSetType = normalT unsigned
+                                   },GenHS,"setPassManagerBuilderOptLevel")
+                          ,(Setter { ftSetVar = "SizeLevel"
+                                   , ftSetType = normalT unsigned
+                                   },GenHS,"setPassManagerBuilderSizeLevel")
+                          ,(Setter { ftSetVar = "Inliner"
+                                   , ftSetType = normalT $ ptr $ llvmType "Pass"
+                                   },GenHS,"setPassManagerBuilderInliner")
+                          ,(Setter { ftSetVar = "DisableSimplifyLibCalls"
+                                   , ftSetType = normalT bool
+                                   },GenHS,"setPassManagerBuilderDisableSimplifyLibCalls")
+                          ,(Setter { ftSetVar = "DisableUnitAtATime"
+                                   , ftSetType = normalT bool
+                                   },GenHS,"setPassManagerBuilderDisableUnitAtATime")
+                          ,(Setter { ftSetVar = "DisableUnrollLoops"
+                                   , ftSetType = normalT bool
+                                   },GenHS,"setPassManagerBuilderDisableUnrollLoops")
+                          ,(Setter { ftSetVar = "Vectorize"
+                                   , ftSetType = normalT bool
+                                   },GenHS,"setPassManagerBuilderVectorize")
+                          --,(Setter { ftSetVar = "LoopVectorize"
+                          --         , ftSetType = normalT bool
+                          --         },GenHS,"setPassManagerBuilderLoopVectorize")
+                          ]
              }
        ]++
        [Spec { specHeader = "llvm/Transforms/Scalar.h"

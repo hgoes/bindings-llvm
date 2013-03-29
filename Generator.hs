@@ -45,6 +45,12 @@ data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                          , ftOverloaded :: Bool
                          , ftPure :: Bool
                          }
+             | Setter { ftSetVar :: String
+                      , ftSetType :: Type
+                      }
+             | Getter { ftGetVar :: String
+                      , ftGetType :: Type
+                      }
 
 type OutConverter = String -> ([String],String)
 type InConverter = String -> ([String],String)
@@ -245,15 +251,16 @@ generateWrapper inc_sym spec
                         , ftStatic = stat } -> (if stat
                                                 then id
                                                 else ((self_ptr,"self"):)) (mkArgs $ fmap snd $ args)
+              Setter { ftSetVar = var
+                     , ftSetType = tp } -> [(self_ptr,"self"),(tp,"value")]
+              Getter { } -> [(self_ptr,"self")]
             self_ptr = toPtr (specFullType cls)
-            (args',cmds) = unzip $ fmap (\(tp,name) -> let (tp',_,inC) = toCType tp
-                                                           (cmds,res) = inC name
-                                                       in ((tp',name,res),cmds)
-                                        ) args
             rt = case fun of
               Constructor _ -> normalT $ ptr void
               Destructor _ -> normalT void
               MemberFun { ftReturnType = tp } -> tp
+              Setter {} -> normalT void
+              Getter { ftGetType = tp } -> tp
             body = case fun of
               Constructor _ -> \args' -> ([],"new "++specFullName cls++"("++argList args'++")")
               Destructor _ -> \[(_,n)] -> (["delete "++n++";"],"")
@@ -272,6 +279,12 @@ generateWrapper inc_sym spec
                                          else "("++rself++")->")++name++targs++
                                               "("++argList rargs++")"
                              in ([],call)
+              Getter { ftGetVar = name
+                     , ftGetType = tp
+                     } -> \[(_,self)] -> ([],"("++self++")->"++name)
+              Setter { ftSetVar = name
+                     , ftSetType = tp
+                     } -> \[(_,self),(_,val)] -> (["("++self++")->"++name++" = "++val++";"],"")
         in generateWrapperFunction' rt as args body
 
 generateFFI :: [String] -> String -> [Spec] -> String
@@ -319,6 +332,18 @@ generateFFI mname header specs
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
                                       toHaskellType True False $ normalT void,
                                       cname)
+                                Setter { ftSetType = tp }
+                                  -> ([toHaskellType True False $ toPtr $ specFullType cs,
+                                       toHaskellType True False tp],
+                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
+                                      toHaskellType True False $ normalT void,
+                                      cname)
+                                Getter { ftGetType = tp }
+                                  -> ([toHaskellType True False $ toPtr $ specFullType cs],
+                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
+                                      toHaskellType True False tp,
+                                      cname)
+                                      
                              ) funs
                    GlobalFunSpec { gfunReturnType = rtp
                                  , gfunArgs = args

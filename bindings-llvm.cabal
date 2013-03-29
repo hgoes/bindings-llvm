@@ -46,6 +46,7 @@ library
     LLVM.FFI.APInt
     LLVM.FFI.PassManager
     LLVM.FFI.Pass
+    LLVM.FFI.PassManagerBuilder
     LLVM.Target.Alpha
     LLVM.Target.ARM
     LLVM.Target.Blackfin
