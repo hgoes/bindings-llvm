@@ -43,6 +43,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                           [(Constructor { ftConArgs = [] },GenHS,"newArrayRefEmpty"++tp)
                           ,(Constructor { ftConArgs = [(False,toPtr rtp)
                                                       ,(False,normalT size_t)] },GenHS,"newArrayRef"++tp)
+                          ,(Destructor False,GenHS,"deleteArrayRef"++tp)
                           ,(memberFun { ftReturnType = normalT size_t
                                       , ftName = "size"
                                       },GenHS,"arrayRefSize"++tp)

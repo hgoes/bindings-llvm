@@ -56,7 +56,8 @@ instance ArrayRefC (Ptr name) where {\
   newArrayRef' = newArrayRef##name ;\
   arrayRefSize' = arrayRefSize##name ;\
   arrayRefEquals = arrayRefEquals##name ;\
-  arrayRefIndex' = arrayRefIndex##name\
+  arrayRefIndex' = arrayRefIndex##name ;\
+  deleteArrayRef = deleteArrayRef##name\
 }
 
 #define FUN(cls,name,sig)\

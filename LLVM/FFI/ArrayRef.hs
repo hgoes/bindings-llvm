@@ -15,6 +15,7 @@ class ArrayRefC a where
   arrayRefSize' :: Ptr (ArrayRef a) -> IO CSize
   arrayRefEquals :: Ptr (ArrayRef a) -> Ptr (ArrayRef a) -> IO Bool
   arrayRefIndex' :: Ptr (ArrayRef a) -> CSize -> IO (Ptr a)
+  deleteArrayRef :: Ptr (ArrayRef a) -> IO ()
 
 newArrayRef :: ArrayRefC a => Ptr a -> Integer -> IO (Ptr (ArrayRef a))
 newArrayRef ptr size = newArrayRef' ptr (fromIntegral size)
