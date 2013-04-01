@@ -27,4 +27,6 @@ extern int ICMP_SGE();
 extern int ICMP_SLT();
 extern int ICMP_SLE();
 
+extern int writeBitCodeToFile(void* m,const char* path);
+
 #endif

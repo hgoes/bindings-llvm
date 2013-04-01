@@ -1,4 +1,6 @@
 #include <llvm/InstrTypes.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 
 extern "C" {
   int FCMP_OEQ() {
@@ -72,5 +74,14 @@ extern "C" {
   }
   int ICMP_SLE() {
     return llvm::CmpInst::ICMP_SLE;
+  }
+
+  int writeBitCodeToFile(void* m,const char* path) {
+    std::string ErrorInfo;
+    llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::raw_fd_ostream::F_Binary);
+    if (!ErrorInfo.empty())
+      return -1;
+    llvm::WriteBitcodeToFile((llvm::Module*)m, OS);
+    return 0;
   }
 }

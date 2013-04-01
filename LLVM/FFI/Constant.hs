@@ -46,6 +46,7 @@ import LLVM.FFI.OOP
 import LLVM.FFI.Value
 import LLVM.FFI.User
 import LLVM.FFI.Type
+import LLVM.FFI.IPList
 
 import Foreign
 import Foreign.C
@@ -176,3 +177,4 @@ instance GetType GlobalVariable where
 
 GETTYPE(UndefValue)
 
+SPECIALIZE_IPLIST(GlobalVariable,capi)

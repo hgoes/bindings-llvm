@@ -2,6 +2,7 @@ module LLVM.FFI.Type
        ( -- * Types
          Type() 
         ,TypeC()
+        ,typeGetContext
         ,isVoidType
         ,isHalfType
         ,isFloatType
@@ -19,6 +20,7 @@ module LLVM.FFI.Type
         ,getIntegerType
          -- ** Function Type
         ,FunctionType()
+        ,newFunctionType
         ,functionTypeIsVarArg
         ,functionTypeGetReturnType
         ,functionTypeGetNumParams
@@ -30,6 +32,7 @@ module LLVM.FFI.Type
         ,compositeTypeIndexValid
          -- *** Struct Type
         ,StructType()
+        ,newStructType
         ,structTypeIsPacked
         ,structTypeHasName
         ,structTypeGetName
@@ -85,6 +88,9 @@ SPECIALIZE_ARRAYREF(Type,capi)
 typeDump :: TypeC t => Ptr t -> IO ()
 typeDump = typeDump_
 
+typeGetContext :: TypeC t => Ptr t -> IO (Ptr LLVMContext)
+typeGetContext = typeGetContext_
+
 getBitWidth :: Ptr IntegerType -> IO Integer
 getBitWidth ptr = fmap fromIntegral (getBitWidth_ ptr)
 
@@ -96,6 +102,9 @@ functionTypeGetNumParams ptr = fmap fromIntegral (functionTypeGetNumParams_ ptr)
 
 functionTypeGetParamType :: Ptr FunctionType -> Integer -> IO (Ptr Type)
 functionTypeGetParamType ptr i = functionTypeGetParamType_ ptr (fromIntegral i)
+
+newFunctionType :: TypeC rtp => Ptr rtp -> Ptr (ArrayRef (Ptr Type)) -> Bool -> IO (Ptr FunctionType)
+newFunctionType = newFunctionType_
 
 isVoidType :: TypeC t => Ptr t -> Bool
 isVoidType = isVoidTy_

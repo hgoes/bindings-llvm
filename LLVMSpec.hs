@@ -102,7 +102,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                               },GenHS,"listIterator"++tp++"NEq")]
                      }
                ]
-              | tp <- ["Function","Instruction","BasicBlock"]
+              | tp <- ["Function","Instruction","BasicBlock","GlobalVariable"]
               , let rtp = Type [] (NamedType ["llvm"] tp [])
               ]++
        [Spec { specHeader = "llvm/ADT/APFloat.h"
@@ -166,7 +166,12 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                           [(memberFun { ftReturnType = normalT void
                                       , ftName = "dump"
                                       , ftOverloaded = True
-                                      },GenHS,"typeDump_")]++
+                                      },GenHS,"typeDump_")
+                          ,(memberFun { ftReturnType = normalT $ ref $ llvmType "LLVMContext"
+                                      , ftName = "getContext"
+                                      , ftOverloaded = True
+                                      },GenHS,"typeGetContext_")
+                          ]++
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "is"++tp++"Ty"
                                       , ftOverloaded = True
@@ -277,7 +282,16 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType ["llvm"] "Type" []
                                       , ftName = "getElementType"
                                       , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"structTypeGetElementType_")]
+                                      },GenHS,"structTypeGetElementType_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
+                                      , ftName = "get"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                 ,(False,normalT $ NamedType ["llvm"] "ArrayRef"
+                                                        [normalT $ ptr $ llvmType "Type"])
+                                                 ,(False,normalT bool)]
+                                      , ftStatic = True
+                                      },GenHS,"newStructType")
+                          ]
              }
        ,Spec { specHeader = "llvm/DerivedTypes.h"
              , specNS = ["llvm"]
@@ -297,6 +311,15 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                           ,(memberFun { ftReturnType = normalT (ptr $ NamedType ["llvm"] "Type" [])
                                       , ftName = "getReturnType"
                                       },GenHS,"functionTypeGetReturnType")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionType"
+                                      , ftName = "get"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
+                                                 ,(False,normalT $ NamedType ["llvm"] "ArrayRef" 
+                                                            [normalT $ ptr $ llvmType "Type"])
+                                                 ,(False,normalT bool)
+                                                 ]
+                                      , ftStatic = True
+                                      },GenHS,"newFunctionType_")
                           ]
              }
        ,Spec { specHeader = "llvm/Value.h"
@@ -588,6 +611,15 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
              , specType = ClassSpec [(Constructor [],GenHS,"newLLVMContext")
                                     ,(Destructor False,GenHS,"deleteLLVMContext")]
              }
+       ,Spec { specHeader = "llvm/LLVMContext.h"
+             , specNS = ["llvm"]
+             , specName = "getGlobalContext"
+             , specTemplateArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT $ ref $ llvmType "LLVMContext"
+                                        , gfunArgs = []
+                                        , gfunHSName = "getGlobalContext"
+                                        }
+             }
        ,Spec { specHeader = "llvm/Module.h"
              , specNS = ["llvm"]
              , specName = "Module"
@@ -601,9 +633,14 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "dump"
                                       },GenHS,"moduleDump")
                           ,(memberFun { ftReturnType = normalT $ RefType $ NamedType ["llvm"] "iplist"
-                                                       [normalT $ NamedType ["llvm"] "Function" []] 
+                                                       [normalT $ NamedType ["llvm"] "Function" []]
                                       , ftName = "getFunctionList"
-                                      },GenHS,"getFunctionList") ]
+                                      },GenHS,"getFunctionList")
+                          ,(memberFun { ftReturnType = normalT $ ref $ NamedType ["llvm"] "iplist"
+                                                       [normalT $ NamedType ["llvm"] "GlobalVariable" []]
+                                      , ftName = "getGlobalList"
+                                      },GenHS,"getGlobalList")
+                          ]
              }
        ,Spec { specHeader = "llvm/Support/IRReader.h"
              , specNS = []

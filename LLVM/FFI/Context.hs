@@ -2,6 +2,7 @@ module LLVM.FFI.Context
        (LLVMContext()
        ,newLLVMContext
        ,deleteLLVMContext
+       ,getGlobalContext
        ,withContext)
        where
 
