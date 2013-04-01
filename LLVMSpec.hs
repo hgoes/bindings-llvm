@@ -1273,13 +1273,36 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
              , specNS = ["llvm"]
              , specName = "Pass"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec 
+                          [(memberFun { ftReturnType = constT $ ptr $ llvmType "PassInfo"
+                                      , ftName = "lookupPassInfo"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                      , ftStatic = True
+                                      },GenHS,"passLookupPassInfo")
+                           ]
              }
        ,Spec { specHeader = "llvm/Pass.h"
              , specNS = ["llvm"]
              , specName = "FunctionPass"
              , specTemplateArgs = []
              , specType = ClassSpec []
+             }
+       ,Spec { specHeader = "llvm/PassSupport.h"
+             , specNS = ["llvm"]
+             , specName = "PassInfo"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Destructor False,GenHS,"deletePassInfo")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Pass"
+                                      , ftName = "createPass"
+                                      },GenHS,"passInfoCreatePass")
+                          ,(memberFun { ftReturnType = constT $ ptr $ char
+                                      , ftName = "getPassName"
+                                      },GenHS,"passInfoGetPassName_")
+                          ,(memberFun { ftReturnType = constT $ ptr $ char
+                                      , ftName = "getPassArgument"
+                                      },GenHS,"passInfoGetPassArgument_")
+                          ]
              }
        ,Spec { specHeader = "llvm/Transforms/IPO/PassManagerBuilder.h"
              , specNS = ["llvm"]
