@@ -13,6 +13,7 @@ module LLVM.FFI.Type
         ,isFloatingPointType
         ,isX86_MMXType
         ,isLabelType
+        ,isMetadataType
         ,typeDump 
          -- ** Integer Type
         ,IntegerType()
@@ -135,6 +136,9 @@ isX86_MMXType = isX86_MMXTy_
 
 isLabelType :: TypeC t => Ptr t -> Bool
 isLabelType = isLabelTy_
+
+isMetadataType :: TypeC t => Ptr t -> Bool
+isMetadataType = isMetadataTy_
 
 structTypeGetNumElements :: Ptr StructType -> IO Integer
 structTypeGetNumElements ptr = fmap toInteger $ structTypeGetNumElements_ ptr

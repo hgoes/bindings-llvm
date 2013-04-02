@@ -190,7 +190,7 @@ llvm version
                                       , ftPure = True
                                       },GenHS,"is"++tp++"Ty_")
                            | tp <- ["Void","Half","Float","Double","X86_FP80","FP128","PPC_FP128"
-                                  ,"FloatingPoint","X86_MMX","Label"]
+                                  ,"FloatingPoint","X86_MMX","Label","Metadata"]
                           ]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
