@@ -26,7 +26,6 @@ module LLVM.FFI.Constant
         ConstantStruct(),
         ConstantVector(),
         GlobalValue(),
-        Function(),
         GlobalAlias(),
         GlobalVariable(),
         globalVariableIsConstant,

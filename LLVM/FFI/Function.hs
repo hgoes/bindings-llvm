@@ -1,9 +1,9 @@
 module LLVM.FFI.Function 
-       (getBasicBlockList
+       (Function()
+       ,getBasicBlockList
        )where
 
 import LLVM.FFI.Interface
-import LLVM.FFI.Constant
 import LLVM.FFI.IPList
 import LLVM.FFI.BasicBlock
 
