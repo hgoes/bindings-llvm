@@ -194,7 +194,7 @@ callInstGetNumArgOperands :: Ptr CallInst -> IO Integer
 callInstGetNumArgOperands ptr = fmap toInteger (callInstGetNumArgOperands_ ptr)
 
 callInstGetArgOperand :: Ptr CallInst -> Integer -> IO (Ptr Value)
-callInstGetArgOperand ptr idx = callInstGetArgOperand ptr (fromInteger idx)
+callInstGetArgOperand ptr idx = callInstGetArgOperand_ ptr (fromInteger idx)
 
 foreign import capi "extra.h FCMP_OEQ"
   fCMP_OEQ :: CInt
