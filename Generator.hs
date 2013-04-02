@@ -212,8 +212,10 @@ writeWrapper inc_sym spec build_path header_f wrapper_f ffi_f = do
 generateWrapper :: String -> [Spec] -> (String,String)
 generateWrapper inc_sym spec
   = let includes = ["#include <"++cs++">" | cs <- nub $ fmap specHeader spec]
-        all_cont = concat [ fmap (generateWrapperFunction cs) funs
-                          | cs@Spec { specType = ClassSpec funs } <- spec ]
+        all_cont = concat [ case specType cs of
+                               ClassSpec funs -> fmap (generateWrapperFunction cs) funs
+                               GlobalFunSpec rtp args hsname -> [generateGlobalWrapper cs rtp args hsname]
+                          | cs <- spec ]
         header_cont = unlines $ ["#ifndef "++inc_sym
                                 ,"#define "++inc_sym
                                 ,"#include <stdint.h>"
@@ -241,6 +243,11 @@ generateWrapper inc_sym spec
                        conv++
                        ["  return "++res2++";"
                        ,"}"])
+    
+    generateGlobalWrapper :: Spec -> Type -> [(Bool,Type)] -> String -> ([String],[String])
+    generateGlobalWrapper cls rtp args hsname
+      = generateWrapperFunction' rtp hsname (mkArgs (fmap snd args))
+        (\args' -> ([],specFullName cls++"("++argList args'++")"))
     
     generateWrapperFunction :: Spec -> (FunSpec,GenSpec,String) -> ([String],[String])
     generateWrapperFunction cls (fun,_,as)
