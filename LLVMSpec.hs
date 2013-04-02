@@ -1,26 +1,38 @@
 module LLVMSpec where
 
+import Data.Version
 import Generator
 import CPPType
 
-llvm :: [Spec]
-llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
-             , specNS = ["llvm"]
-             , specName = "StringRef"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(Constructor { ftConArgs = [] },GenHS,"newStringRefEmpty")
-                          ,(Constructor { ftConArgs = [(False,constT cstring)] },GenHS,"newStringRef_")
-                          ,(Destructor False,GenHS,"deleteStringRef")
-                          ,(memberFun { ftReturnType = constT cstring
-                                      , ftName = "data"
-                                      },GenHS,"stringRefData_")
-                          ,(memberFun { ftReturnType = normalT size_t
-                                      , ftName = "size"
-                                      },GenHS,"stringRefSize_")
-                          ]
-             }
-       ]++
+llvm3_3 :: Version
+llvm3_3 = Version { versionBranch = [3,3]
+                  , versionTags = []
+                  }
+
+irInclude :: Version -> String -> String
+irInclude ver hdr = if ver >= llvm3_3
+                    then "llvm/IR/"++hdr
+                    else "llvm/"++hdr
+
+llvm :: Version -> [Spec]
+llvm version
+  = [Spec { specHeader = "llvm/ADT/StringRef.h"
+          , specNS = ["llvm"]
+          , specName = "StringRef"
+          , specTemplateArgs = []
+          , specType = ClassSpec
+                       [(Constructor { ftConArgs = [] },GenHS,"newStringRefEmpty")
+                       ,(Constructor { ftConArgs = [(False,constT cstring)] },GenHS,"newStringRef_")
+                       ,(Destructor False,GenHS,"deleteStringRef")
+                       ,(memberFun { ftReturnType = constT cstring
+                                   , ftName = "data"
+                                   },GenHS,"stringRefData_")
+                       ,(memberFun { ftReturnType = normalT size_t
+                                   , ftName = "size"
+                                   },GenHS,"stringRefSize_")
+                       ]
+          }
+    ]++
        [Spec { specHeader = "llvm/ADT/OwningPtr.h"
              , specNS = ["llvm"]
              , specName = "OwningPtr"
@@ -158,7 +170,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                           ]
              }
        ]++
-       [Spec { specHeader = "llvm/Type.h"
+       [Spec { specHeader = irInclude version "Type.h"
              , specNS = ["llvm"]
              , specName = "Type"
              , specTemplateArgs = []
@@ -181,7 +193,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                   ,"FloatingPoint","X86_MMX","Label"]
                           ]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "IntegerType"
              , specTemplateArgs = []
@@ -196,7 +208,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftStatic = True
                                       },GenHS,"getIntegerType_")]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "CompositeType"
              , specTemplateArgs = []
@@ -212,7 +224,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"compositeTypeIndexValid_")]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "SequentialType"
              , specTemplateArgs = []
@@ -222,7 +234,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"sequentialTypeGetElementType_")]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "ArrayType"
              , specTemplateArgs = []
@@ -231,7 +243,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getNumElements"
                                       },GenHS,"arrayTypeGetNumElements_")]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "PointerType"
              , specTemplateArgs = []
@@ -246,7 +258,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftStatic = True
                                       },GenHS,"pointerTypeGet_")]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "VectorType"
              , specTemplateArgs = []
@@ -262,7 +274,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"vectorTypeGet_")
                           ]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "StructType"
              , specTemplateArgs = []
@@ -293,7 +305,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"newStructType")
                           ]
              }
-       ,Spec { specHeader = "llvm/DerivedTypes.h"
+       ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = ["llvm"]
              , specName = "FunctionType"
              , specTemplateArgs = []
@@ -322,7 +334,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"newFunctionType_")
                           ]
              }
-       ,Spec { specHeader = "llvm/Value.h"
+       ,Spec { specHeader = irInclude version "Value.h"
              , specNS = ["llvm"]
              , specName = "Value"
              , specTemplateArgs = []
@@ -345,13 +357,13 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"valueGetType_")
                           ]
              }
-       ,Spec { specHeader = "llvm/Argument.h"
+       ,Spec { specHeader = irInclude version "Argument.h"
              , specNS = ["llvm"]
              , specName = "Argument"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/BasicBlock.h"
+       ,Spec { specHeader = irInclude version "BasicBlock.h"
              , specNS = ["llvm"]
              , specName = "BasicBlock"
              , specTemplateArgs = []
@@ -368,19 +380,19 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"getTerminator")
                           ]
              }
-       ,Spec { specHeader = "llvm/InlineAsm.h"
+       ,Spec { specHeader = irInclude version "InlineAsm.h"
              , specNS = ["llvm"]
              , specName = "InlineAsm"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Metadata.h"
+       ,Spec { specHeader = irInclude version "Metadata.h"
              , specNS = ["llvm"]
              , specName = "MDNode"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Metadata.h"
+       ,Spec { specHeader = irInclude version "Metadata.h"
              , specNS = ["llvm"]
              , specName = "MDString"
              , specTemplateArgs = []
@@ -392,13 +404,28 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Constant.h"
+       ,Spec { specHeader = irInclude version "Constant.h"
              , specNS = ["llvm"]
              , specName = "Constant"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec 
+                          (if version >= llvm3_3
+                           then [(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isNullValue"
+                                            },GenHS,"isNullValue")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "canTrap"
+                                            },GenHS,"canTrap")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isThreadDependent"
+                                            },GenHS,"isThreadDependent")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isConstantUsed"
+                                            },GenHS,"isConstantUsed")
+                                ]
+                           else [])
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "BlockAddress"
              , specTemplateArgs = []
@@ -409,7 +436,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"constantGetAggregateElement_")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantArray"
              , specTemplateArgs = []
@@ -418,7 +445,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"constantArrayGetType")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantDataSequential"
              , specTemplateArgs = []
@@ -428,7 +455,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"constantDataSequentialGetType")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantDataArray"
              , specTemplateArgs = []
@@ -437,7 +464,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"constantDataArrayGetType")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantDataVector"
              , specTemplateArgs = []
@@ -446,7 +473,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"constantDataVectorGetType")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantExpr"
              , specTemplateArgs = []
@@ -454,7 +481,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                         --            , ftName = "getAsInstruction"
                                         --            },GenHS,"constantExprGetAsInstruction")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantFP"
              , specTemplateArgs = []
@@ -463,7 +490,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getValueAPF"
                                       },GenHS,"constantFPGetValueAPF")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantInt"
              , specTemplateArgs = []
@@ -475,7 +502,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getValue"
                                       },GenHS,"constantIntGetValue")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantPointerNull"
              , specTemplateArgs = []
@@ -484,7 +511,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"constantPointerNullGetType")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantStruct"
              , specTemplateArgs = []
@@ -493,7 +520,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"constantStructGetType")]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantVector"
              , specTemplateArgs = []
@@ -502,7 +529,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"constantVectorGetType")]
              }
-       ,Spec { specHeader = "llvm/GlobalValue.h"
+       ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = ["llvm"]
              , specName = "GlobalValue"
              , specTemplateArgs = []
@@ -512,13 +539,13 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"globalValueGetType")]
              }
-       ,Spec { specHeader = "llvm/GlobalValue.h"
+       ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = ["llvm"]
              , specName = "GlobalAlias"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/GlobalValue.h"
+       ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = ["llvm"]
              , specName = "GlobalVariable"
              , specTemplateArgs = []
@@ -534,7 +561,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"globalVariableGetInitializer")
                           ]
              }
-       ,Spec { specHeader = "llvm/Function.h"
+       ,Spec { specHeader = irInclude version "Function.h"
              , specNS = ["llvm"]
              , specName = "Function"
              , specTemplateArgs = []
@@ -551,7 +578,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"getEntryBlock")
                           ]
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "UndefValue"
              , specTemplateArgs = []
@@ -604,14 +631,14 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"getColumnNo_")
                           ]
              }
-       ,Spec { specHeader = "llvm/LLVMContext.h"
+       ,Spec { specHeader = irInclude version "LLVMContext.h"
              , specNS = ["llvm"]
              , specName = "LLVMContext"
              , specTemplateArgs = []
              , specType = ClassSpec [(Constructor [],GenHS,"newLLVMContext")
                                     ,(Destructor False,GenHS,"deleteLLVMContext")]
              }
-       ,Spec { specHeader = "llvm/LLVMContext.h"
+       ,Spec { specHeader = irInclude version "LLVMContext.h"
              , specNS = ["llvm"]
              , specName = "getGlobalContext"
              , specTemplateArgs = []
@@ -620,7 +647,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                         , gfunHSName = "getGlobalContext"
                                         }
              }
-       ,Spec { specHeader = "llvm/Module.h"
+       ,Spec { specHeader = irInclude version "Module.h"
              , specNS = ["llvm"]
              , specName = "Module"
              , specTemplateArgs = []
@@ -771,13 +798,13 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Constants.h"
+       ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = ["llvm"]
              , specName = "ConstantAggregateZero"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instruction.h"
+       ,Spec { specHeader = irInclude version "Instruction.h"
              , specNS = ["llvm"]
              , specName = "Instruction"
              , specTemplateArgs = []
@@ -789,19 +816,19 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getDebugLoc"
                                       },GenHS,"instructionGetDebugLoc")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "AtomicCmpXchgInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "AtomicRMWInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "BinaryOperator"
              , specTemplateArgs = []
@@ -810,7 +837,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getOpcode"
                                       },GenHS,"binOpGetOpCode_")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "CallInst"
              , specTemplateArgs = []
@@ -830,7 +857,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"callInstGetCalledValue")
                           ]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "CmpInst"
              , specTemplateArgs = []
@@ -840,19 +867,19 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"cmpInstGetPredicate_")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "FCmpInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "ICmpInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "ExtractElementInst"
              , specTemplateArgs = []
@@ -864,13 +891,13 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getIndexOperand"
                                       },GenHS,"extractElementInstGetIndexOperand")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "FenceInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "GetElementPtrInst"
              , specTemplateArgs = []
@@ -892,7 +919,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"getElementPtrInstIdxEnd")
                           ]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "InsertElementInst"
              , specTemplateArgs = []
@@ -901,19 +928,19 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"insertElementInstGetType")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "InsertValueInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "LandingPadInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "PHINode"
              , specTemplateArgs = []
@@ -930,7 +957,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftArgs = [(False,normalT unsigned)]
                                       },GenHS,"phiNodeGetIncomingBlock_")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "SelectInst"
              , specTemplateArgs = []
@@ -946,7 +973,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"selectInstGetFalseValue")
                           ]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "ShuffleVectorInst"
              , specTemplateArgs = []
@@ -955,7 +982,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getType"
                                       },GenHS,"shuffleVectorInstGetType")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "StoreInst"
              , specTemplateArgs = []
@@ -974,7 +1001,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"storeInstGetPointerOperand")
                           ]
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm"]
              , specName = "TerminatorInst"
              , specTemplateArgs = []
@@ -989,7 +1016,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"terminatorInstGetSuccessor_")]
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm"]
              , specName = "BranchInst"
              , specTemplateArgs = []
@@ -1001,25 +1028,25 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getCondition"
                                       },GenHS,"branchInstGetCondition")]
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm"]
              , specName = "IndirectBrInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm"]
              , specName = "InvokeInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm"]
              , specName = "ResumeInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm"]
              , specName = "ReturnInst"
              , specTemplateArgs = []
@@ -1028,7 +1055,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getReturnValue"
                                       },GenHS,"returnInstGetReturnValue")]
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm"]
              , specName = "SwitchInst"
              , specTemplateArgs = []
@@ -1046,7 +1073,7 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "case_default"
                                       },GenHS,"switchInstCaseDefault")]
              }
-       ,Spec { specHeader = "llvm/InstrTypes.h"
+       ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = ["llvm","SwitchInst"]
              , specName = "CaseIt"
              , specTemplateArgs = []
@@ -1068,19 +1095,19 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getCaseSuccessor"
                                       },GenHS,"caseItGetCaseSuccessor")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "UnreachableInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "UnaryInstruction"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "AllocaInst"
              , specTemplateArgs = []
@@ -1098,85 +1125,85 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftName = "getAlignment"
                                       },GenHS,"allocaInstGetAlignment_")]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "CastInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "BitCastInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "FPExtInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "FPToUIInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "FPTruncInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "IntToPtrInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "PtrToIntInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "SExtInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "SIToFPInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "TruncInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "UIToFPInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "ZExtInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "ExtractValueInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "LoadInst"
              , specTemplateArgs = []
@@ -1192,13 +1219,13 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       },GenHS,"loadInstGetPointerOperand")
                           ]
              }
-       ,Spec { specHeader = "llvm/Instructions.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = ["llvm"]
              , specName = "VAArgInst"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/User.h"
+       ,Spec { specHeader = irInclude version "User.h"
              , specNS = ["llvm"]
              , specName = "User"
              , specTemplateArgs = []
@@ -1213,13 +1240,13 @@ llvm = [Spec { specHeader = "llvm/ADT/StringRef.h"
                                       , ftOverloaded = True
                                       },GenHS,"getOperand_")]
              }
-       ,Spec { specHeader = "llvm/Operator.h"
+       ,Spec { specHeader = irInclude version "Operator.h"
              , specNS = ["llvm"]
              , specName = "Operator"
              , specTemplateArgs = []
              , specType = ClassSpec []
              }
-       ,Spec { specHeader = "llvm/Use.h"
+       ,Spec { specHeader = irInclude version "Use.h"
              , specNS = ["llvm"]
              , specName = "Use"
              , specTemplateArgs = []

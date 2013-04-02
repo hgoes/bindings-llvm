@@ -18,7 +18,8 @@ main = defaultMainWithHooks $
                        , postConf = \args cfg pkgd lbi -> do
                             createDirectoryIfMissing True (buildDir lbi </> "wrapper")
                             createDirectoryIfMissing True (buildDir lbi </> "LLVM" </> "FFI")
-                            writeWrapper "HS_LLVM_PROXY" llvm
+                            version <- getLLVMVersion
+                            writeWrapper "HS_LLVM_PROXY" (llvm version)
                               (buildDir lbi)
                               proxy_h
                               wrap_c
@@ -71,6 +72,7 @@ adaptBuildInfo bi vers cflags libs libdir incdir
   = bi { cppOptions = ["-DHS_LLVM_VERSION="++versionToDefine vers]++
                       cppOptions bi
        , ccOptions = cflags++
+                     ["-DHS_LLVM_VERSION="++versionToDefine vers]++
                      ccOptions bi
        , includeDirs = incdir:includeDirs bi
        , extraLibs = libs++extraLibs bi

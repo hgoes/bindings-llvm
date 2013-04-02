@@ -37,7 +37,7 @@ module LLVM.FFI.Constant
         isNullValue,
         canTrap,
         isThreadDependent,
-        isConstUsed
+        isConstantUsed
 #endif
        ) where
 

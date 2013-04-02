@@ -1,4 +1,8 @@
+#if HS_LLVM_VERSION >= 303
+#include <llvm/IR/InstrTypes.h>
+#else
 #include <llvm/InstrTypes.h>
+#endif
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 
