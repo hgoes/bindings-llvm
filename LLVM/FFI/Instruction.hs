@@ -180,7 +180,7 @@ data BinOpType =
 #define HANDLE_BINARY_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
 #include <llvm/Instruction.def>
   UnknownBinOp
-  deriving Show
+  deriving (Show,Eq,Ord)
 
 toOpCode :: CInt -> BinOpType
 #define HANDLE_BINARY_INST(N,OPC,CLASS) toOpCode N = OPC
