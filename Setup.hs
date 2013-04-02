@@ -81,8 +81,9 @@ getLLVMVersion :: IO Version
 getLLVMVersion = do
   outp <- readProcess "llvm-config" ["--version"] ""
   let parses = readP_to_S parseVersion outp
-      Just (version,_) = find (\(vers,rest) -> rest == "\n") parses
-  return version
+  case find (\(vers,rest) -> rest == "\n" || rest == "svn\n") parses of
+    Just (version,_) -> return version
+    Nothing -> error $ "Failed to parse llvm version: "++show parses
 
 getLLVMCFlags :: IO [String]
 getLLVMCFlags = do
