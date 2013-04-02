@@ -576,6 +576,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ RefType $ NamedType ["llvm"] "BasicBlock" []
                                       , ftName = "getEntryBlock"
                                       },GenHS,"getEntryBlock")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionType"
+                                      , ftName = "getFunctionType"
+                                      },GenHS,"functionGetFunctionType")
                           ]
              }
        ,Spec { specHeader = irInclude version "Constants.h"

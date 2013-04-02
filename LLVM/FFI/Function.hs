@@ -1,6 +1,9 @@
 module LLVM.FFI.Function 
        (Function()
+       ,functionIsVarArg
        ,getBasicBlockList
+       ,getEntryBlock
+       ,functionGetFunctionType
        )where
 
 import LLVM.FFI.Interface
