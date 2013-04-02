@@ -1398,6 +1398,14 @@ llvm version
                      ,"createScalarReplAggregatesPass"
                      ,"createSimplifyLibCallsPass"
                      ,"createTailCallEliminationPass"
-                     ,"createVerifierPass"
                      ]
-       ]
+       ]++
+       [Spec { specHeader = "llvm/Analysis/Verifier.h"
+             , specNS = ["llvm"]
+             , specName = "createVerifierPass"
+             , specTemplateArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "FunctionPass"
+                                        , gfunArgs = []
+                                        , gfunHSName = "createVerifierPass"
+                                        }
+             }]
