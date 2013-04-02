@@ -306,7 +306,7 @@ toICmpOp op
 getFCmpOp :: Ptr FCmpInst -> IO FCmpOp
 getFCmpOp ptr = fmap toFCmpOp (cmpInstGetPredicate_ ptr)
 
-getICmpOp :: Ptr FCmpInst -> IO ICmpOp
+getICmpOp :: Ptr ICmpInst -> IO ICmpOp
 getICmpOp ptr = fmap toICmpOp (cmpInstGetPredicate_ ptr)
 
 TYPE(Instruction)
