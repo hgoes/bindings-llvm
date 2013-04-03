@@ -11,7 +11,7 @@ import Foreign.Ptr
 
 useToList :: Ptr Use -> Ptr Use -> IO [Ptr Value]
 useToList use end
-  | use == end = return []
+  | use == end || use == nullPtr = return []
   | otherwise = do
     val <- useGet use
     use' <- useGetNext use
