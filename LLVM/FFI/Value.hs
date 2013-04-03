@@ -22,6 +22,7 @@ import LLVM.FFI.Interface
 import LLVM.FFI.Type
 import LLVM.FFI.OOP
 import LLVM.FFI.StringRef
+import LLVM.FFI.IPList
 
 import Foreign
 import Foreign.C
@@ -34,6 +35,7 @@ argumentGetArgNo ptr = fmap toInteger (argumentGetArgNo_ ptr)
 TYPE(Value)
 TYPE_LEAF(Argument)
 SUBTYPE(Value,Argument)
+SPECIALIZE_IPLIST(Argument,capi)
 TYPE_LEAF(InlineAsm)
 SUBTYPE(Value,InlineAsm)
 TYPE_LEAF(MDNode)

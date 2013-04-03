@@ -114,7 +114,7 @@ llvm version
                                               },GenHS,"listIterator"++tp++"NEq")]
                      }
                ]
-              | tp <- ["Function","Instruction","BasicBlock","GlobalVariable"]
+              | tp <- ["Function","Instruction","BasicBlock","GlobalVariable","Argument"]
               , let rtp = Type [] (NamedType ["llvm"] tp [])
               ]++
        [Spec { specHeader = "llvm/ADT/APFloat.h"
