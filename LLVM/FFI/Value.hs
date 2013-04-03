@@ -2,6 +2,8 @@
 module LLVM.FFI.Value
        (Value(),ValueC(),
         Argument(),
+        argumentGetParent,
+        argumentGetArgNo,
         InlineAsm(),
         MDNode(),
         MDString(),
@@ -23,6 +25,9 @@ import LLVM.FFI.StringRef
 
 import Foreign
 import Foreign.C
+
+argumentGetArgNo :: Ptr Argument -> IO Integer
+argumentGetArgNo ptr = fmap toInteger (argumentGetArgNo_ ptr)
 
 #include "Helper.h"
 

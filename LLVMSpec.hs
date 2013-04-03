@@ -361,7 +361,14 @@ llvm version
              , specNS = ["llvm"]
              , specName = "Argument"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec 
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
+                                      , ftName = "getParent"
+                                      },GenHS,"argumentGetParent")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getArgNo"
+                                      },GenHS,"argumentGetArgNo_")
+                          ]
              }
        ,Spec { specHeader = irInclude version "BasicBlock.h"
              , specNS = ["llvm"]
@@ -579,6 +586,10 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionType"
                                       , ftName = "getFunctionType"
                                       },GenHS,"functionGetFunctionType")
+                          ,(memberFun { ftReturnType = normalT $ ref $ NamedType ["llvm"] "iplist"
+                                                       [normalT $ llvmType "Argument"]
+                                      , ftName = "getArgumentList"
+                                      },GenHS,"functionGetArgumentList")
                           ]
              }
        ,Spec { specHeader = irInclude version "Constants.h"

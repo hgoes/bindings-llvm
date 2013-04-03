@@ -4,6 +4,7 @@ module LLVM.FFI.Function
        ,getBasicBlockList
        ,getEntryBlock
        ,functionGetFunctionType
+       ,functionGetArgumentList
        )where
 
 import LLVM.FFI.Interface
