@@ -978,6 +978,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Use"
                                       , ftName = "idx_end"
                                       },GenHS,"getElementPtrInstIdxEnd")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumIndices"
+                                      },GenHS,"getElementPtrInstGetNumIndices_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"

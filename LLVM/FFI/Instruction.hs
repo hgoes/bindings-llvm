@@ -39,6 +39,7 @@ module LLVM.FFI.Instruction
          getElementPtrInstIdxBegin,
          getElementPtrInstIdxEnd,
          getElementPtrInstIsInBounds,
+         getElementPtrInstGetNumIndices,
          -- ** Insert Element Instruction
          InsertElementInst(),
          -- ** Insert Value Instruction
@@ -151,6 +152,9 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+getElementPtrInstGetNumIndices :: Ptr GetElementPtrInst -> IO Integer
+getElementPtrInstGetNumIndices ptr = fmap toInteger (getElementPtrInstGetNumIndices_ ptr)
 
 loadInstGetAlignment :: Ptr LoadInst -> IO Integer
 loadInstGetAlignment ptr = fmap toInteger (loadInstGetAlignment_ ptr)
