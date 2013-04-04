@@ -100,11 +100,11 @@ renderType (Type qual tp)
     renderC (RefType tp) = renderC tp++"&"
 
 renderNS :: NS -> String
-renderNS = concat . fmap (\ns -> ns++"::")
+renderNS = concat . fmap (\ns -> className ns++renderTempl (classArgs ns)++"::")
 
 renderTempl :: [Type] -> String
 renderTempl [] = ""
-renderTempl xs = "<"++concat (fmap renderType xs)++">"
+renderTempl xs = "<"++concat (intersperse "," $ fmap renderType xs)++">"
 
 normalT :: TypeC -> Type
 normalT = Type []
@@ -123,7 +123,9 @@ int64_t = NamedType [] "int64_t" []
 double = NamedType [] "double" []
 ptr = PtrType
 ref = RefType
-llvmType name = NamedType ["llvm"] name []
+llvmType name = NamedType llvmNS name []
+
+llvmNS = [ClassName "llvm" []]
 
 toPtr :: Type -> Type
 toPtr (Type qual tp) = Type qual (ptr tp)
@@ -181,7 +183,7 @@ toHaskellType addP False (Type q c) = toHSType (not addP) c
     toHSType _ (PtrType t) = HsTyApp 
                              (HsTyCon $ UnQual $ HsIdent "Ptr")
                              (toHSType True t)
-    toHSType isP (NamedType _ name []) = case name of
+    toHSType isP (NamedType [] name []) = case name of
       "void" -> HsTyTuple []
       "char" -> HsTyCon $ UnQual $ HsIdent "CChar"
       "size_t" -> HsTyCon $ UnQual $ HsIdent "CSize"
@@ -199,7 +201,7 @@ toHaskellType addP False (Type q c) = toHSType (not addP) c
       = (if isP
          then id
          else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
-        ) $ foldl HsTyApp (toHSType True (NamedType ns name [])) (fmap (toHaskellType False False) tmpl)
+        ) $ foldl HsTyApp (toHSType True (NamedType [] name [])) (fmap (toHaskellType False False) $ concat (fmap classArgs ns)++tmpl)
 
 writeWrapper :: String -> [Spec] -> String -> String -> String -> [String] -> IO ()
 writeWrapper inc_sym spec build_path header_f wrapper_f ffi_f = do
@@ -303,7 +305,7 @@ generateFFI mname header specs
              ,""]++dts++fns)
   where
     dts = [ "data "++hsName (specName cs) ++
-            concat (fmap (\(_,i) -> " a"++show i) (zip (specTemplateArgs cs) [0..]))++
+            concat (fmap (\(_,i) -> " a"++show i) (zip (specCollectTemplateArgs cs) [0..]))++
             " = "++hsName (specName cs)
           | cs@Spec { specType = ClassSpec {} } <- nubBy (\x y -> specName x == specName y) specs
           ]
@@ -355,6 +357,7 @@ generateFFI mname header specs
                    GlobalFunSpec { gfunReturnType = rtp
                                  , gfunArgs = args
                                  , gfunHSName = hsname } -> [(fmap (uncurry $ toHaskellType True) args,
+                                                              HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
                                                               toHaskellType True False rtp,
                                                               hsname)]
                  , let sig = (concat [ prettyPrint tp ++ " -> " 
@@ -379,3 +382,8 @@ comma = concat . intersperse ","
 
 argList :: [(Type,String)] -> String
 argList = comma . fmap (\(_,arg) -> arg)
+
+specCollectTemplateArgs :: Spec -> [Type]
+specCollectTemplateArgs spec 
+  = concat (fmap classArgs (specNS spec)) ++
+    specTemplateArgs spec

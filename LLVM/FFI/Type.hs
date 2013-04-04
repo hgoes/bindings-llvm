@@ -59,6 +59,7 @@ module LLVM.FFI.Type
 import LLVM.FFI.OOP
 import LLVM.FFI.Context
 import LLVM.FFI.ArrayRef
+import LLVM.FFI.SetVector
 import LLVM.FFI.Interface
 
 import Foreign
@@ -85,6 +86,7 @@ TYPE_LEAF(VectorType)
 SUBTYPE3(Type,CompositeType,SequentialType,VectorType)
 
 SPECIALIZE_ARRAYREF(Type,capi)
+SPECIALIZE_SETVECTOR(Type,capi)
 
 typeDump :: TypeC t => Ptr t -> IO ()
 typeDump = typeDump_

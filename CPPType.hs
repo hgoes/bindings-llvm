@@ -3,7 +3,12 @@ module CPPType where
 import Text.ParserCombinators.ReadP
 import Data.Char
 
-type NS = [String]
+data ClassName = ClassName { className :: String
+                           , classArgs :: [Type]
+                           }
+               deriving (Show,Eq,Ord)
+
+type NS = [ClassName]
 
 data Type = Type [TypeQualifier] TypeC deriving (Eq,Ord,Show)
 

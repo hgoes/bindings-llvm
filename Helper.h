@@ -60,6 +60,18 @@ instance ArrayRefC (Ptr name) where {\
   deleteArrayRef = deleteArrayRef##name\
 }
 
+#define SPECIALIZE_SETVECTOR(name,cconv)\
+instance SetVectorC (Ptr name) where {\
+  setVectorEmpty = setVector##name##Empty ;\
+  setVectorBegin = setVector##name##Begin ;\
+  setVectorEnd = setVector##name##End ;\
+} ;\
+instance SetVectorIteratorC (Ptr name) where {\
+  setVectorIteratorDeref = setVectorIterator##name##Deref ;\
+  setVectorIteratorNext = setVectorIterator##name##Next ;\
+  setVectorIteratorEq = setVectorIterator##name##Eq\
+}
+
 #define FUN(cls,name,sig)\
 foreign import capi unsafe _TO_STRING(llvm_proxy.h cls##_##name)\
   _##name :: Ptr t -> sig ;\
