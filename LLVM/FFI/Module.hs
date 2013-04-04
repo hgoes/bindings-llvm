@@ -4,6 +4,7 @@ module LLVM.FFI.Module
        ,deleteModule
        ,getGlobalList
        ,getFunctionList
+       ,getTypeByName
        ,moduleDump
        ,parseIR
        ,writeBitCodeToFile

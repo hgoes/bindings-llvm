@@ -681,6 +681,10 @@ llvm version
                                                        [normalT $ NamedType ["llvm"] "GlobalVariable" []]
                                       , ftName = "getGlobalList"
                                       },GenHS,"getGlobalList")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
+                                      , ftName = "getTypeByName"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                      },GenHS,"getTypeByName")
                           ]
              }
        ,Spec { specHeader = "llvm/Support/IRReader.h"
