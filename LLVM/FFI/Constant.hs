@@ -8,6 +8,7 @@ module LLVM.FFI.Constant
         ConstantDataArray(),
         ConstantDataVector(),
         ConstantExpr(),
+        constantExprGetOpcode,
         --constantExprGetAsInstruction,
         {-BinaryConstantExpr(),
         CompareConstantExpr(),
@@ -47,11 +48,18 @@ import LLVM.FFI.Value
 import LLVM.FFI.User
 import LLVM.FFI.Type
 import LLVM.FFI.IPList
+import LLVM.FFI.Instruction
 
 import Foreign
 import Foreign.C
 
 #include "Helper.h"
+
+constantExprGetOpcode :: Ptr ConstantExpr -> IO OpType
+constantExprGetOpcode ptr = do
+  opc <- constantExprGetOpcode_ ptr
+  let Just res = toOpCode opc
+  return res
 
 constantGetAggregateElement :: ConstantC t => Ptr t -> Integer -> IO (Ptr Constant)
 constantGetAggregateElement ptr idx = constantGetAggregateElement_ ptr (fromInteger idx)

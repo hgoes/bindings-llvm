@@ -527,9 +527,10 @@ llvm version
              , specNS = llvmNS
              , specName = "ConstantExpr"
              , specTemplateArgs = []
-             , specType = ClassSpec [] --[(memberFun { ftReturnType = normalT $ ptr $ llvmType "Instruction"
-                                        --            , ftName = "getAsInstruction"
-                                        --            },GenHS,"constantExprGetAsInstruction")]
+             , specType = ClassSpec 
+                          [(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getOpcode"
+                                      },GenHS,"constantExprGetOpcode_")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS

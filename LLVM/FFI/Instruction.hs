@@ -2,6 +2,18 @@ module LLVM.FFI.Instruction
        (-- * Instructions
          Instruction(),
          InstructionC(),
+         OpType(..),
+         toOpCode,
+         TermOpType(..),
+         toTermOpCode,
+         BinOpType(..),
+         toBinOpCode,
+         MemoryOpType(..),
+         toMemoryOpCode,
+         CastOpType(..),
+         toCastOpCode,
+         OtherOpType(..),
+         toOtherOpCode,
          instructionGetParent,
          instructionGetDebugLoc,
          -- ** Atomic Compare & Exchange Instruction
@@ -10,7 +22,6 @@ module LLVM.FFI.Instruction
          AtomicRMWInst(),
          -- ** Binary Operator
          BinaryOperator(),
-         BinOpType(..),
          binOpGetOpCode,
          -- ** Call Instructions
          CallInst(),
@@ -180,19 +191,83 @@ phiNodeGetIncomingValue ptr idx = phiNodeGetIncomingValue_ ptr (fromInteger idx)
 phiNodeGetIncomingBlock :: Ptr PHINode -> Integer -> IO (Ptr BasicBlock)
 phiNodeGetIncomingBlock ptr idx = phiNodeGetIncomingBlock_ ptr (fromInteger idx)
 
+data OpType 
+  = TermOp TermOpType
+  | BinOp BinOpType
+  | MemoryOp MemoryOpType
+  | CastOp CastOpType
+  | OtherOp OtherOpType
+  deriving (Show,Eq,Ord)
+
+data TermOpType =
+#define HANDLE_TERM_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#include <llvm/Instruction.def>
+  UnknownTermOp
+  deriving (Show,Eq,Ord)
+
 data BinOpType =
 #define HANDLE_BINARY_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
 #include <llvm/Instruction.def>
   UnknownBinOp
   deriving (Show,Eq,Ord)
 
-toOpCode :: CInt -> BinOpType
-#define HANDLE_BINARY_INST(N,OPC,CLASS) toOpCode N = OPC
+data MemoryOpType =
+#define HANDLE_MEMORY_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
 #include <llvm/Instruction.def>
-toOpCode _ = UnknownBinOp
+  UnknownMemoryOp
+  deriving (Show,Eq,Ord)
+
+data CastOpType =
+#define HANDLE_CAST_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#include <llvm/Instruction.def>
+  UnknownCastOp
+  deriving (Show,Eq,Ord)
+
+data OtherOpType =
+#define HANDLE_OTHER_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#include <llvm/Instruction.def>
+  UnknownOtherOp
+  deriving (Show,Eq,Ord)
+
+toTermOpCode :: Integral a => a -> Maybe TermOpType
+#define HANDLE_TERM_INST(N,OPC,CLASS) toTermOpCode N = Just OPC
+#include <llvm/Instruction.def>
+toTermOpCode _ = Nothing
+
+toBinOpCode :: Integral a => a -> Maybe BinOpType
+#define HANDLE_BINARY_INST(N,OPC,CLASS) toBinOpCode N = Just OPC
+#include <llvm/Instruction.def>
+toBinOpCode _ = Nothing
+
+toMemoryOpCode :: Integral a => a -> Maybe MemoryOpType
+#define HANDLE_MEMORY_INST(N,OPC,CLASS) toMemoryOpCode N = Just OPC
+#include <llvm/Instruction.def>
+toMemoryOpCode _ = Nothing
+
+toCastOpCode :: Integral a => a -> Maybe CastOpType
+#define HANDLE_CAST_INST(N,OPC,CLASS) toCastOpCode N = Just OPC
+#include <llvm/Instruction.def>
+toCastOpCode _ = Nothing
+
+toOtherOpCode :: Integral a => a -> Maybe OtherOpType
+#define HANDLE_OTHER_INST(N,OPC,CLASS) toOtherOpCode N = Just OPC
+#include <llvm/Instruction.def>
+toOtherOpCode _ = Nothing
+
+toOpCode :: Integral a => a -> Maybe OpType
+#define HANDLE_TERM_INST(N,OPC,CLASS) toOpCode N = Just (TermOp OPC)
+#define HANDLE_BINARY_INST(N,OPC,CLASS) toOpCode N = Just (BinOp OPC)
+#define HANDLE_MEMORY_INST(N,OPC,CLASS) toOpCode N = Just (MemoryOp OPC)
+#define HANDLE_CAST_INST(N,OPC,CLASS) toOpCode N = Just (CastOp OPC)
+#define HANDLE_OTHER_INST(N,OPC,CLASS) toOpCode N = Just (OtherOp OPC)
+#include <llvm/Instruction.def>
+toOpCode _ = Nothing
 
 binOpGetOpCode :: Ptr BinaryOperator -> IO BinOpType
-binOpGetOpCode op = fmap toOpCode (binOpGetOpCode_ op)
+binOpGetOpCode op = do
+  opc <- binOpGetOpCode_ op
+  let Just res = toBinOpCode opc
+  return res
 
 callInstGetNumArgOperands :: Ptr CallInst -> IO Integer
 callInstGetNumArgOperands ptr = fmap toInteger (callInstGetNumArgOperands_ ptr)
