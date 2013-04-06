@@ -5,6 +5,8 @@ module LLVM.FFI.Constant
         ConstantAggregateZero(),
         ConstantArray(),
         ConstantDataSequential(),
+        constantDataSequentialGetNumElements,
+        constantDataSequentialGetElementAsConstant,
         ConstantDataArray(),
         ConstantDataVector(),
         ConstantExpr(),
@@ -63,6 +65,12 @@ constantExprGetOpcode ptr = do
 
 constantGetAggregateElement :: ConstantC t => Ptr t -> Integer -> IO (Ptr Constant)
 constantGetAggregateElement ptr idx = constantGetAggregateElement_ ptr (fromInteger idx)
+
+constantDataSequentialGetNumElements :: ConstantDataSequentialC t => Ptr t -> IO Integer
+constantDataSequentialGetNumElements ptr = fmap toInteger (constantDataSequentialGetNumElements_ ptr)
+
+constantDataSequentialGetElementAsConstant :: ConstantDataSequentialC t => Ptr t -> Integer -> IO (Ptr Constant)
+constantDataSequentialGetElementAsConstant ptr i = constantDataSequentialGetElementAsConstant_ ptr (fromInteger i)
 
 TYPE(Constant)
 SUBTYPE2(Value,User,Constant)

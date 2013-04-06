@@ -503,7 +503,16 @@ llvm version
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "SequentialType" []
                                       , ftName = "getType"
                                       , ftOverloaded = True
-                                      },GenHS,"constantDataSequentialGetType")]
+                                      },GenHS,"constantDataSequentialGetType")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumElements"
+                                      , ftOverloaded = True
+                                      },GenHS,"constantDataSequentialGetNumElements_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                      , ftName = "getElementAsConstant"
+                                      , ftOverloaded = True
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },GenHS,"constantDataSequentialGetElementAsConstant_")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
