@@ -30,6 +30,12 @@ extern int ICMP_SLE();
 #define HANDLE_CC(name) extern int CConv_##name();
 #include "CConvs.def"
 
+#define HANDLE_ORDERING(name) extern int AtomicOrdering_##name();
+#include "AtomicOrdering.def"
+
+#define HANDLE_BINOP(name) extern int RMWBinOp_##name();
+#include "RMWBinOp.def"
+
 extern int writeBitCodeToFile(void* m,const char* path);
 
 #endif

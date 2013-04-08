@@ -1,11 +1,14 @@
 #if HS_LLVM_VERSION >= 303
 #include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/CallingConv.h>
 #else
 #include <llvm/InstrTypes.h>
+#include <llvm/Instructions.h>
+#include <llvm/CallingConv.h>
 #endif
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
-#include <llvm/CallingConv.h>
 
 extern "C" {
   int FCMP_OEQ() {
@@ -83,6 +86,12 @@ extern "C" {
 
 #define HANDLE_CC(name) int CConv_##name() { return llvm::CallingConv::name; }
 #include "CConvs.def"
+
+#define HANDLE_ORDERING(name) int AtomicOrdering_##name() { return llvm::name; }
+#include "AtomicOrdering.def"
+
+#define HANDLE_BINOP(name) int RMWBinOp_##name() { return llvm::AtomicRMWInst::name; }
+#include "RMWBinOp.def"
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;

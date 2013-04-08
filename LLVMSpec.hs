@@ -891,13 +891,43 @@ llvm version
              , specNS = llvmNS
              , specName = "AtomicCmpXchgInst"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec 
+                          [(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isVolatile"
+                                      },GenHS,"atomicCmpXchgInstIsVolatile")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOrdering"
+                                      },GenHS,"atomicCmpXchgInstGetOrdering_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getPointerOperand"
+                                      },GenHS,"atomicCmpXchgInstGetPointerOperand")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getCompareOperand"
+                                      },GenHS,"atomicCmpXchgInstGetCompareOperand")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getNewValOperand"
+                                      },GenHS,"atomicCmpXchgInstGetNewValOperand")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "AtomicRMWInst"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec 
+                          [(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOperation"
+                                      },GenHS,"atomicRMWInstGetOperation_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isVolatile"
+                                      },GenHS,"atomicRMWInstIsVolatile")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOrdering"
+                                      },GenHS,"atomicRMWInstGetOrdering_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getPointerOperand"
+                                      },GenHS,"atomicRMWInstGetPointerOperand")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getValOperand"
+                                      },GenHS,"atomicRMWInstGetValOperand")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -969,7 +999,10 @@ llvm version
              , specNS = llvmNS
              , specName = "FenceInst"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec 
+                          [(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOrdering"
+                                      },GenHS,"fenceInstGetOrdering_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1092,6 +1125,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
                                       },GenHS,"storeInstGetAlignment_")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOrdering"
+                                      },GenHS,"storeInstGetOrdering_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getValueOperand"
                                       },GenHS,"storeInstGetValueOperand")
@@ -1336,6 +1372,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
                                       },GenHS,"loadInstGetAlignment_")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOrdering"
+                                      },GenHS,"loadInstGetOrdering_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getPointerOperand"
                                       },GenHS,"loadInstGetPointerOperand")

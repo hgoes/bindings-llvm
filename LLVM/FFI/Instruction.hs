@@ -16,12 +16,26 @@ module LLVM.FFI.Instruction
          toOtherOpCode,
          CallingConv(..),
          toCallingConv,
+         AtomicOrdering(..),
+         toAtomicOrdering,
+         RMWBinOp(..),
+         toRMWBinOp,
          instructionGetParent,
          instructionGetDebugLoc,
          -- ** Atomic Compare & Exchange Instruction
          AtomicCmpXchgInst(),
+         atomicCmpXchgInstIsVolatile,
+         atomicCmpXchgInstGetOrdering,
+         atomicCmpXchgInstGetPointerOperand,
+         atomicCmpXchgInstGetCompareOperand,
+         atomicCmpXchgInstGetNewValOperand,
          -- ** Atomic Read & Modify & Write Instruction
          AtomicRMWInst(),
+         atomicRMWInstGetOperation,
+         atomicRMWInstIsVolatile,
+         atomicRMWInstGetOrdering,
+         atomicRMWInstGetPointerOperand,
+         atomicRMWInstGetValOperand,
          -- ** Binary Operator
          BinaryOperator(),
          binOpGetOpCode,
@@ -47,6 +61,7 @@ module LLVM.FFI.Instruction
          ExtractElementInst(),
          -- ** Fence Instruction
          FenceInst(),
+         fenceInstGetOrdering,
          -- ** Get Element Pointer Instruction
          GetElementPtrInst(),
          getElementPtrInstGetPointerOperand,
@@ -82,6 +97,7 @@ module LLVM.FFI.Instruction
          StoreInst(),
          storeInstIsVolatile,
          storeInstGetAlignment,
+         storeInstGetOrdering,
          storeInstGetValueOperand,
          storeInstGetPointerOperand,
          -- ** Terminator Instructions
@@ -162,6 +178,7 @@ module LLVM.FFI.Instruction
          LoadInst(),
          loadInstIsVolatile,
          loadInstGetAlignment,
+         loadInstGetOrdering,
          loadInstGetPointerOperand,
          -- *** VarArg Instruction
          VAArgInst()
@@ -179,6 +196,52 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+loadInstGetOrdering :: Ptr LoadInst -> IO AtomicOrdering
+loadInstGetOrdering = fmap toAtomicOrdering . loadInstGetOrdering_
+
+storeInstGetOrdering :: Ptr StoreInst -> IO AtomicOrdering
+storeInstGetOrdering = fmap toAtomicOrdering . storeInstGetOrdering_
+
+atomicRMWInstGetOperation :: Ptr AtomicRMWInst -> IO RMWBinOp
+atomicRMWInstGetOperation = fmap toRMWBinOp . atomicRMWInstGetOperation_
+
+atomicRMWInstGetOrdering :: Ptr AtomicRMWInst -> IO AtomicOrdering
+atomicRMWInstGetOrdering = fmap toAtomicOrdering . atomicRMWInstGetOrdering_
+
+data RMWBinOp =
+#define HANDLE_BINOP(name) PRESERVE(  ) RMW##name
+#define HANDLE_SEP PRESERVE(  ) |
+#include "RMWBinOp.def"
+  deriving (Show,Eq,Ord)
+
+#define HANDLE_BINOP(name) foreign import capi _TO_STRING(extra.h RMWBinOp_##name) rmwBinOp_##name :: CInt
+#include "RMWBinOp.def"
+
+toRMWBinOp :: CInt -> RMWBinOp
+toRMWBinOp op
+#define HANDLE_BINOP(name) PRESERVE(  ) | op == rmwBinOp_##name = RMW##name
+#include "RMWBinOp.def"
+
+atomicCmpXchgInstGetOrdering :: Ptr AtomicCmpXchgInst -> IO AtomicOrdering
+atomicCmpXchgInstGetOrdering = fmap toAtomicOrdering . atomicCmpXchgInstGetOrdering_
+
+fenceInstGetOrdering :: Ptr FenceInst -> IO AtomicOrdering
+fenceInstGetOrdering = fmap toAtomicOrdering . fenceInstGetOrdering_
+
+data AtomicOrdering =
+#define HANDLE_ORDERING(name) PRESERVE(  ) name
+#define HANDLE_SEP PRESERVE(  ) |
+#include "AtomicOrdering.def"
+  deriving (Show,Eq,Ord)
+
+#define HANDLE_ORDERING(name) foreign import capi _TO_STRING(extra.h AtomicOrdering_##name) atomicOrdering_##name :: CInt
+#include "AtomicOrdering.def"
+
+toAtomicOrdering :: CInt -> AtomicOrdering
+toAtomicOrdering op
+#define HANDLE_ORDERING(name) PRESERVE(  ) | op == atomicOrdering_##name = name
+#include "AtomicOrdering.def"
 
 landingPadInstIsCatch :: Ptr LandingPadInst -> Integer -> IO Bool
 landingPadInstIsCatch ptr i = landingPadInstIsCatch_ ptr (fromInteger i)
