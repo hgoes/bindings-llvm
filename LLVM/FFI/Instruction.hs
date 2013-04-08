@@ -60,6 +60,12 @@ module LLVM.FFI.Instruction
          InsertValueInst(),
          -- ** Landing Pad Instruction
          LandingPadInst(),
+         landingPadInstGetPersonaliteFn,
+         landingPadInstIsCleanup,
+         landingPadInstGetNumClauses,
+         landingPadInstGetClause,
+         landingPadInstIsCatch,
+         landingPadInstIsFilter,
          -- ** PHI-Node
          PHINode(),
          phiNodeGetNumIncomingValues,
@@ -173,6 +179,18 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+landingPadInstIsCatch :: Ptr LandingPadInst -> Integer -> IO Bool
+landingPadInstIsCatch ptr i = landingPadInstIsCatch_ ptr (fromInteger i)
+
+landingPadInstIsFilter :: Ptr LandingPadInst -> Integer -> IO Bool
+landingPadInstIsFilter ptr i = landingPadInstIsCatch_ ptr (fromInteger i)
+
+landingPadInstGetClause :: Ptr LandingPadInst -> Integer -> IO (Ptr Value)
+landingPadInstGetClause ptr i = landingPadInstGetClause_ ptr (fromInteger i)
+
+landingPadInstGetNumClauses :: Ptr LandingPadInst -> IO Integer
+landingPadInstGetNumClauses = fmap toInteger . landingPadInstGetNumClauses_
 
 callInstGetCallingConv :: Ptr CallInst -> IO CallingConv
 callInstGetCallingConv = fmap toCallingConv . callInstGetCallingConv_

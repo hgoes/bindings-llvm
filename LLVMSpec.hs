@@ -1015,7 +1015,29 @@ llvm version
              , specNS = llvmNS
              , specName = "LandingPadInst"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getPersonalityFn"
+                                      },GenHS,"landingPadInstGetPersonaliteFn")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isCleanup"
+                                      },GenHS,"landingPadInstIsCleanup")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumClauses"
+                                      },GenHS,"landingPadInstGetNumClauses_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getClause"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },GenHS,"landingPadInstGetClause_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isCatch"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },GenHS,"landingPadInstIsCatch_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isFilter"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },GenHS,"landingPadInstIsFilter_")
+                          ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
