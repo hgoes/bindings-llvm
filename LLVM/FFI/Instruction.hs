@@ -30,6 +30,7 @@ module LLVM.FFI.Instruction
          callInstIsTailCall,
          callInstGetNumArgOperands,
          callInstGetArgOperand,
+         callInstGetCallingConv,
          callInstGetCalledValue,
          -- ** Compare Instructions
          CmpInst(),
@@ -92,6 +93,7 @@ module LLVM.FFI.Instruction
          InvokeInst(),
          invokeInstGetNumArgOperands,
          invokeInstGetArgOperand,
+         invokeInstGetCallingConv,
          invokeInstGetCalledValue,
          invokeInstGetNormalDest,
          invokeInstGetUnwindDest,
@@ -171,6 +173,12 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+callInstGetCallingConv :: Ptr CallInst -> IO CallingConv
+callInstGetCallingConv = fmap toCallingConv . callInstGetCallingConv_
+
+invokeInstGetCallingConv :: Ptr InvokeInst -> IO CallingConv
+invokeInstGetCallingConv = fmap toCallingConv . invokeInstGetCallingConv_
 
 data CallingConv =
 #define HANDLE_CC(name) PRESERVE(  ) name

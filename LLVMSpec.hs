@@ -923,6 +923,9 @@ llvm version
                                       , ftName = "getArgOperand"
                                       , ftArgs = [(False,normalT unsigned)]
                                       },GenHS,"callInstGetArgOperand_")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getCallingConv"
+                                      },GenHS,"callInstGetCallingConv_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getCalledValue"
                                       },GenHS,"callInstGetCalledValue")
@@ -1120,6 +1123,9 @@ llvm version
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftName = "getArgOperand"
                                       },GenHS,"invokeInstGetArgOperand_")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getCallingConv"
+                                      },GenHS,"invokeInstGetCallingConv_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCalledValue"
                                       },GenHS,"invokeInstGetCalledValue")
