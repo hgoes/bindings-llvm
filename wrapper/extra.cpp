@@ -5,6 +5,7 @@
 #endif
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/CallingConv.h>
 
 extern "C" {
   int FCMP_OEQ() {
@@ -79,6 +80,9 @@ extern "C" {
   int ICMP_SLE() {
     return llvm::CmpInst::ICMP_SLE;
   }
+
+#define HANDLE_CC(name) int CConv_##name() { return llvm::CallingConv::name; }
+#include "CConvs.def"
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;

@@ -27,6 +27,9 @@ extern int ICMP_SGE();
 extern int ICMP_SLT();
 extern int ICMP_SLE();
 
+#define HANDLE_CC(name) extern int CConv_##name();
+#include "CConvs.def"
+
 extern int writeBitCodeToFile(void* m,const char* path);
 
 #endif

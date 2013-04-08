@@ -14,6 +14,8 @@ module LLVM.FFI.Instruction
          toCastOpCode,
          OtherOpType(..),
          toOtherOpCode,
+         CallingConv(..),
+         toCallingConv,
          instructionGetParent,
          instructionGetDebugLoc,
          -- ** Atomic Compare & Exchange Instruction
@@ -169,6 +171,20 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+data CallingConv =
+#define HANDLE_CC(name) PRESERVE(  ) name
+#define HANDLE_SEP PRESERVE(  ) |
+#include "CConvs.def"
+  deriving (Show,Eq,Ord)
+
+#define HANDLE_CC(name) foreign import capi _TO_STRING(extra.h CConv_##name) cConv_##name :: CInt
+#include "CConvs.def"
+
+toCallingConv :: CInt -> CallingConv
+toCallingConv op
+#define HANDLE_CC(name) PRESERVE(  ) | op == cConv_##name = name
+#include "CConvs.def"
 
 invokeInstGetNumArgOperands :: Ptr InvokeInst -> IO Integer
 invokeInstGetNumArgOperands = fmap toInteger . invokeInstGetNumArgOperands_
