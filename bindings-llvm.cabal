@@ -6,7 +6,7 @@ build-type:     Custom
 
 library
   build-tools:    cpphs
-  build-depends: base,tagged>=0.4
+  build-depends: base,tagged>=0.4,unix
   includes:             
     --wrapper/llvm_proxy.h
     wrapper/extra.h
@@ -65,5 +65,6 @@ library
     LLVM.Target.X86
     LLVM.Target.XCore
     LLVM.FFI.Transforms.Scalar
+    LLVM.FFI.OStream
   other-modules:
     LLVM.FFI.Interface

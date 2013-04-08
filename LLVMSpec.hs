@@ -1592,4 +1592,20 @@ llvm version
                                         , gfunArgs = []
                                         , gfunHSName = "createVerifierPass"
                                         }
+             }
+       ,Spec { specHeader = "llvm/Support/raw_ostream.h"
+             , specNS = llvmNS
+             , specName = "raw_ostream"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Destructor True,GenHS,"deleteOStream_")
+                          ]
+             }
+       ,Spec { specHeader = "llvm/Support/raw_ostream.h"
+             , specNS = llvmNS
+             , specName = "raw_fd_ostream"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [(False,normalT int),(False,normalT bool),(False,normalT bool)],GenHS,"newFDOStream_")
+                          ,(Destructor False,GenHS,"deleteFDOStream")]
              }]
