@@ -1112,7 +1112,27 @@ llvm version
              , specNS = llvmNS
              , specName = "InvokeInst"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumArgOperands"
+                                      },GenHS,"invokeInstGetNumArgOperands_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      , ftName = "getArgOperand"
+                                      },GenHS,"invokeInstGetArgOperand_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getCalledValue"
+                                      },GenHS,"invokeInstGetCalledValue")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                      , ftName = "getNormalDest"
+                                      },GenHS,"invokeInstGetNormalDest")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                      , ftName = "getUnwindDest"
+                                      },GenHS,"invokeInstGetUnwindDest")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
+                                      , ftName = "getLandingPadInst"
+                                      },GenHS,"invokeInstGetLandingPadInst")
+                          ]
              }
        ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = llvmNS

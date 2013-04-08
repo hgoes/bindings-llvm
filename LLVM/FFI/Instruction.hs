@@ -88,6 +88,12 @@ module LLVM.FFI.Instruction
          IndirectBrInst(),
          -- *** Invoke Instruction
          InvokeInst(),
+         invokeInstGetNumArgOperands,
+         invokeInstGetArgOperand,
+         invokeInstGetCalledValue,
+         invokeInstGetNormalDest,
+         invokeInstGetUnwindDest,
+         invokeInstGetLandingPadInst,
          -- *** Resume Instruction
          ResumeInst(),
          -- *** Return Instruction
@@ -163,6 +169,12 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+invokeInstGetNumArgOperands :: Ptr InvokeInst -> IO Integer
+invokeInstGetNumArgOperands = fmap toInteger . invokeInstGetNumArgOperands_
+
+invokeInstGetArgOperand :: Ptr InvokeInst -> Integer -> IO (Ptr Value)
+invokeInstGetArgOperand ptr i = invokeInstGetArgOperand_ ptr (fromInteger i)
 
 getElementPtrInstGetNumIndices :: Ptr GetElementPtrInst -> IO Integer
 getElementPtrInstGetNumIndices ptr = fmap toInteger (getElementPtrInstGetNumIndices_ ptr)
