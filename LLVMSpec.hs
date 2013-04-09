@@ -1487,6 +1487,12 @@ llvm version
                                       },GenHS,"modulePassRunOnModule_")
                           ]
              }
+       ,Spec { specHeader = "llvm/Pass.h"
+             , specNS = llvmNS
+             , specName = "ImmutablePass"
+             , specTemplateArgs = []
+             , specType = ClassSpec []
+             }
        ,Spec { specHeader = "llvm/Analysis/FindUsedTypes.h"
              , specNS = llvmNS
              , specName = "FindUsedTypes"
@@ -1497,6 +1503,14 @@ llvm version
                           ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "llvm" []] "SetVector" [normalT $ ptr $ llvmType "Type"]
                                       , ftName = "getTypes"
                                       },GenHS,"findUsedTypesGetTypes")]
+             }
+       ,Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
+             , specNS = llvmNS
+             , specName = "TargetLibraryInfo"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [],GenHS,"newTargetLibraryInfo")
+                          ,(Destructor False,GenHS,"deleteTargetLibraryInfo")]
              }
        ,Spec { specHeader = "llvm/PassSupport.h"
              , specNS = llvmNS
@@ -1608,4 +1622,5 @@ llvm version
              , specType = ClassSpec
                           [(Constructor [(False,normalT int),(False,normalT bool),(False,normalT bool)],GenHS,"newFDOStream_")
                           ,(Destructor False,GenHS,"deleteFDOStream")]
-             }]
+             }
+       ]
