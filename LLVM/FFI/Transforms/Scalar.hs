@@ -13,6 +13,8 @@ module LLVM.FFI.Transforms.Scalar
        ,createLICMPass
        ,createLoopDeletionPass
        ,createLoopRotatePass
+       ,createLoopSimplifyPass
+       ,createLoopStrengthReducePass
        ,createLoopUnrollPass
        ,createLoopUnswitchPass
        ,createMemCpyOptPass

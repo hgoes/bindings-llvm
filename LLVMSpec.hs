@@ -1618,6 +1618,8 @@ llvm version
                      ,"createLICMPass"
                      ,"createLoopDeletionPass"
                      ,"createLoopRotatePass"
+                     ,"createLoopSimplifyPass"
+                     ,"createLoopStrengthReducePass"
                      ,"createLoopUnrollPass"
                      ,"createLoopUnswitchPass"
                      ,"createMemCpyOptPass"
