@@ -1,6 +1,7 @@
 module LLVM.FFI.Pass
        (Pass()
        ,PassC()
+       ,deletePass
        ,passLookupPassInfo
        ,FunctionPass()
        ,ModulePass()
@@ -48,6 +49,9 @@ instance ModulePassC TargetLibraryInfo
 
 class ImmutablePassC t
 instance ImmutablePassC TargetLibraryInfo
+
+deletePass :: PassC t => Ptr t -> IO ()
+deletePass = deletePass_
 
 modulePassRunOnModule :: ModulePassC p => Ptr p -> Ptr Module -> IO Bool
 modulePassRunOnModule = modulePassRunOnModule_

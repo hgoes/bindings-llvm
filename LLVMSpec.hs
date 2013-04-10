@@ -1462,7 +1462,8 @@ llvm version
              , specName = "Pass"
              , specTemplateArgs = []
              , specType = ClassSpec 
-                          [(memberFun { ftReturnType = constT $ ptr $ llvmType "PassInfo"
+                          [(Destructor True,GenHS,"deletePass_")
+                          ,(memberFun { ftReturnType = constT $ ptr $ llvmType "PassInfo"
                                       , ftName = "lookupPassInfo"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
                                       , ftStatic = True
