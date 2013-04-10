@@ -9,6 +9,7 @@
 #endif
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/Target/TargetLibraryInfo.h>
 
 extern "C" {
   int FCMP_OEQ() {
@@ -92,6 +93,9 @@ extern "C" {
 
 #define HANDLE_BINOP(name) int RMWBinOp_##name() { return llvm::AtomicRMWInst::name; }
 #include "RMWBinOp.def"
+
+#define HANDLE_LIBFUNC(name) int LibFunc_##name() { return llvm::LibFunc::name; }
+#include "LibFunc.def"
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;

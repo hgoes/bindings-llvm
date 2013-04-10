@@ -13,13 +13,22 @@ module LLVM.FFI.Pass
        ,deleteFindUsedTypes
        ,findUsedTypesGetTypes
        ,TargetLibraryInfo()
+       ,LibFunc(..)
        ,newTargetLibraryInfo
        ,deleteTargetLibraryInfo
+       ,targetLibraryInfoGetLibFunc
+       ,targetLibraryInfoGetName
+       ,targetLibraryInfoHas
        ,createCFGSimplificationPass
        ) where
 
 import LLVM.FFI.Interface
+import Foreign.C
 import Foreign.Ptr
+import Foreign.Marshal.Alloc
+import Foreign.Storable
+
+#include "Helper.h"
 
 class PassC t
 
@@ -42,3 +51,37 @@ instance ImmutablePassC TargetLibraryInfo
 
 modulePassRunOnModule :: ModulePassC p => Ptr p -> Ptr Module -> IO Bool
 modulePassRunOnModule = modulePassRunOnModule_
+
+targetLibraryInfoGetLibFunc :: Ptr TargetLibraryInfo -> Ptr StringRef -> IO (Maybe LibFunc)
+targetLibraryInfoGetLibFunc tli str
+  = alloca (\iptr -> do
+               res <- targetLibraryInfoGetLibFunc_ tli str iptr
+               if res
+                 then (do
+                          ires <- peek iptr
+                          return (Just $ toLibFunc ires))
+                 else return Nothing)
+
+targetLibraryInfoGetName :: Ptr TargetLibraryInfo -> LibFunc -> IO (Ptr StringRef)
+targetLibraryInfoGetName ptr f = targetLibraryInfoGetName_ ptr (fromLibFunc f)
+
+targetLibraryInfoHas :: Ptr TargetLibraryInfo -> LibFunc -> IO Bool
+targetLibraryInfoHas ptr f = targetLibraryInfoHas_ ptr (fromLibFunc f)
+
+data LibFunc =
+#define HANDLE_LIBFUNC(name) PRESERVE(  ) Func_##name
+#define HANDLE_SEP PRESERVE(  ) |
+#include "LibFunc.def"
+  deriving (Show,Eq,Ord)
+
+toLibFunc :: CInt -> LibFunc
+toLibFunc op
+#define HANDLE_LIBFUNC(name) PRESERVE(  ) | op == libFunc_##name = Func_##name
+#include "LibFunc.def"
+
+fromLibFunc :: LibFunc -> CInt
+#define HANDLE_LIBFUNC(name) fromLibFunc Func_##name = libFunc_##name
+#include "LibFunc.def"
+
+#define HANDLE_LIBFUNC(name) foreign import capi _TO_STRING(extra.h LibFunc_##name) libFunc_##name :: CInt
+#include "LibFunc.def"

@@ -36,6 +36,9 @@ extern int ICMP_SLE();
 #define HANDLE_BINOP(name) extern int RMWBinOp_##name();
 #include "RMWBinOp.def"
 
+#define HANDLE_LIBFUNC(name) extern int LibFunc_##name();
+#include "LibFunc.def"
+
 extern int writeBitCodeToFile(void* m,const char* path);
 
 #endif

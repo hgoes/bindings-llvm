@@ -1510,7 +1510,21 @@ llvm version
              , specTemplateArgs = []
              , specType = ClassSpec
                           [(Constructor [],GenHS,"newTargetLibraryInfo")
-                          ,(Destructor False,GenHS,"deleteTargetLibraryInfo")]
+                          ,(Destructor False,GenHS,"deleteTargetLibraryInfo")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "getLibFunc"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")
+                                                 ,(False,normalT $ ref $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                      },GenHS,"targetLibraryInfoGetLibFunc_")
+                          ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                      , ftName = "getName"
+                                      , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                      },GenHS,"targetLibraryInfoGetName_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "has"
+                                      , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                      },GenHS,"targetLibraryInfoHas_")
+                          ]
              }
        ,Spec { specHeader = "llvm/PassSupport.h"
              , specNS = llvmNS

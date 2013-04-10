@@ -15,6 +15,7 @@ data Type = Type [TypeQualifier] TypeC deriving (Eq,Ord,Show)
 data TypeQualifier = QConst deriving (Eq,Ord,Show)
 
 data TypeC = NamedType NS String [Type]
+           | EnumType NS String
            | PtrType TypeC
            | RefType TypeC
            deriving (Eq,Ord,Show)

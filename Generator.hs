@@ -71,6 +71,9 @@ idOut x = ([],x)
 idIn :: InConverter
 idIn x = ([],x)
 
+enumCastIn :: NS -> String -> InConverter
+enumCastIn ns name x = ([],"static_cast<"++renderType (normalT $ EnumType ns name)++">("++x++")")
+
 copyOut :: Type -> OutConverter
 copyOut tp x = ([],"new "++renderType tp++"("++x++")")
 
@@ -96,6 +99,7 @@ renderType (Type qual tp)
   where
     renderQualifier QConst = "const"
     renderC (NamedType ns str templ) = renderNS ns ++ str ++ renderTempl templ
+    renderC (EnumType ns str) = renderNS ns ++ str
     renderC (PtrType tp) = renderC tp++"*"
     renderC (RefType tp) = renderC tp++"&"
 
@@ -168,6 +172,7 @@ toCType (Type q c) = let (x,out,inC) = toCType' c
     toCType' (PtrType t) = if isCType t
                            then (PtrType t,idOut,idIn)
                            else (PtrType void,voidCastOut,voidCastIn (Type q t))
+    toCType' (EnumType ns name) = (NamedType [] "int" [],idOut,enumCastIn ns name)
     toCType' t = if isCType t
                  then (t,idOut,idIn)
                  else (ptr void,copyOut (Type q t),passAsPointer (Type q t))
@@ -202,6 +207,8 @@ toHaskellType addP False (Type q c) = toHSType (not addP) c
          then id
          else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
         ) $ foldl HsTyApp (toHSType True (NamedType [] name [])) (fmap (toHaskellType False False) $ concat (fmap classArgs ns)++tmpl)
+    toHSType isP (EnumType ns name)
+      = HsTyCon $ UnQual $ HsIdent "CInt"
 
 writeWrapper :: String -> [Spec] -> String -> String -> String -> [String] -> IO ()
 writeWrapper inc_sym spec build_path header_f wrapper_f ffi_f = do
