@@ -20,6 +20,11 @@ module LLVM.FFI.Pass
        ,targetLibraryInfoGetLibFunc
        ,targetLibraryInfoGetName
        ,targetLibraryInfoHas
+       ,DataLayout()
+       ,newDataLayoutFromString
+       ,newDataLayoutFromModule
+       ,dataLayoutIsLittleEndian
+       ,dataLayoutIsBigEndian
        ,createCFGSimplificationPass
        ) where
 
@@ -39,6 +44,7 @@ instance PassC ModulePass
 instance PassC ImmutablePass
 instance PassC FindUsedTypes
 instance PassC TargetLibraryInfo
+instance PassC DataLayout
 
 class ModulePassC t
 
@@ -46,9 +52,11 @@ instance ModulePassC ModulePass
 instance ModulePassC ImmutablePass
 instance ModulePassC FindUsedTypes
 instance ModulePassC TargetLibraryInfo
+instance ModulePassC DataLayout
 
 class ImmutablePassC t
 instance ImmutablePassC TargetLibraryInfo
+instance ImmutablePassC DataLayout
 
 deletePass :: PassC t => Ptr t -> IO ()
 deletePass = deletePass_

@@ -1527,6 +1527,20 @@ llvm version
                                       },GenHS,"targetLibraryInfoHas_")
                           ]
              }
+       ,Spec { specHeader = irInclude version "DataLayout.h"
+             , specNS = llvmNS
+             , specName = "DataLayout"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [(False,normalT $ llvmType "StringRef")],GenHS,"newDataLayoutFromString")
+                          ,(Constructor [(False,constT $ ptr $ llvmType "Module")],GenHS,"newDataLayoutFromModule")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isLittleEndian"
+                                      },GenHS,"dataLayoutIsLittleEndian")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isBigEndian"
+                                      },GenHS,"dataLayoutIsBigEndian")]
+             }
        ,Spec { specHeader = "llvm/PassSupport.h"
              , specNS = llvmNS
              , specName = "PassInfo"
@@ -1677,5 +1691,27 @@ llvm version
                                         ,(False,normalT uint64_t)
                                         ,(False,constT $ ptr $ llvmType "MDNode")
                                         ],GenHS,"newLocation_")]
+             }
+       ,Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
+             , specNS = llvmNS
+             , specName = "getMallocAllocatedType"
+             , specTemplateArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Type"
+                                        , gfunArgs = [(False,constT $ ptr $ llvmType "CallInst")
+                                                     ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")]
+                                        , gfunHSName = "getMallocAllocatedType"
+                                        }
+             }
+       ,Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
+             , specNS = llvmNS
+             , specName = "getMallocArraySize"
+             , specTemplateArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Value"
+                                        , gfunArgs = [(False,normalT $ ptr $ llvmType "CallInst")
+                                                     ,(False,constT $ ptr $ llvmType "DataLayout")
+                                                     ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")
+                                                     ,(False,normalT bool)]
+                                        , gfunHSName = "getMallocArraySize"
+                                        }
              }
        ]

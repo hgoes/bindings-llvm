@@ -46,6 +46,8 @@ module LLVM.FFI.Instruction
          callInstGetArgOperand,
          callInstGetCallingConv,
          callInstGetCalledValue,
+         getMallocAllocatedType,
+         getMallocArraySize,
          -- ** Compare Instructions
          CmpInst(),
          CmpInstC(),
