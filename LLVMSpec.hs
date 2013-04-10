@@ -1714,4 +1714,15 @@ llvm version
                                         , gfunHSName = "getMallocArraySize"
                                         }
              }
+       ,Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
+             , specNS = llvmNS
+             , specName = "isMallocLikeFn"
+             , specTemplateArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT bool
+                                        , gfunArgs = [(True,constT $ ptr $ llvmType "Value")
+                                                     ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")
+                                                     ,(False,normalT bool)]
+                                        , gfunHSName = "isMallocLikeFn_"
+                                        }
+             }
        ]

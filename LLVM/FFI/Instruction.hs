@@ -46,6 +46,7 @@ module LLVM.FFI.Instruction
          callInstGetArgOperand,
          callInstGetCallingConv,
          callInstGetCalledValue,
+         isMallocLikeFn,
          getMallocAllocatedType,
          getMallocArraySize,
          -- ** Compare Instructions
@@ -198,6 +199,9 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+isMallocLikeFn :: ValueC t => Ptr t -> Ptr TargetLibraryInfo -> Bool -> IO Bool
+isMallocLikeFn = isMallocLikeFn_
 
 loadInstGetOrdering :: Ptr LoadInst -> IO AtomicOrdering
 loadInstGetOrdering = fmap toAtomicOrdering . loadInstGetOrdering_
