@@ -10,6 +10,7 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/Target/TargetLibraryInfo.h>
+#include <llvm/Analysis/AliasAnalysis.h>
 
 extern "C" {
   int FCMP_OEQ() {
@@ -96,6 +97,9 @@ extern "C" {
 
 #define HANDLE_LIBFUNC(name) int LibFunc_##name() { return llvm::LibFunc::name; }
 #include "LibFunc.def"
+
+#define HANDLE_ALIAS_RESULT(name) int AliasResult_##name() { return llvm::AliasAnalysis::name; }
+#include "Alias.def"
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;

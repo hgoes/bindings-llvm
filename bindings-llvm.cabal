@@ -66,5 +66,6 @@ library
     LLVM.Target.XCore
     LLVM.FFI.Transforms.Scalar
     LLVM.FFI.OStream
+    LLVM.FFI.AliasAnalysis
   other-modules:
     LLVM.FFI.Interface

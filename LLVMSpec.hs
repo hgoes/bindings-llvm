@@ -1637,4 +1637,44 @@ llvm version
                           [(Constructor [(False,normalT int),(False,normalT bool),(False,normalT bool)],GenHS,"newFDOStream_")
                           ,(Destructor False,GenHS,"deleteFDOStream")]
              }
+       ,Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
+             , specNS = llvmNS
+             , specName = "AliasAnalysis"
+             , specTemplateArgs = []
+             , specType = ClassSpec $
+                          [(Constructor [],GenHS,"newAliasAnalysis")
+                          ,(Destructor True,GenHS,"deleteAliasAnalysis_")
+                          ,(memberFun { ftReturnType = constT $ ptr $ llvmType "TargetLibraryInfo"
+                                      , ftName = "getTargetLibraryInfo"
+                                      , ftOverloaded = True
+                                      },GenHS,"aliasAnalysisGetTargetLibraryInfo_")
+                          ,(memberFun { ftReturnType = normalT uint64_t
+                                      , ftName = "getTypeStoreSize"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                      , ftOverloaded = True
+                                      },GenHS,"aliasAnalysisGetTypeStoreSize_")]++
+                          [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" []
+                                      , ftName = "getLocation"
+                                      , ftArgs = [(False,constT $ ptr $ llvmType (inst++"Inst"))]
+                                      , ftOverloaded = True
+                                      },GenHS,"aliasAnalysisGetLocation"++inst++"_")
+                           | inst <- ["Load","Store","VAArg","AtomicCmpXchg","AtomicRMW"]]++
+                          [(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "AliasResult"
+                                      , ftName = "alias"
+                                      , ftArgs = [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [])
+                                                 ,(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [])]
+                                      , ftOverloaded = True
+                                      },GenHS,"aliasAnalysisAlias_")
+                          ]
+             }
+       ,Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
+             , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
+             , specName = "Location"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [(True,constT $ ptr $ llvmType "Value")
+                                        ,(False,normalT uint64_t)
+                                        ,(False,constT $ ptr $ llvmType "MDNode")
+                                        ],GenHS,"newLocation_")]
+             }
        ]

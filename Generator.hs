@@ -177,10 +177,10 @@ toCType (Type q c) = let (x,out,inC) = toCType' c
                  then (t,idOut,idIn)
                  else (ptr void,copyOut (Type q t),passAsPointer (Type q t))
 
-toHaskellType :: Bool -> Bool -> Type -> HsType
-toHaskellType _ True _
-  = HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr") (HsTyVar $ HsIdent "t")
-toHaskellType addP False (Type q c) = toHSType (not addP) c
+toHaskellType :: Bool -> Maybe String -> Type -> HsType
+toHaskellType _ (Just v) _
+  = HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr") (HsTyVar $ HsIdent v)
+toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
   where
     toHSType _ (RefType t) = HsTyApp 
                              (HsTyCon $ UnQual $ HsIdent "Ptr")
@@ -206,7 +206,7 @@ toHaskellType addP False (Type q c) = toHSType (not addP) c
       = (if isP
          then id
          else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
-        ) $ foldl HsTyApp (toHSType True (NamedType [] name [])) (fmap (toHaskellType False False) $ concat (fmap classArgs ns)++tmpl)
+        ) $ foldl HsTyApp (toHSType True (NamedType [] name [])) (fmap (toHaskellType False Nothing) $ concat (fmap classArgs ns)++tmpl)
     toHSType isP (EnumType ns name)
       = HsTyCon $ UnQual $ HsIdent "CInt"
 
@@ -331,41 +331,51 @@ generateFFI mname header specs
                                           , ftReturnType = rtp }
                                   -> ((if isS
                                        then id
-                                       else ((toHaskellType True isO $ toPtr $ specFullType cs):))
-                                      (fmap (uncurry (toHaskellType True)) r),
+                                       else ((toHaskellType True (if isO
+                                                                  then Just "t"
+                                                                  else Nothing) $ toPtr $ specFullType cs):))
+                                      (fmap (\((isO',tp'),n) -> toHaskellType True (if isO'
+                                                                                    then Just $ "t"++show n
+                                                                                    else Nothing) tp') (zip r [0..])),
                                       (if isP
                                        then id
                                        else HsTyApp (HsTyCon $ UnQual $ HsIdent "IO"))
-                                      (toHaskellType True False rtp),
+                                      (toHaskellType True Nothing rtp),
                                       cname)
                                 Constructor { ftConArgs = r }
-                                  -> (fmap (uncurry $ toHaskellType True) r,
+                                  -> (fmap (\((isO',tp'),n) -> toHaskellType True (if isO'
+                                                                                   then Just $ "t"++show n
+                                                                                   else Nothing) tp') (zip r [0..]),
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True False $ toPtr $ specFullType cs,
+                                      toHaskellType True Nothing $ toPtr $ specFullType cs,
                                       cname)
                                 Destructor { ftOverloadedDestructor = isO }
-                                  -> ([toHaskellType True isO $ toPtr $ specFullType cs],
+                                  -> ([toHaskellType True (if isO
+                                                           then Just "t"
+                                                           else Nothing) $ toPtr $ specFullType cs],
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True False $ normalT void,
+                                      toHaskellType True Nothing $ normalT void,
                                       cname)
                                 Setter { ftSetType = tp }
-                                  -> ([toHaskellType True False $ toPtr $ specFullType cs,
-                                       toHaskellType True False tp],
+                                  -> ([toHaskellType True Nothing $ toPtr $ specFullType cs,
+                                       toHaskellType True Nothing tp],
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True False $ normalT void,
+                                      toHaskellType True Nothing $ normalT void,
                                       cname)
                                 Getter { ftGetType = tp }
-                                  -> ([toHaskellType True False $ toPtr $ specFullType cs],
+                                  -> ([toHaskellType True Nothing $ toPtr $ specFullType cs],
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True False tp,
+                                      toHaskellType True Nothing tp,
                                       cname)
                                       
                              ) funs
                    GlobalFunSpec { gfunReturnType = rtp
                                  , gfunArgs = args
-                                 , gfunHSName = hsname } -> [(fmap (uncurry $ toHaskellType True) args,
+                                 , gfunHSName = hsname } -> [(fmap (\((isO',tp'),n) -> toHaskellType True (if isO'
+                                                                                                           then Just $ "t"++show n
+                                                                                                           else Nothing) tp') (zip args [0..]),
                                                               HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                                              toHaskellType True False rtp,
+                                                              toHaskellType True Nothing rtp,
                                                               hsname)]
                  , let sig = (concat [ prettyPrint tp ++ " -> " 
                                      | tp <- tps

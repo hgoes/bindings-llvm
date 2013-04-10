@@ -39,6 +39,9 @@ extern int ICMP_SLE();
 #define HANDLE_LIBFUNC(name) extern int LibFunc_##name();
 #include "LibFunc.def"
 
+#define HANDLE_ALIAS_RESULT(name) extern int AliasResult_##name();
+#include "Alias.def"
+
 extern int writeBitCodeToFile(void* m,const char* path);
 
 #endif
