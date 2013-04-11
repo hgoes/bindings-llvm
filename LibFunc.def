@@ -4,6 +4,7 @@
 #ifndef HANDLE_SEP
 #define HANDLE_SEP
 #endif
+#if HS_LLVM_VERSION >= 303
       /// int _IO_getc(_IO_FILE * __fp);
 HANDLE_LIBFUNC(under_IO_getc)
 HANDLE_SEP
@@ -40,6 +41,7 @@ HANDLE_SEP
       /// void *new(unsigned long, nothrow);
 HANDLE_LIBFUNC(ZnwmRKSt9nothrow_t)
 HANDLE_SEP
+#endif
       /// int __cxa_atexit(void (*f)(void *), void *p, void *d);
 HANDLE_LIBFUNC(cxa_atexit)
 HANDLE_SEP
@@ -53,6 +55,7 @@ HANDLE_SEP
       /// void __cxa_guard_release(guard_t *guard);
 HANDLE_LIBFUNC(cxa_guard_release)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int __isoc99_scanf (const char *format, ...)
 HANDLE_LIBFUNC(dunder_isoc99_scanf)
 HANDLE_SEP
@@ -77,12 +80,14 @@ HANDLE_SEP
       /// int access(const char *path, int amode);
 HANDLE_LIBFUNC(access)
 HANDLE_SEP
+#endif
       /// double acos(double x);
 HANDLE_LIBFUNC(acos)
 HANDLE_SEP
       /// float acosf(float x);
 HANDLE_LIBFUNC(acosf)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// double acosh(double x);
 HANDLE_LIBFUNC(acosh)
 HANDLE_SEP
@@ -92,6 +97,7 @@ HANDLE_SEP
       /// long double acoshl(long double x);
 HANDLE_LIBFUNC(acoshl)
 HANDLE_SEP
+#endif
       /// long double acosl(long double x);
 HANDLE_LIBFUNC(acosl)
 HANDLE_SEP
@@ -101,6 +107,7 @@ HANDLE_SEP
       /// float asinf(float x);
 HANDLE_LIBFUNC(asinf)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// double asinh(double x);
 HANDLE_LIBFUNC(asinh)
 HANDLE_SEP
@@ -110,6 +117,7 @@ HANDLE_SEP
       /// long double asinhl(long double x);
 HANDLE_LIBFUNC(asinhl)
 HANDLE_SEP
+#endif
       /// long double asinl(long double x);
 HANDLE_LIBFUNC(asinl)
 HANDLE_SEP
@@ -128,6 +136,7 @@ HANDLE_SEP
       /// float atanf(float x);
 HANDLE_LIBFUNC(atanf)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// double atanh(double x);
 HANDLE_LIBFUNC(atanh)
 HANDLE_SEP
@@ -137,9 +146,11 @@ HANDLE_SEP
       /// long double atanhl(long double x);
 HANDLE_LIBFUNC(atanhl)
 HANDLE_SEP
+#endif
       /// long double atanl(long double x);
 HANDLE_LIBFUNC(atanl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// double atof(const char *str);
 HANDLE_LIBFUNC(atof)
 HANDLE_SEP
@@ -173,6 +184,7 @@ HANDLE_SEP
       /// long double cbrtl(long double x);
 HANDLE_LIBFUNC(cbrtl)
 HANDLE_SEP
+#endif
       /// double ceil(double x);
 HANDLE_LIBFUNC(ceil)
 HANDLE_SEP
@@ -182,6 +194,7 @@ HANDLE_SEP
       /// long double ceill(long double x);
 HANDLE_LIBFUNC(ceill)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int chmod(const char *path, mode_t mode);
 HANDLE_LIBFUNC(chmod)
 HANDLE_SEP
@@ -194,6 +207,7 @@ HANDLE_SEP
       /// int closedir(DIR *dirp);
 HANDLE_LIBFUNC(closedir)
 HANDLE_SEP
+#endif
       /// double copysign(double x, double y);
 HANDLE_LIBFUNC(copysign)
 HANDLE_SEP
@@ -221,12 +235,15 @@ HANDLE_SEP
       /// long double cosl(long double x);
 HANDLE_LIBFUNC(cosl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// char *ctermid(char *s);
 HANDLE_LIBFUNC(ctermid)
 HANDLE_SEP
+#endif
       /// double exp(double x);
 HANDLE_LIBFUNC(exp)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// double exp10(double x);
 HANDLE_LIBFUNC(exp10)
 HANDLE_SEP
@@ -236,6 +253,7 @@ HANDLE_SEP
       /// long double exp10l(long double x);
 HANDLE_LIBFUNC(exp10l)
 HANDLE_SEP
+#endif
       /// double exp2(double x);
 HANDLE_LIBFUNC(exp2)
 HANDLE_SEP
@@ -269,6 +287,7 @@ HANDLE_SEP
       /// long double fabsl(long double x);
 HANDLE_LIBFUNC(fabsl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int fclose(FILE *stream);
 HANDLE_LIBFUNC(fclose)
 HANDLE_SEP
@@ -305,12 +324,15 @@ HANDLE_SEP
       /// int fileno(FILE *stream);
 HANDLE_LIBFUNC(fileno)
 HANDLE_SEP
+#endif
       /// int fiprintf(FILE *stream, const char *format, ...);
 HANDLE_LIBFUNC(fiprintf)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// void flockfile(FILE *file);
 HANDLE_LIBFUNC(flockfile)
 HANDLE_SEP
+#endif
       /// double floor(double x);
 HANDLE_LIBFUNC(floor)
 HANDLE_SEP
@@ -329,6 +351,7 @@ HANDLE_SEP
       /// long double fmodl(long double x, long double y);
 HANDLE_LIBFUNC(fmodl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// FILE *fopen(const char *filename, const char *mode);
 HANDLE_LIBFUNC(fopen)
 HANDLE_SEP
@@ -341,9 +364,11 @@ HANDLE_SEP
       /// int fputc(int c, FILE *stream);
 HANDLE_LIBFUNC(fputc)
 HANDLE_SEP
+#endif
       /// int fputs(const char *s, FILE *stream);
 HANDLE_LIBFUNC(fputs)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// size_t fread(void *ptr, size_t size, size_t nitems, FILE *stream);
 HANDLE_LIBFUNC(fread)
 HANDLE_SEP
@@ -401,10 +426,12 @@ HANDLE_SEP
       /// void funlockfile(FILE *file);
 HANDLE_LIBFUNC(funlockfile)
 HANDLE_SEP
+#endif
       /// size_t fwrite(const void *ptr, size_t size, size_t nitems,
       /// FILE *stream);
 HANDLE_LIBFUNC(fwrite)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int getc(FILE *stream);
 HANDLE_LIBFUNC(getc)
 HANDLE_SEP
@@ -435,9 +462,11 @@ HANDLE_SEP
       /// uint16_t htons(uint16_t hostshort);
 HANDLE_LIBFUNC(htons)
 HANDLE_SEP
+#endif
       /// int iprintf(const char *format, ...);
 HANDLE_LIBFUNC(iprintf)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int isascii(int c);
 HANDLE_LIBFUNC(isascii)
 HANDLE_SEP
@@ -453,6 +482,7 @@ HANDLE_SEP
       /// long long int llabs(long long int j);
 HANDLE_LIBFUNC(llabs)
 HANDLE_SEP
+#endif
       /// double log(double x);
 HANDLE_LIBFUNC(log)
 HANDLE_SEP
@@ -483,6 +513,7 @@ HANDLE_SEP
       /// double long double log2l(long double x);
 HANDLE_LIBFUNC(log2l)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// double logb(double x);
 HANDLE_LIBFUNC(logb)
 HANDLE_SEP
@@ -492,12 +523,14 @@ HANDLE_SEP
       /// long double logbl(long double x);
 HANDLE_LIBFUNC(logbl)
 HANDLE_SEP
+#endif
       /// float logf(float x);
 HANDLE_LIBFUNC(logf)
 HANDLE_SEP
       /// long double logl(long double x);
 HANDLE_LIBFUNC(logl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int lstat(const char *path, struct stat *buf);
 HANDLE_LIBFUNC(lstat)
 HANDLE_SEP
@@ -519,21 +552,25 @@ HANDLE_SEP
       /// int memcmp(const void *s1, const void *s2, size_t n);
 HANDLE_LIBFUNC(memcmp)
 HANDLE_SEP
+#endif
       /// void *memcpy(void *s1, const void *s2, size_t n);
 HANDLE_LIBFUNC(memcpy)
 HANDLE_SEP
       /// void *memmove(void *s1, const void *s2, size_t n);
 HANDLE_LIBFUNC(memmove)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       // void *memrchr(const void *s, int c, size_t n);
 HANDLE_LIBFUNC(memrchr)
 HANDLE_SEP
+#endif
       /// void *memset(void *b, int c, size_t len);
 HANDLE_LIBFUNC(memset)
 HANDLE_SEP
       /// void memset_pattern16(void *b, const void *pattern16, size_t len);
 HANDLE_LIBFUNC(memset_pattern16)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int mkdir(const char *path, mode_t mode);
 HANDLE_LIBFUNC(mkdir)
 HANDLE_SEP
@@ -549,6 +586,7 @@ HANDLE_SEP
       /// long double modfl(long double value, long double *iptr);
 HANDLE_LIBFUNC(modfl)
 HANDLE_SEP
+#endif
       /// double nearbyint(double x);
 HANDLE_LIBFUNC(nearbyint)
 HANDLE_SEP
@@ -558,6 +596,7 @@ HANDLE_SEP
       /// long double nearbyintl(long double x);
 HANDLE_LIBFUNC(nearbyintl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// uint32_t ntohl(uint32_t netlong);
 HANDLE_LIBFUNC(ntohl)
 HANDLE_SEP
@@ -585,6 +624,7 @@ HANDLE_SEP
       /// int posix_memalign(void **memptr, size_t alignment, size_t size);
 HANDLE_LIBFUNC(posix_memalign)
 HANDLE_SEP
+#endif
       /// double pow(double x, double y);
 HANDLE_LIBFUNC(pow)
 HANDLE_SEP
@@ -594,6 +634,7 @@ HANDLE_SEP
       /// long double powl(long double x, long double y);
 HANDLE_LIBFUNC(powl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// ssize_t pread(int fildes, void *buf, size_t nbyte, off_t offset);
 HANDLE_LIBFUNC(pread)
 HANDLE_SEP
@@ -641,6 +682,7 @@ HANDLE_SEP
       /// void rewind(FILE *stream);
 HANDLE_LIBFUNC(rewind)
 HANDLE_SEP
+#endif
       /// double rint(double x);
 HANDLE_LIBFUNC(rint)
 HANDLE_SEP
@@ -650,9 +692,11 @@ HANDLE_SEP
       /// long double rintl(long double x);
 HANDLE_LIBFUNC(rintl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int rmdir(const char *path);
 HANDLE_LIBFUNC(rmdir)
 HANDLE_SEP
+#endif
       /// double round(double x);
 HANDLE_LIBFUNC(round)
 HANDLE_SEP
@@ -662,6 +706,7 @@ HANDLE_SEP
       /// long double roundl(long double x);
 HANDLE_LIBFUNC(roundl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int scanf(const char *restrict format, ... );
 HANDLE_LIBFUNC(scanf)
 HANDLE_SEP
@@ -675,6 +720,7 @@ HANDLE_SEP
       /// int setvbuf(FILE *stream, char *buf, int type, size_t size);
 HANDLE_LIBFUNC(setvbuf)
 HANDLE_SEP
+#endif
       /// double sin(double x);
 HANDLE_LIBFUNC(sin)
 HANDLE_SEP
@@ -696,12 +742,14 @@ HANDLE_SEP
       /// int siprintf(char *str, const char *format, ...);
 HANDLE_LIBFUNC(siprintf)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int snprintf(char *s, size_t n, const char *format, ...);
 HANDLE_LIBFUNC(snprintf)
 HANDLE_SEP
       /// int sprintf(char *str, const char *format, ...);
 HANDLE_LIBFUNC(sprintf)
 HANDLE_SEP
+#endif
       /// double sqrt(double x);
 HANDLE_LIBFUNC(sqrt)
 HANDLE_SEP
@@ -711,6 +759,7 @@ HANDLE_SEP
       /// long double sqrtl(long double x);
 HANDLE_LIBFUNC(sqrtl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// int sscanf(const char *s, const char *format, ... );
 HANDLE_LIBFUNC(sscanf)
 HANDLE_SEP
@@ -823,6 +872,7 @@ HANDLE_SEP
       /// int system(const char *command);
 HANDLE_LIBFUNC(system)
 HANDLE_SEP
+#endif
       /// double tan(double x);
 HANDLE_LIBFUNC(tan)
 HANDLE_SEP
@@ -841,6 +891,7 @@ HANDLE_SEP
       /// long double tanl(long double x);
 HANDLE_LIBFUNC(tanl)
 HANDLE_SEP
+#if HS_LLVM_VERSION >= 303
       /// clock_t times(struct tms *buffer);
 HANDLE_LIBFUNC(times)
 HANDLE_SEP
@@ -853,6 +904,7 @@ HANDLE_SEP
       /// int toascii(int c);
 HANDLE_LIBFUNC(toascii)
 HANDLE_SEP
+#endif
       /// double trunc(double x);
 HANDLE_LIBFUNC(trunc)
 HANDLE_SEP
@@ -861,6 +913,7 @@ HANDLE_LIBFUNC(truncf)
 HANDLE_SEP
       /// long double truncl(long double x);
 HANDLE_LIBFUNC(truncl)
+#if HS_LLVM_VERSION >= 303
 HANDLE_SEP
       /// int uname(struct utsname *name);
 HANDLE_LIBFUNC(uname)
@@ -906,5 +959,6 @@ HANDLE_LIBFUNC(vsscanf)
 HANDLE_SEP
       /// ssize_t write(int fildes, const void *buf, size_t nbyte);
 HANDLE_LIBFUNC(write)
+#endif
 #undef HANDLE_LIBFUNC
 #undef HANDLE_SEP

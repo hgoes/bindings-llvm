@@ -200,7 +200,11 @@ import Foreign.C
 
 SPECIALIZE_IPLIST(Instruction,capi)
 
+#if HS_LLVM_VERSION >= 303
 isMallocLikeFn :: ValueC t => Ptr t -> Ptr TargetLibraryInfo -> Bool -> IO Bool
+#else
+isMallocLikeFn :: ValueC t => Ptr t -> IO Bool
+#endif
 isMallocLikeFn = isMallocLikeFn_
 
 loadInstGetOrdering :: Ptr LoadInst -> IO AtomicOrdering

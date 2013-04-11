@@ -17,14 +17,24 @@ module LLVM.FFI.Pass
        ,LibFunc(..)
        ,newTargetLibraryInfo
        ,deleteTargetLibraryInfo
+#if HS_LLVM_VERSION >= 303
        ,targetLibraryInfoGetLibFunc
+#endif
        ,targetLibraryInfoGetName
        ,targetLibraryInfoHas
+#if HS_LLVM_VERSION >= 303
        ,DataLayout()
        ,newDataLayoutFromString
        ,newDataLayoutFromModule
        ,dataLayoutIsLittleEndian
        ,dataLayoutIsBigEndian
+#else
+       ,TargetData()
+       ,newTargetDataFromString
+       ,newTargetDataFromModule
+       ,targetDataIsLittleEndian
+       ,targetDataIsBigEndian
+#endif
        ,createCFGSimplificationPass
        ) where
 
@@ -44,7 +54,6 @@ instance PassC ModulePass
 instance PassC ImmutablePass
 instance PassC FindUsedTypes
 instance PassC TargetLibraryInfo
-instance PassC DataLayout
 
 class ModulePassC t
 
@@ -52,11 +61,16 @@ instance ModulePassC ModulePass
 instance ModulePassC ImmutablePass
 instance ModulePassC FindUsedTypes
 instance ModulePassC TargetLibraryInfo
-instance ModulePassC DataLayout
 
 class ImmutablePassC t
 instance ImmutablePassC TargetLibraryInfo
+
+#if HS_LLVM_VERSION >= 303
+instance PassC DataLayout
+instance ModulePassC DataLayout
 instance ImmutablePassC DataLayout
+#endif
+
 
 deletePass :: PassC t => Ptr t -> IO ()
 deletePass = deletePass_
@@ -64,6 +78,7 @@ deletePass = deletePass_
 modulePassRunOnModule :: ModulePassC p => Ptr p -> Ptr Module -> IO Bool
 modulePassRunOnModule = modulePassRunOnModule_
 
+#if HS_LLVM_VERSION >= 303
 targetLibraryInfoGetLibFunc :: Ptr TargetLibraryInfo -> Ptr StringRef -> IO (Maybe LibFunc)
 targetLibraryInfoGetLibFunc tli str
   = alloca (\iptr -> do
@@ -73,6 +88,7 @@ targetLibraryInfoGetLibFunc tli str
                           ires <- peek iptr
                           return (Just $ toLibFunc ires))
                  else return Nothing)
+#endif
 
 targetLibraryInfoGetName :: Ptr TargetLibraryInfo -> LibFunc -> IO (Ptr StringRef)
 targetLibraryInfoGetName ptr f = targetLibraryInfoGetName_ ptr (fromLibFunc f)

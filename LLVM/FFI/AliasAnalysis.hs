@@ -3,7 +3,9 @@ module LLVM.FFI.AliasAnalysis
        ,AliasAnalysisC()
        ,newAliasAnalysis
        ,deleteAliasAnalysis
+#if HS_LLVM_VERSION >= 303
        ,aliasAnalysisGetTargetLibraryInfo
+#endif
        ,aliasAnalysisGetTypeStoreSize
        ,aliasAnalysisGetLocationLoad
        ,aliasAnalysisGetLocationStore
@@ -32,8 +34,10 @@ class AliasAnalysisC t
 deleteAliasAnalysis :: AliasAnalysisC t => Ptr t -> IO ()
 deleteAliasAnalysis = deleteAliasAnalysis_
 
+#if HS_LLVM_VERSION >= 303
 aliasAnalysisGetTargetLibraryInfo :: AliasAnalysisC t => Ptr t -> IO (Ptr TargetLibraryInfo)
 aliasAnalysisGetTargetLibraryInfo = aliasAnalysisGetTargetLibraryInfo_
+#endif
 
 aliasAnalysisGetTypeStoreSize :: (AliasAnalysisC a,TypeC tp) => Ptr a -> Ptr tp -> IO Word64
 aliasAnalysisGetTypeStoreSize = aliasAnalysisGetTypeStoreSize_

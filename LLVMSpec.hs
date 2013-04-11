@@ -1509,15 +1509,17 @@ llvm version
              , specNS = llvmNS
              , specName = "TargetLibraryInfo"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(Constructor [],GenHS,"newTargetLibraryInfo")
-                          ,(Destructor False,GenHS,"deleteTargetLibraryInfo")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "getLibFunc"
-                                      , ftArgs = [(False,normalT $ llvmType "StringRef")
-                                                 ,(False,normalT $ ref $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                      },GenHS,"targetLibraryInfoGetLibFunc_")
-                          ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                          ,(Destructor False,GenHS,"deleteTargetLibraryInfo")]++
+                          (if version>=llvm3_3
+                           then [(memberFun { ftReturnType = normalT bool
+                                            , ftName = "getLibFunc"
+                                            , ftArgs = [(False,normalT $ llvmType "StringRef")
+                                                       ,(False,normalT $ ref $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                            },GenHS,"targetLibraryInfoGetLibFunc_")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
                                       , ftName = "getName"
                                       , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
                                       },GenHS,"targetLibraryInfoGetName_")
@@ -1526,22 +1528,37 @@ llvm version
                                       , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
                                       },GenHS,"targetLibraryInfoHas_")
                           ]
-             }
-       ,Spec { specHeader = irInclude version "DataLayout.h"
-             , specNS = llvmNS
-             , specName = "DataLayout"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(Constructor [(False,normalT $ llvmType "StringRef")],GenHS,"newDataLayoutFromString")
-                          ,(Constructor [(False,constT $ ptr $ llvmType "Module")],GenHS,"newDataLayoutFromModule")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isLittleEndian"
-                                      },GenHS,"dataLayoutIsLittleEndian")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isBigEndian"
-                                      },GenHS,"dataLayoutIsBigEndian")]
-             }
-       ,Spec { specHeader = "llvm/PassSupport.h"
+             }]++
+       (if version >= llvm3_3 
+        then [Spec { specHeader = irInclude version "DataLayout.h"
+                   , specNS = llvmNS
+                   , specName = "DataLayout"
+                   , specTemplateArgs = []
+                   , specType = ClassSpec
+                                [(Constructor [(False,normalT $ llvmType "StringRef")],GenHS,"newDataLayoutFromString")
+                                ,(Constructor [(False,constT $ ptr $ llvmType "Module")],GenHS,"newDataLayoutFromModule")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isLittleEndian"
+                                            },GenHS,"dataLayoutIsLittleEndian")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isBigEndian"
+                                            },GenHS,"dataLayoutIsBigEndian")]
+                   }]
+        else [Spec { specHeader = "llvm/Target/TargetData.h"
+                   , specNS = llvmNS
+                   , specName = "TargetData"
+                   , specTemplateArgs = []
+                   , specType = ClassSpec
+                                [(Constructor [(False,normalT $ llvmType "StringRef")],GenHS,"newTargetDataFromString")
+                                ,(Constructor [(False,constT $ ptr $ llvmType "Module")],GenHS,"newTargetDataFromModule")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isLittleEndian"
+                                            },GenHS,"targetDataIsLittleEndian")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isBigEndian"
+                                            },GenHS,"targetDataIsBigEndian")]
+                   }])++
+       [Spec { specHeader = "llvm/PassSupport.h"
              , specNS = llvmNS
              , specName = "PassInfo"
              , specTemplateArgs = []
@@ -1660,12 +1677,14 @@ llvm version
              , specTemplateArgs = []
              , specType = ClassSpec $
                           [(Constructor [],GenHS,"newAliasAnalysis")
-                          ,(Destructor True,GenHS,"deleteAliasAnalysis_")
-                          ,(memberFun { ftReturnType = constT $ ptr $ llvmType "TargetLibraryInfo"
-                                      , ftName = "getTargetLibraryInfo"
-                                      , ftOverloaded = True
-                                      },GenHS,"aliasAnalysisGetTargetLibraryInfo_")
-                          ,(memberFun { ftReturnType = normalT uint64_t
+                          ,(Destructor True,GenHS,"deleteAliasAnalysis_")]++
+                          (if version>=llvm3_3
+                           then [(memberFun { ftReturnType = constT $ ptr $ llvmType "TargetLibraryInfo"
+                                            , ftName = "getTargetLibraryInfo"
+                                            , ftOverloaded = True
+                                            },GenHS,"aliasAnalysisGetTargetLibraryInfo_")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT uint64_t
                                       , ftName = "getTypeStoreSize"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
                                       , ftOverloaded = True
@@ -1699,8 +1718,10 @@ llvm version
              , specName = "getMallocAllocatedType"
              , specTemplateArgs = []
              , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Type"
-                                        , gfunArgs = [(False,constT $ ptr $ llvmType "CallInst")
-                                                     ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")]
+                                        , gfunArgs = [(False,constT $ ptr $ llvmType "CallInst")]++
+                                                     (if version>=llvm3_3
+                                                      then [(False,constT $ ptr $ llvmType "TargetLibraryInfo")]
+                                                      else [])
                                         , gfunHSName = "getMallocAllocatedType"
                                         }
              }
@@ -1709,21 +1730,27 @@ llvm version
              , specName = "getMallocArraySize"
              , specTemplateArgs = []
              , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Value"
-                                        , gfunArgs = [(False,normalT $ ptr $ llvmType "CallInst")
-                                                     ,(False,constT $ ptr $ llvmType "DataLayout")
-                                                     ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")
-                                                     ,(False,normalT bool)]
+                                        , gfunArgs = [(False,normalT $ ptr $ llvmType "CallInst")]++
+                                                     (if version >= llvm3_3
+                                                      then [(False,constT $ ptr $ llvmType "DataLayout")
+                                                           ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")]
+                                                      else [(False,constT $ ptr $ llvmType "TargetData")])++
+                                                     [(False,normalT bool)]
                                         , gfunHSName = "getMallocArraySize"
                                         }
              }
        ,Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
              , specNS = llvmNS
-             , specName = "isMallocLikeFn"
+             , specName = if version>=llvm3_3
+                          then "isMallocLikeFn"
+                          else "isMalloc"
              , specTemplateArgs = []
              , specType = GlobalFunSpec { gfunReturnType = normalT bool
-                                        , gfunArgs = [(True,constT $ ptr $ llvmType "Value")
-                                                     ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")
-                                                     ,(False,normalT bool)]
+                                        , gfunArgs = [(True,constT $ ptr $ llvmType "Value")]++
+                                                     (if version>=llvm3_3
+                                                      then [(False,constT $ ptr $ llvmType "TargetLibraryInfo")
+                                                           ,(False,normalT bool)]
+                                                      else [])
                                         , gfunHSName = "isMallocLikeFn_"
                                         }
              }
