@@ -85,7 +85,7 @@ SUBTYPE3(Type,CompositeType,SequentialType,PointerType)
 TYPE_LEAF(VectorType)
 SUBTYPE3(Type,CompositeType,SequentialType,VectorType)
 
-SPECIALIZE_ARRAYREF(Type,capi)
+SPECIALIZE_ARRAYREF(Type)
 SPECIALIZE_SETVECTOR(Type,capi)
 
 typeDump :: TypeC t => Ptr t -> IO ()

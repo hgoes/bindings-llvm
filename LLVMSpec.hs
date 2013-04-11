@@ -69,8 +69,8 @@ llvm version
                                    },GenHS,"arrayRefIndex"++tp)
                        ]
           }
-     | tp <- ["Type"]
-    , let rtp = Type [] (ptr $ NamedType llvmNS tp [])
+     | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
+                  ,("CChar",constT $ ptr char)]
     ]++
     concat [[Spec { specHeader = "llvm/ADT/ilist.h"
                   , specNS = llvmNS

@@ -51,9 +51,10 @@ instance IListIteratorC name where {\
   iListIteratorNEq = listIterator##name##NEq\
 }
 
-#define SPECIALIZE_ARRAYREF(name,cconv)\
+#define SPECIALIZE_ARRAYREF(name)\
 instance ArrayRefC (Ptr name) where {\
   newArrayRef' = newArrayRef##name ;\
+  newArrayRefEmpty = newArrayRefEmpty##name ;\
   arrayRefSize' = arrayRefSize##name ;\
   arrayRefEquals = arrayRefEquals##name ;\
   arrayRefIndex' = arrayRefIndex##name ;\
