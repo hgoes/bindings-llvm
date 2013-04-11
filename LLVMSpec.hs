@@ -1646,6 +1646,41 @@ llvm version
                      ,"createTailCallEliminationPass"
                      ]
        ]++
+       [Spec { specHeader = "llvm/Transforms/IPO.h"
+             , specNS = llvmNS
+             , specName = f
+             , specTemplateArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType p
+                                        , gfunArgs = fmap (\x -> (False,x)) a
+                                        , gfunHSName = f
+                                        }
+             } | (p,f,a) <- [("ModulePass","createStripSymbolsPass",[normalT bool])
+                           ,("ModulePass","createStripNonDebugSymbolsPass",[])
+                           ,("ModulePass","createStripDebugDeclarePass",[])
+                           ,("ModulePass","createStripDeadDebugInfoPass",[])
+                           ,("ModulePass","createConstantMergePass",[])
+                           ,("ModulePass","createGlobalOptimizerPass",[])
+                           ,("ModulePass","createGlobalDCEPass",[])
+                           ,("Pass","createFunctionInliningPass",[normalT int])
+                           ,("Pass","createAlwaysInlinerPass",[normalT bool])
+                           ,("Pass","createPruneEHPass",[])
+                           ,("ModulePass","createInternalizePass",[normalT $ NamedType llvmNS "ArrayRef" [constT $ ptr $ char]])
+                           ,("ModulePass","createDeadArgEliminationPass",[])
+                           ,("ModulePass","createDeadArgHackingPass",[])
+                           ,("Pass","createArgumentPromotionPass",[normalT unsigned])
+                           ,("ModulePass","createIPConstantPropagationPass",[])
+                           ,("ModulePass","createIPSCCPPass",[])
+                           ,("Pass","createLoopExtractorPass",[])
+                           ,("Pass","createSingleLoopExtractorPass",[])
+                           ,("ModulePass","createBlockExtractorPass",[])
+                           ,("ModulePass","createStripDeadPrototypesPass",[])
+                           ,("Pass","createFunctionAttrsPass",[])
+                           ,("ModulePass","createMergeFunctionsPass",[])
+                           ,("ModulePass","createPartialInliningPass",[])
+                           ,("ModulePass","createMetaRenamerPass",[])
+                           ,("ModulePass","createBarrierNoopPass",[])
+                           ]
+       ]++
        [Spec { specHeader = "llvm/Analysis/Verifier.h"
              , specNS = llvmNS
              , specName = "createVerifierPass"
