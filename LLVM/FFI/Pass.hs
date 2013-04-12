@@ -69,8 +69,11 @@ instance ImmutablePassC TargetLibraryInfo
 instance PassC DataLayout
 instance ModulePassC DataLayout
 instance ImmutablePassC DataLayout
+#else
+instance PassC TargetData
+instance ModulePassC TargetData
+instance ImmutablePassC TargetData
 #endif
-
 
 deletePass :: PassC t => Ptr t -> IO ()
 deletePass = deletePass_
