@@ -1676,10 +1676,11 @@ llvm version
                            ,("ModulePass","createStripDeadPrototypesPass",[])
                            ,("Pass","createFunctionAttrsPass",[])
                            ,("ModulePass","createMergeFunctionsPass",[])
-                           ,("ModulePass","createPartialInliningPass",[])
-                           ,("ModulePass","createMetaRenamerPass",[])
-                           ,("ModulePass","createBarrierNoopPass",[])
-                           ]
+                           ,("ModulePass","createPartialInliningPass",[])]++
+        (if version>=llvm3_3
+         then [("ModulePass","createMetaRenamerPass",[])
+              ,("ModulePass","createBarrierNoopPass",[])]
+         else [])
        ]++
        [Spec { specHeader = "llvm/Analysis/Verifier.h"
              , specNS = llvmNS

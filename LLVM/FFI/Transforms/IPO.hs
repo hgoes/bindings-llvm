@@ -22,7 +22,10 @@ module LLVM.FFI.Transforms.IPO
        ,createFunctionAttrsPass
        ,createMergeFunctionsPass
        ,createPartialInliningPass
+#if HS_LLVM_VERSION >= 303
        ,createMetaRenamerPass
-       ,createBarrierNoopPass) where
+       ,createBarrierNoopPass
+#endif
+) where
 
 import LLVM.FFI.Interface
