@@ -5,7 +5,7 @@ cabal-version:  >= 1.2
 build-type:     Custom
 
 library
-  build-tools:    cpphs
+  build-tools:    cpphs,llvm-config
   build-depends: base,tagged>=0.4,unix
   includes:             
     --wrapper/llvm_proxy.h

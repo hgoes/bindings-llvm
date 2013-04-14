@@ -1,8 +1,11 @@
 module Main where
 
 import Distribution.Simple
+import Distribution.Simple.Setup
 import Distribution.Simple.LocalBuildInfo
 import Distribution.PackageDescription
+import Distribution.Simple.Program
+import Distribution.Verbosity
 import qualified Distribution.ModuleName as M
 import System.Process
 import Data.Version
@@ -13,43 +16,52 @@ import System.Directory
 import Generator
 import LLVMSpec
 
-main = defaultMainWithHooks $
-       simpleUserHooks { confHook = \cfg flags -> (confHook simpleUserHooks cfg flags) >>= adaptLocalBuildInfo 
-                       , postConf = \args cfg pkgd lbi -> do
-                            createDirectoryIfMissing True (buildDir lbi </> "wrapper")
-                            createDirectoryIfMissing True (buildDir lbi </> "LLVM" </> "FFI")
-                            version <- getLLVMVersion
-                            writeWrapper "HS_LLVM_PROXY" (llvm version)
-                              (buildDir lbi)
-                              proxy_h
-                              wrap_c
-                              iface_m
-                       , buildHook = \pd lbi uh bf -> do
-                            buildHook simpleUserHooks 
-                              (pd { library = case library pd of
-                                       Just lib -> Just $ lib { libBuildInfo = (libBuildInfo lib) 
-                                                                               { cSources = [buildDir lbi </> wrap_c]
-                                                                                            ++(cSources (libBuildInfo lib))
-                                                                               --, otherModules = [M.fromString iface_name]
-                                                                               --                 ++(otherModules (libBuildInfo lib))
-                                                                               }
-                                                              } 
-                                  })
-                              lbi uh bf
-                       }
+llvmConfigProgram :: Program
+llvmConfigProgram = simpleProgram "llvm-config"
+
+adaptHooks :: UserHooks -> UserHooks
+adaptHooks hooks
+  = hooks { hookedPrograms = llvmConfigProgram:hookedPrograms hooks
+          , confHook = \pd flags -> do
+            db <- configureProgram normal llvmConfigProgram (configPrograms flags)
+            lbi <- confHook hooks pd (flags { configPrograms = db })
+            adaptLocalBuildInfo lbi
+          , buildHook = \pd lbi uh bf -> do
+            createDirectoryIfMissing True (buildDir lbi </> "wrapper")
+            createDirectoryIfMissing True (buildDir lbi </> "LLVM" </> "FFI")
+            version <- getLLVMVersion (configPrograms $ configFlags lbi)
+            writeWrapper "HS_LLVM_PROXY" (llvm version)
+              (buildDir lbi)
+              proxy_h
+              wrap_c
+              iface_m
+            buildHook hooks
+              (pd { library = case library pd of
+                       Just lib -> Just $
+                                   lib { libBuildInfo = (libBuildInfo lib)
+                                                        { cSources = [buildDir lbi </> wrap_c]
+                                                                     ++(cSources (libBuildInfo lib))
+                                                        }
+                                       }
+                  }) lbi uh bf
+          }
   where
     proxy_h = "wrapper" </> "llvm_proxy.h"
     wrap_c = "wrapper" </> "llvm_wrap.cxx"
     iface_m = ["LLVM","FFI","Interface"]
     iface_name = concat $ intersperse "." iface_m
-                                         
+
+main = defaultMainWithHooks $
+       adaptHooks simpleUserHooks
+
 adaptLocalBuildInfo :: LocalBuildInfo -> IO LocalBuildInfo
 adaptLocalBuildInfo bi = do
-  version <- getLLVMVersion
-  cflags <- getLLVMCFlags
-  libs <- getLLVMLibs
-  libdir <- getLLVMLibdir
-  incdir <- getLLVMIncludedir
+  let db = configPrograms $ configFlags bi
+  version <- getLLVMVersion db
+  cflags <- getLLVMCFlags db
+  libs <- getLLVMLibs db
+  libdir <- getLLVMLibdir db
+  incdir <- getLLVMIncludedir db
   return $ bi { localPkgDescr = adaptPackageDescription 
                                 (localPkgDescr bi)
                                 version cflags 
@@ -79,36 +91,36 @@ adaptBuildInfo bi vers cflags libs libdir incdir
        , extraLibDirs = libdir:extraLibDirs bi
        }
 
-getLLVMVersion :: IO Version
-getLLVMVersion = do
-  outp <- readProcess "llvm-config" ["--version"] ""
+getLLVMVersion :: ProgramConfiguration -> IO Version
+getLLVMVersion db = do
+  outp <- getDbProgramOutput normal llvmConfigProgram db ["--version"]
   let parses = readP_to_S parseVersion outp
   case find (\(vers,rest) -> rest == "\n" || rest == "svn\n") parses of
     Just (version,_) -> return version
     Nothing -> error $ "Failed to parse llvm version: "++show parses
 
-getLLVMCFlags :: IO [String]
-getLLVMCFlags = do
-  outp <- readProcess "llvm-config" ["--cflags"] ""
+getLLVMCFlags :: ProgramConfiguration -> IO [String]
+getLLVMCFlags db = do
+  outp <- getDbProgramOutput normal llvmConfigProgram db ["--cflags"]
   return $ words outp
 
-getLLVMLibdir :: IO String
-getLLVMLibdir = do
-  outp <- readProcess "llvm-config" ["--libdir"] ""
+getLLVMLibdir :: ProgramConfiguration -> IO String
+getLLVMLibdir db = do
+  outp <- getDbProgramOutput normal llvmConfigProgram db ["--libdir"]
   let [dir] = lines outp
   return dir
 
-getLLVMLibs :: IO [String]
-getLLVMLibs = do
-  outp <- readProcess "llvm-config" ["--libnames"] ""
+getLLVMLibs :: ProgramConfiguration -> IO [String]
+getLLVMLibs db = do
+  outp <- getDbProgramOutput normal llvmConfigProgram db ["--libnames"]
   return $ fmap (\lib -> case dropExtension lib of
                     'l':'i':'b':name -> name
                     name -> name
                 ) (words outp)
 
-getLLVMIncludedir :: IO String
-getLLVMIncludedir = do
-  outp <- readProcess "llvm-config" ["--includedir"] ""
+getLLVMIncludedir :: ProgramConfiguration -> IO String
+getLLVMIncludedir db = do
+  outp <- getDbProgramOutput normal llvmConfigProgram db ["--includedir"]
   let [dir] = lines outp
   return dir
 
