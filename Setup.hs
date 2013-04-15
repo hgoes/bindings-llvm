@@ -23,8 +23,10 @@ adaptHooks :: UserHooks -> UserHooks
 adaptHooks hooks
   = hooks { hookedPrograms = llvmConfigProgram:hookedPrograms hooks
           , confHook = \pd flags -> do
-            db <- configureProgram normal llvmConfigProgram (configPrograms flags)
-            lbi <- confHook hooks pd (flags { configPrograms = db })
+            let db1 = userSpecifyPaths (configProgramPaths flags) (configPrograms flags)
+                db2 = userSpecifyArgss (configProgramArgs flags) db1
+            db3 <- configureProgram normal llvmConfigProgram db2
+            lbi <- confHook hooks pd (flags { configPrograms = db3 })
             adaptLocalBuildInfo lbi
           , buildHook = \pd lbi uh bf -> do
             createDirectoryIfMissing True (buildDir lbi </> "wrapper")
