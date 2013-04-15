@@ -79,6 +79,7 @@ adaptPackageDescription pkg vers cflags ldflags libdir incdir
                                               vers cflags 
                                               ldflags libdir incdir
                              }
+             , description = (description pkg) ++ "\n%LLVM_VERSION="++show vers++"%"
              }
 
 adaptBuildInfo :: BuildInfo -> Version -> [String] -> [String] -> String -> String -> BuildInfo
