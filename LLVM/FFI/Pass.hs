@@ -20,7 +20,9 @@ module LLVM.FFI.Pass
 #if HS_LLVM_VERSION >= 303
        ,targetLibraryInfoGetLibFunc
 #endif
+#if HS_LLVM_VERSION >= 301
        ,targetLibraryInfoGetName
+#endif
        ,targetLibraryInfoHas
 #if HS_LLVM_VERSION >= 303
        ,DataLayout()
@@ -93,8 +95,10 @@ targetLibraryInfoGetLibFunc tli str
                  else return Nothing)
 #endif
 
+#if HS_LLVM_VERSION >= 301
 targetLibraryInfoGetName :: Ptr TargetLibraryInfo -> LibFunc -> IO (Ptr StringRef)
 targetLibraryInfoGetName ptr f = targetLibraryInfoGetName_ ptr (fromLibFunc f)
+#endif
 
 targetLibraryInfoHas :: Ptr TargetLibraryInfo -> LibFunc -> IO Bool
 targetLibraryInfoHas ptr f = targetLibraryInfoHas_ ptr (fromLibFunc f)

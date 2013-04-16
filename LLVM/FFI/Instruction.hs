@@ -130,8 +130,11 @@ module LLVM.FFI.Instruction
          returnInstGetReturnValue,
          -- *** Switch Instruction
          SwitchInst(),
+#if HS_LLVM_VERSION>=301
          CaseIt(),
+#endif
          switchInstGetCondition,
+#if HS_LLVM_VERSION>=301
          switchInstCaseBegin,
          switchInstCaseEnd,
          switchInstCaseDefault,
@@ -140,6 +143,7 @@ module LLVM.FFI.Instruction
          caseItEq,
          caseItGetCaseValue,
          caseItGetCaseSuccessor,
+#endif
          -- *** Unreachable Instruction
          UnreachableInst(),
          -- ** Unary Instructions

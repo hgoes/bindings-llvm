@@ -9,7 +9,9 @@ module LLVM.FFI.PassManagerBuilder
        ,setPassManagerBuilderDisableSimplifyLibCalls
        ,setPassManagerBuilderDisableUnitAtATime
        ,setPassManagerBuilderDisableUnrollLoops
+#if HS_LLVM_VERSION >= 301
        ,setPassManagerBuilderVectorize
+#endif
        --,setPassManagerBuilderLoopVectorize
        ) where
 

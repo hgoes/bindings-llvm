@@ -1,14 +1,18 @@
 module LLVM.FFI.Constant 
        (Constant(),ConstantC(),
+#if HS_LLVM_VERSION>=301
         constantGetAggregateElement,
+#endif
         BlockAddress(),
         ConstantAggregateZero(),
         ConstantArray(),
+#if HS_LLVM_VERSION>=301
         ConstantDataSequential(),
         constantDataSequentialGetNumElements,
         constantDataSequentialGetElementAsConstant,
         ConstantDataArray(),
         ConstantDataVector(),
+#endif
         ConstantExpr(),
         constantExprGetOpcode,
         --constantExprGetAsInstruction,
@@ -63,6 +67,7 @@ constantExprGetOpcode ptr = do
   let Just res = toOpCode opc
   return res
 
+#if HS_LLVM_VERSION>=301
 constantGetAggregateElement :: ConstantC t => Ptr t -> Integer -> IO (Ptr Constant)
 constantGetAggregateElement ptr idx = constantGetAggregateElement_ ptr (fromInteger idx)
 
@@ -71,6 +76,7 @@ constantDataSequentialGetNumElements ptr = fmap toInteger (constantDataSequentia
 
 constantDataSequentialGetElementAsConstant :: ConstantDataSequentialC t => Ptr t -> Integer -> IO (Ptr Constant)
 constantDataSequentialGetElementAsConstant ptr i = constantDataSequentialGetElementAsConstant_ ptr (fromInteger i)
+#endif
 
 TYPE(Constant)
 SUBTYPE2(Value,User,Constant)
@@ -80,12 +86,14 @@ TYPE_LEAF(ConstantAggregateZero)
 SUBTYPE3(Value,User,Constant,ConstantAggregateZero)
 TYPE_LEAF(ConstantArray)
 SUBTYPE3(Value,User,Constant,ConstantArray)
+#if HS_LLVM_VERSION>=301
 TYPE(ConstantDataSequential)
 SUBTYPE3(Value,User,Constant,ConstantDataSequential)
 TYPE_LEAF(ConstantDataArray)
 SUBTYPE4(Value,User,Constant,ConstantDataSequential,ConstantDataArray)
 TYPE_LEAF(ConstantDataVector)
 SUBTYPE4(Value,User,Constant,ConstantDataSequential,ConstantDataVector)
+#endif
 TYPE(ConstantExpr)
 SUBTYPE3(Value,User,Constant,ConstantExpr)
 {-TYPE_LEAF(BinaryConstantExpr)
@@ -135,6 +143,7 @@ instance GetType ConstantArray where
   type TypeOfValue ConstantArray = ArrayType
   getType = constantArrayGetType
 
+#if HS_LLVM_VERSION>=301
 instance GetType ConstantDataSequential where
   type TypeOfValue ConstantDataSequential = SequentialType
   getType = constantDataSequentialGetType
@@ -146,6 +155,7 @@ instance GetType ConstantDataArray where
 instance GetType ConstantDataVector where
   type TypeOfValue ConstantDataVector = VectorType
   getType = constantDataVectorGetType
+#endif
 
 GETTYPE(ConstantExpr)
 {-GETTYPE(BinaryConstantExpr)

@@ -4,7 +4,9 @@ module LLVM.FFI.Type
         ,TypeC()
         ,typeGetContext
         ,isVoidType
+#if HS_LLVM_VERSION>=301
         ,isHalfType
+#endif
         ,isFloatType
         ,isDoubleType
         ,isX86_FP80Type
@@ -112,8 +114,10 @@ newFunctionType = newFunctionType_
 isVoidType :: TypeC t => Ptr t -> Bool
 isVoidType = isVoidTy_
 
+#if HS_LLVM_VERSION>=301
 isHalfType :: TypeC t => Ptr t -> Bool
 isHalfType = isHalfTy_
+#endif
 
 isFloatType :: TypeC t => Ptr t -> Bool
 isFloatType = isFloatTy_

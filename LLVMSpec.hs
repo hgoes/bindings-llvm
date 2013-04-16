@@ -9,6 +9,11 @@ llvm3_3 = Version { versionBranch = [3,3]
                   , versionTags = []
                   }
 
+llvm3_1 :: Version
+llvm3_1 = Version { versionBranch = [3,1]
+                  , versionTags = []
+                  }
+
 irInclude :: Version -> String -> String
 irInclude ver hdr = if ver >= llvm3_3
                     then "llvm/IR/"++hdr
@@ -232,7 +237,10 @@ llvm version
                                       , ftOverloaded = True
                                       , ftPure = True
                                       },GenHS,"is"++tp++"Ty_")
-                           | tp <- ["Void","Half","Float","Double","X86_FP80","FP128","PPC_FP128"
+                           | tp <- ["Void"]++(if version>=llvm3_1
+                                             then ["Half"]
+                                             else [])++
+                                  ["Float","Double","X86_FP80","FP128","PPC_FP128"
                                   ,"FloatingPoint","X86_MMX","Label","Metadata"]
                           ]
              }
@@ -458,7 +466,14 @@ llvm version
              , specNS = llvmNS
              , specName = "Constant"
              , specTemplateArgs = []
-             , specType = ClassSpec 
+             , specType = ClassSpec $
+                          (if version>=llvm3_1
+                           then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                            , ftName = "getAggregateElement"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            , ftOverloaded = True
+                                            },GenHS,"constantGetAggregateElement_")]
+                           else [])++
                           (if version >= llvm3_3
                            then [(memberFun { ftReturnType = normalT bool
                                             , ftName = "isNullValue"
@@ -479,12 +494,7 @@ llvm version
              , specNS = llvmNS
              , specName = "BlockAddress"
              , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
-                                      , ftName = "getAggregateElement"
-                                      , ftArgs = [(False,normalT unsigned)]
-                                      , ftOverloaded = True
-                                      },GenHS,"constantGetAggregateElement_")]
+             , specType = ClassSpec []
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
@@ -495,44 +505,47 @@ llvm version
                                       , ftName = "getType"
                                       },GenHS,"constantArrayGetType")]
              }
-       ,Spec { specHeader = irInclude version "Constants.h"
-             , specNS = llvmNS
-             , specName = "ConstantDataSequential"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "SequentialType" []
-                                      , ftName = "getType"
-                                      , ftOverloaded = True
-                                      },GenHS,"constantDataSequentialGetType")
-                          ,(memberFun { ftReturnType = normalT unsigned
-                                      , ftName = "getNumElements"
-                                      , ftOverloaded = True
-                                      },GenHS,"constantDataSequentialGetNumElements_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
-                                      , ftName = "getElementAsConstant"
-                                      , ftOverloaded = True
-                                      , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"constantDataSequentialGetElementAsConstant_")]
-             }
-       ,Spec { specHeader = irInclude version "Constants.h"
-             , specNS = llvmNS
-             , specName = "ConstantDataArray"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "ArrayType" []
-                                      , ftName = "getType"
-                                      },GenHS,"constantDataArrayGetType")]
-             }
-       ,Spec { specHeader = irInclude version "Constants.h"
-             , specNS = llvmNS
-             , specName = "ConstantDataVector"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
-                                      , ftName = "getType"
-                                      },GenHS,"constantDataVectorGetType")]
-             }
-       ,Spec { specHeader = irInclude version "Constants.h"
+       ]++
+    (if version>=llvm3_1
+     then [Spec { specHeader = irInclude version "Constants.h"
+                , specNS = llvmNS
+                , specName = "ConstantDataSequential"
+                , specTemplateArgs = []
+                , specType = ClassSpec
+                             [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "SequentialType" []
+                                         , ftName = "getType"
+                                         , ftOverloaded = True
+                                         },GenHS,"constantDataSequentialGetType")
+                             ,(memberFun { ftReturnType = normalT unsigned
+                                         , ftName = "getNumElements"
+                                         , ftOverloaded = True
+                                         },GenHS,"constantDataSequentialGetNumElements_")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                         , ftName = "getElementAsConstant"
+                                         , ftOverloaded = True
+                                         , ftArgs = [(False,normalT unsigned)]
+                                         },GenHS,"constantDataSequentialGetElementAsConstant_")]
+                }
+          ,Spec { specHeader = irInclude version "Constants.h"
+                , specNS = llvmNS
+                , specName = "ConstantDataArray"
+                , specTemplateArgs = []
+                , specType = ClassSpec
+                             [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "ArrayType" []
+                                         , ftName = "getType"
+                                         },GenHS,"constantDataArrayGetType")]
+                }
+          ,Spec { specHeader = irInclude version "Constants.h"
+                , specNS = llvmNS
+                , specName = "ConstantDataVector"
+                , specTemplateArgs = []
+                , specType = ClassSpec
+                             [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
+                                         , ftName = "getType"
+                                         },GenHS,"constantDataVectorGetType")]
+                }]
+     else [])++
+       [Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
              , specName = "ConstantExpr"
              , specTemplateArgs = []
@@ -778,11 +791,13 @@ llvm version
                                                       ,"Constant"
                                                       ,"BlockAddress"
                                                       ,"ConstantAggregateZero"
-                                                      ,"ConstantArray"
-                                                      ,"ConstantDataSequential"
-                                                      ,"ConstantDataArray"
-                                                      ,"ConstantDataVector"
-                                                      ,"ConstantExpr"
+                                                      ,"ConstantArray"]++
+                                                      (if version>=llvm3_1
+                                                       then ["ConstantDataSequential"
+                                                            ,"ConstantDataArray"
+                                                            ,"ConstantDataVector"]
+                                                       else [])++
+                                                      ["ConstantExpr"
                                                       {-,"BinaryConstantExpr"
                                                         ,"CompareConstantExpr"
                                                         ,"ExtractElementConstantExpr"
@@ -1213,47 +1228,51 @@ llvm version
                                       , ftName = "getReturnValue"
                                       },GenHS,"returnInstGetReturnValue")]
              }
-       ,Spec { specHeader = irInclude version "InstrTypes.h"
+       ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "SwitchInst"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCondition"
-                                      },GenHS,"switchInstGetCondition")
-                          ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
-                                      , ftName = "case_begin"
-                                      },GenHS,"switchInstCaseBegin")
-                          ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
-                                      , ftName = "case_end"
-                                      },GenHS,"switchInstCaseEnd")
-                          ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
-                                      , ftName = "case_default"
-                                      },GenHS,"switchInstCaseDefault")]
-             }
-       ,Spec { specHeader = irInclude version "InstrTypes.h"
-             , specNS = [ClassName "llvm" [],ClassName "SwitchInst" []]
-             , specName = "CaseIt"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
-                                      , ftName = "operator++"
-                                      },GenHS,"caseItNext")
-                          ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
-                                      , ftName = "operator--"
-                                      },GenHS,"caseItPrev")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "operator=="
-                                      , ftArgs = [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" [])]
-                                      },GenHS,"caseItEq")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
-                                      , ftName = "getCaseValue"
-                                      },GenHS,"caseItGetCaseValue")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
-                                      , ftName = "getCaseSuccessor"
-                                      },GenHS,"caseItGetCaseSuccessor")]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
+                                      },GenHS,"switchInstGetCondition")]++
+                          (if version>=llvm3_1
+                           then [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
+                                            , ftName = "case_begin"
+                                            },GenHS,"switchInstCaseBegin")
+                                ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
+                                            , ftName = "case_end"
+                                            },GenHS,"switchInstCaseEnd")
+                                ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
+                                            , ftName = "case_default"
+                                            },GenHS,"switchInstCaseDefault")]
+                           else [])
+             }]++
+    (if version>=llvm3_1
+     then [Spec { specHeader = irInclude version "InstrTypes.h"
+                , specNS = [ClassName "llvm" [],ClassName "SwitchInst" []]
+                , specName = "CaseIt"
+                , specTemplateArgs = []
+                , specType = ClassSpec
+                             [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
+                                         , ftName = "operator++"
+                                         },GenHS,"caseItNext")
+                             ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
+                                         , ftName = "operator--"
+                                         },GenHS,"caseItPrev")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "operator=="
+                                         , ftArgs = [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" [])]
+                                         },GenHS,"caseItEq")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
+                                         , ftName = "getCaseValue"
+                                         },GenHS,"caseItGetCaseValue")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                         , ftName = "getCaseSuccessor"
+                                         },GenHS,"caseItGetCaseSuccessor")]
+                }]
+     else [])++
+       [Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "UnreachableInst"
              , specTemplateArgs = []
@@ -1519,11 +1538,13 @@ llvm version
                                                        ,(False,normalT $ ref $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
                                             },GenHS,"targetLibraryInfoGetLibFunc_")]
                            else [])++
-                          [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
-                                      , ftName = "getName"
-                                      , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                      },GenHS,"targetLibraryInfoGetName_")
-                          ,(memberFun { ftReturnType = normalT bool
+                          (if version>=llvm3_1
+                           then [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                            , ftName = "getName"
+                                            , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                            },GenHS,"targetLibraryInfoGetName_")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT bool
                                       , ftName = "has"
                                       , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
                                       },GenHS,"targetLibraryInfoHas_")
@@ -1579,7 +1600,7 @@ llvm version
              , specNS = llvmNS
              , specName = "PassManagerBuilder"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(Constructor [],GenHS,"newPassManagerBuilder")
                           ,(Destructor False,GenHS,"deletePassManagerBuilder")
                           ,(memberFun { ftName = "populateFunctionPassManager"
@@ -1603,14 +1624,12 @@ llvm version
                                    },GenHS,"setPassManagerBuilderDisableUnitAtATime")
                           ,(Setter { ftSetVar = "DisableUnrollLoops"
                                    , ftSetType = normalT bool
-                                   },GenHS,"setPassManagerBuilderDisableUnrollLoops")
-                          ,(Setter { ftSetVar = "Vectorize"
-                                   , ftSetType = normalT bool
-                                   },GenHS,"setPassManagerBuilderVectorize")
-                          --,(Setter { ftSetVar = "LoopVectorize"
-                          --         , ftSetType = normalT bool
-                          --         },GenHS,"setPassManagerBuilderLoopVectorize")
-                          ]
+                                   },GenHS,"setPassManagerBuilderDisableUnrollLoops")]++
+               (if version>=llvm3_1
+                then [(Setter { ftSetVar = "Vectorize"
+                              , ftSetType = normalT bool
+                              },GenHS,"setPassManagerBuilderVectorize")]
+                else [])
              }
        ]++
        [Spec { specHeader = "llvm/Transforms/Scalar.h"
@@ -1662,7 +1681,9 @@ llvm version
                            ,("ModulePass","createGlobalOptimizerPass",[])
                            ,("ModulePass","createGlobalDCEPass",[])
                            ,("Pass","createFunctionInliningPass",[normalT int])
-                           ,("Pass","createAlwaysInlinerPass",[normalT bool])
+                           ,("Pass","createAlwaysInlinerPass",if version>=llvm3_1
+                                                              then [normalT bool]
+                                                              else [])
                            ,("Pass","createPruneEHPass",[])
                            ,("ModulePass","createInternalizePass",[normalT $ NamedType llvmNS "ArrayRef" [constT $ ptr $ char]])
                            ,("ModulePass","createDeadArgEliminationPass",[])
