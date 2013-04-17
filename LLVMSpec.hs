@@ -927,7 +927,6 @@ llvm version
                                         ,(True,normalT $ ptr $ llvmType "Value")
                                         ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
                                         ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                                        ,(False,normalT $ ptr $ llvmType "BasicBlock")
                                         ],GenHS,"newAtomicCmpXchgInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -955,7 +954,6 @@ llvm version
                                         ,(True,normalT $ ptr $ llvmType "Value")
                                         ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
                                         ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                                        ,(False,normalT $ ptr $ llvmType "BasicBlock")
                                         ],GenHS,"newAtomicRMWInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"

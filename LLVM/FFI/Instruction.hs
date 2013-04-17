@@ -211,19 +211,17 @@ SPECIALIZE_IPLIST(Instruction,capi)
 newAtomicRMWInst :: (ValueC ptr,ValueC value)
                     => RMWBinOp -> Ptr ptr -> Ptr value
                     -> AtomicOrdering -> SynchronizationScope
-                    -> Ptr BasicBlock
                     -> IO (Ptr AtomicRMWInst)
-newAtomicRMWInst op ptr val ord sync blk
+newAtomicRMWInst op ptr val ord sync
   = newAtomicRMWInst_ (fromRMWBinOp op) ptr val
-    (fromAtomicOrdering ord) (fromSynchronizationScope sync) blk
+    (fromAtomicOrdering ord) (fromSynchronizationScope sync)
 
 newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
                         => Ptr ptr -> Ptr cmp -> Ptr newVal
                         -> AtomicOrdering -> SynchronizationScope
-                        -> Ptr BasicBlock
                         -> IO (Ptr AtomicCmpXchgInst)
-newAtomicCmpXchgInst ptr cmp newVal ord sync blk
-  = newAtomicCmpXchgInst_ ptr cmp newVal (fromAtomicOrdering ord) (fromSynchronizationScope sync) blk
+newAtomicCmpXchgInst ptr cmp newVal ord sync
+  = newAtomicCmpXchgInst_ ptr cmp newVal (fromAtomicOrdering ord) (fromSynchronizationScope sync)
 
 data SynchronizationScope =
 #define HANDLE_SYNC_SCOPE(name) PRESERVE(  ) name
