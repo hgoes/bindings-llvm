@@ -963,7 +963,16 @@ llvm version
              , specType = ClassSpec 
                           [(memberFun { ftReturnType = normalT int
                                       , ftName = "getOpcode"
-                                      },GenHS,"binOpGetOpCode_")]
+                                      },GenHS,"binOpGetOpCode_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BinaryOperator"
+                                      , ftName = "Create"
+                                      , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "Instruction" []] "BinaryOps")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newBinaryOperator_")
+                          ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS

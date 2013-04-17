@@ -42,6 +42,7 @@ module LLVM.FFI.Instruction
          atomicRMWInstGetValOperand,
          -- ** Binary Operator
          BinaryOperator(),
+         newBinaryOperator,
          binOpGetOpCode,
          -- ** Call Instructions
          CallInst(),
@@ -207,6 +208,9 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+newBinaryOperator :: (ValueC v1,ValueC v2) => BinOpType -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr BinaryOperator)
+newBinaryOperator op = newBinaryOperator_ (fromBinOpCode op)
 
 newAtomicRMWInst :: (ValueC ptr,ValueC value)
                     => RMWBinOp -> Ptr ptr -> Ptr value
@@ -414,6 +418,10 @@ toBinOpCode :: Integral a => a -> Maybe BinOpType
 #define HANDLE_BINARY_INST(N,OPC,CLASS) toBinOpCode N = Just OPC
 #include <llvm/Instruction.def>
 toBinOpCode _ = Nothing
+
+fromBinOpCode :: BinOpType -> CInt
+#define HANDLE_BINARY_INST(N,OPC,CLASS) fromBinOpCode OPC = N
+#include <llvm/Instruction.def>
 
 toMemoryOpCode :: Integral a => a -> Maybe MemoryOpType
 #define HANDLE_MEMORY_INST(N,OPC,CLASS) toMemoryOpCode N = Just OPC
