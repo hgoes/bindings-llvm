@@ -1,0 +1,11 @@
+#ifndef HANDLE_SYNC_SCOPE
+#define HANDLE_SYNC_SCOPE(name)
+#endif
+#ifndef HANDLE_SEP
+#define HANDLE_SEP
+#endif
+HANDLE_SYNC_SCOPE(SingleThread)
+HANDLE_SEP
+HANDLE_SYNC_SCOPE(CrossThread)
+#undef HANDLE_SYNC_SCOPE
+#undef HANDLE_SEP

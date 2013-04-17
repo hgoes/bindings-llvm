@@ -42,6 +42,9 @@ extern int ICMP_SLE();
 #define HANDLE_ALIAS_RESULT(name) extern int AliasResult_##name();
 #include "Alias.def"
 
+#define HANDLE_SYNC_SCOPE(name) extern int SynchronizationScope_##name();
+#include "SyncScope.def"
+
 extern int writeBitCodeToFile(void* m,const char* path);
 
 #endif

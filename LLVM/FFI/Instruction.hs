@@ -20,6 +20,8 @@ module LLVM.FFI.Instruction
          toAtomicOrdering,
          RMWBinOp(..),
          toRMWBinOp,
+         SynchronizationScope(..),
+         toSynchronizationScope,
          instructionGetParent,
          instructionGetDebugLoc,
          -- ** Atomic Compare & Exchange Instruction
@@ -203,6 +205,20 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+data SynchronizationScope =
+#define HANDLE_SYNC_SCOPE(name) PRESERVE(  ) name
+#define HANDLE_SEP PRESERVE(  ) |
+#include "SyncScope.def"
+  deriving (Show,Eq,Ord)
+
+#define HANDLE_SYNC_SCOPE(name) foreign import capi _TO_STRING(extra.h SynchronizationScope_##name) synchronizationScope_##name :: CInt
+#include "SyncScope.def"
+
+toSynchronizationScope :: CInt -> SynchronizationScope
+toSynchronizationScope op
+#define HANDLE_SYNC_SCOPE(name) PRESERVE(  ) | op == synchronizationScope_##name = name
+#include "SyncScope.def"
 
 #if HS_LLVM_VERSION >= 303
 isMallocLikeFn :: ValueC t => Ptr t -> Ptr TargetLibraryInfo -> Bool -> IO Bool

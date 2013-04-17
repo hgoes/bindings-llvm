@@ -101,6 +101,9 @@ extern "C" {
 #define HANDLE_ALIAS_RESULT(name) int AliasResult_##name() { return llvm::AliasAnalysis::name; }
 #include "Alias.def"
 
+#define HANDLE_SYNC_SCOPE(name) int SynchronizationScope_##name() { return llvm::name; }
+#include "SyncScope.def"
+
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;
     llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::raw_fd_ostream::F_Binary);
