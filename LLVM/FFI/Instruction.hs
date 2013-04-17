@@ -46,6 +46,7 @@ module LLVM.FFI.Instruction
          binOpGetOpCode,
          -- ** Call Instructions
          CallInst(),
+         newCallInst,
          callInstIsTailCall,
          callInstGetNumArgOperands,
          callInstGetArgOperand,
@@ -208,6 +209,9 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+newCallInst :: ValueC fun => Ptr fun -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr CallInst)
+newCallInst = newCallInst_
 
 newBinaryOperator :: (ValueC v1,ValueC v2) => BinOpType -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr BinaryOperator)
 newBinaryOperator op = newBinaryOperator_ (fromBinOpCode op)

@@ -995,6 +995,13 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getCalledValue"
                                       },GenHS,"callInstGetCalledValue")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "CallInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Value"])
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newCallInst_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
