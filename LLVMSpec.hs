@@ -1823,4 +1823,13 @@ llvm version
                                         , gfunHSName = "isMallocLikeFn_"
                                         }
              }
+       ,Spec { specHeader = "llvm/ADT/Twine.h"
+             , specNS = llvmNS
+             , specName = "Twine"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [],GenHS,"newTwineEmpty")
+                          ,(Constructor [(False,constT $ ptr char)],GenHS,"newTwineString_")
+                          ]
+             }
        ]
