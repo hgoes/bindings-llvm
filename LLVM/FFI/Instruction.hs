@@ -26,6 +26,7 @@ module LLVM.FFI.Instruction
          instructionGetDebugLoc,
          -- ** Atomic Compare & Exchange Instruction
          AtomicCmpXchgInst(),
+         newAtomicCmpXchgInst,
          atomicCmpXchgInstIsVolatile,
          atomicCmpXchgInstGetOrdering,
          atomicCmpXchgInstGetPointerOperand,
@@ -206,6 +207,14 @@ import Foreign.C
 
 SPECIALIZE_IPLIST(Instruction,capi)
 
+newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
+                        => Ptr ptr -> Ptr cmp -> Ptr newVal
+                        -> AtomicOrdering -> SynchronizationScope
+                        -> Ptr BasicBlock
+                        -> IO (Ptr AtomicCmpXchgInst)
+newAtomicCmpXchgInst ptr cmp newVal ord sync blk
+  = newAtomicCmpXchgInst_ ptr cmp newVal (fromAtomicOrdering ord) (fromSynchronizationScope sync) blk
+
 data SynchronizationScope =
 #define HANDLE_SYNC_SCOPE(name) PRESERVE(  ) name
 #define HANDLE_SEP PRESERVE(  ) |
@@ -218,6 +227,10 @@ data SynchronizationScope =
 toSynchronizationScope :: CInt -> SynchronizationScope
 toSynchronizationScope op
 #define HANDLE_SYNC_SCOPE(name) PRESERVE(  ) | op == synchronizationScope_##name = name
+#include "SyncScope.def"
+
+fromSynchronizationScope :: SynchronizationScope -> CInt
+#define HANDLE_SYNC_SCOPE(name) fromSynchronizationScope name = synchronizationScope_##name
 #include "SyncScope.def"
 
 #if HS_LLVM_VERSION >= 303
@@ -271,6 +284,10 @@ data AtomicOrdering =
 toAtomicOrdering :: CInt -> AtomicOrdering
 toAtomicOrdering op
 #define HANDLE_ORDERING(name) PRESERVE(  ) | op == atomicOrdering_##name = name
+#include "AtomicOrdering.def"
+
+fromAtomicOrdering :: AtomicOrdering -> CInt
+#define HANDLE_ORDERING(name) fromAtomicOrdering name = atomicOrdering_##name
 #include "AtomicOrdering.def"
 
 landingPadInstIsCatch :: Ptr LandingPadInst -> Integer -> IO Bool
