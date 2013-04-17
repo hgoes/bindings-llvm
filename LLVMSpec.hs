@@ -949,7 +949,14 @@ llvm version
                                       },GenHS,"atomicRMWInstGetPointerOperand")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getValOperand"
-                                      },GenHS,"atomicRMWInstGetValOperand")]
+                                      },GenHS,"atomicRMWInstGetValOperand")
+                          ,(Constructor [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "AtomicRMWInst" []] "BinOp")
+                                        ,(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Value")
+                                        ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
+                                        ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
+                                        ,(False,normalT $ ptr $ llvmType "BasicBlock")
+                                        ],GenHS,"newAtomicRMWInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS

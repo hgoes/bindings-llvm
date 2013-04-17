@@ -34,6 +34,7 @@ module LLVM.FFI.Instruction
          atomicCmpXchgInstGetNewValOperand,
          -- ** Atomic Read & Modify & Write Instruction
          AtomicRMWInst(),
+         newAtomicRMWInst,
          atomicRMWInstGetOperation,
          atomicRMWInstIsVolatile,
          atomicRMWInstGetOrdering,
@@ -207,6 +208,15 @@ import Foreign.C
 
 SPECIALIZE_IPLIST(Instruction,capi)
 
+newAtomicRMWInst :: (ValueC ptr,ValueC value)
+                    => RMWBinOp -> Ptr ptr -> Ptr value
+                    -> AtomicOrdering -> SynchronizationScope
+                    -> Ptr BasicBlock
+                    -> IO (Ptr AtomicRMWInst)
+newAtomicRMWInst op ptr val ord sync blk
+  = newAtomicRMWInst_ (fromRMWBinOp op) ptr val
+    (fromAtomicOrdering ord) (fromSynchronizationScope sync) blk
+
 newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
                         => Ptr ptr -> Ptr cmp -> Ptr newVal
                         -> AtomicOrdering -> SynchronizationScope
@@ -264,6 +274,10 @@ data RMWBinOp =
 toRMWBinOp :: CInt -> RMWBinOp
 toRMWBinOp op
 #define HANDLE_BINOP(name) PRESERVE(  ) | op == rmwBinOp_##name = RMW##name
+#include "RMWBinOp.def"
+
+fromRMWBinOp :: RMWBinOp -> CInt
+#define HANDLE_BINOP(name) fromRMWBinOp RMW##name = rmwBinOp_##name
 #include "RMWBinOp.def"
 
 atomicCmpXchgInstGetOrdering :: Ptr AtomicCmpXchgInst -> IO AtomicOrdering
