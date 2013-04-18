@@ -1018,7 +1018,14 @@ llvm version
              , specNS = llvmNS
              , specName = "FCmpInst"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec
+                          [(Constructor
+                            [(False,normalT $ EnumType [ClassName "llvm" []
+                                                       ,ClassName "CmpInst" []] "Predicate")
+                            ,(True,normalT $ ptr $ llvmType "Value")
+                            ,(True,normalT $ ptr $ llvmType "Value")
+                            ,(False,constT $ ref $ llvmType "Twine")
+                            ],GenHS,"newFCmpInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS

@@ -61,6 +61,7 @@ module LLVM.FFI.Instruction
          -- *** Float Compare Instruction
          FCmpInst(),
          FCmpOp(..),
+         newFCmpInst,
          getFCmpOp,
          -- *** Integer Compare Instruction
          ICmpInst(),
@@ -209,6 +210,9 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+newFCmpInst :: (ValueC v1,ValueC v2) => FCmpOp -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr FCmpInst)
+newFCmpInst op = newFCmpInst_ (fromFCmpOp op)
 
 newCallInst :: ValueC fun => Ptr fun -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr CallInst)
 newCallInst = newCallInst_
