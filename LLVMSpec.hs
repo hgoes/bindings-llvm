@@ -1066,7 +1066,12 @@ llvm version
              , specType = ClassSpec 
                           [(memberFun { ftReturnType = normalT int
                                       , ftName = "getOrdering"
-                                      },GenHS,"fenceInstGetOrdering_")]
+                                      },GenHS,"fenceInstGetOrdering_")
+                          ,(Constructor
+                            [(False,normalT $ ref $ llvmType "LLVMContext")
+                            ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
+                            ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
+                            ],GenHS,"newFenceInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1091,6 +1096,13 @@ llvm version
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumIndices"
                                       },GenHS,"getElementPtrInstGetNumIndices_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "GetElementPtrInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Value"])
+                                                 ,(False,normalT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newGetElementPtrInst_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -1100,13 +1112,29 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
                                       , ftName = "getType"
-                                      },GenHS,"insertElementInstGetType")]
+                                      },GenHS,"insertElementInstGetType")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "InsertElementInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newInsertElementInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "InsertValueInst"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "InsertValueInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef" [normalT unsigned])
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newInsertValueInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1134,6 +1162,20 @@ llvm version
                                       , ftName = "isFilter"
                                       , ftArgs = [(False,normalT unsigned)]
                                       },GenHS,"landingPadInstIsFilter_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,normalT unsigned)
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newLandingPadInst_")
+                          ,(memberFun { ftName = "setCleanup"
+                                      , ftArgs = [(False,normalT bool)]
+                                      },GenHS,"landingPadInstSetCleanup")
+                          ,(memberFun { ftName = "addClause"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                      },GenHS,"landingPadInstAddClause_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -1151,7 +1193,18 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "BasicBlock" []
                                       , ftName = "getIncomingBlock"
                                       , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"phiNodeGetIncomingBlock_")]
+                                      },GenHS,"phiNodeGetIncomingBlock_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "PHINode"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
+                                                 ,(False,normalT unsigned)
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newPhiNode_")
+                          ,(memberFun { ftName = "addIncoming"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                      },GenHS,"phiNodeAddIncoming_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1167,6 +1220,14 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getFalseValue"
                                       },GenHS,"selectInstGetFalseValue")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "SelectInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newSelectInst_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"

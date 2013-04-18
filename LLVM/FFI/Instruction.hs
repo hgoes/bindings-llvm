@@ -75,9 +75,11 @@ module LLVM.FFI.Instruction
          extractElementInstGetIndexOperand,
          -- ** Fence Instruction
          FenceInst(),
+         newFenceInst,
          fenceInstGetOrdering,
          -- ** Get Element Pointer Instruction
          GetElementPtrInst(),
+         newGetElementPtrInst,
          getElementPtrInstGetPointerOperand,
          getElementPtrInstIdxBegin,
          getElementPtrInstIdxEnd,
@@ -85,23 +87,31 @@ module LLVM.FFI.Instruction
          getElementPtrInstGetNumIndices,
          -- ** Insert Element Instruction
          InsertElementInst(),
+         newInsertElementInst,
          -- ** Insert Value Instruction
          InsertValueInst(),
+         newInsertValueInst,
          -- ** Landing Pad Instruction
          LandingPadInst(),
+         newLandingPadInst,
          landingPadInstGetPersonaliteFn,
          landingPadInstIsCleanup,
+         landingPadInstSetCleanup,
          landingPadInstGetNumClauses,
          landingPadInstGetClause,
+         landingPadInstAddClause,
          landingPadInstIsCatch,
          landingPadInstIsFilter,
          -- ** PHI-Node
          PHINode(),
+         newPhiNode,
          phiNodeGetNumIncomingValues,
          phiNodeGetIncomingValue,
          phiNodeGetIncomingBlock,
+         phiNodeAddIncoming,
          -- ** Selection Instruction
          SelectInst(),
+         newSelectInst,
          selectInstGetCondition,
          selectInstGetTrueValue,
          selectInstGetFalseValue,
@@ -207,6 +217,7 @@ import LLVM.FFI.OOP
 import LLVM.FFI.IPList
 import LLVM.FFI.Value
 import LLVM.FFI.User
+import LLVM.FFI.Type
 
 import Foreign
 import Foreign.C
@@ -214,6 +225,33 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+newSelectInst :: (ValueC c,ValueC s1,ValueC s2) => Ptr c -> Ptr s1 -> Ptr s2 -> Ptr Twine -> IO (Ptr SelectInst)
+newSelectInst = newSelectInst_
+
+phiNodeAddIncoming :: ValueC val => Ptr PHINode -> Ptr val -> Ptr BasicBlock -> IO ()
+phiNodeAddIncoming = phiNodeAddIncoming_
+
+newPhiNode :: TypeC tp => Ptr tp -> CUInt -> Ptr Twine -> IO (Ptr PHINode)
+newPhiNode = newPhiNode_
+
+landingPadInstAddClause :: ValueC clause => Ptr LandingPadInst -> Ptr clause -> IO ()
+landingPadInstAddClause = landingPadInstAddClause_
+
+newLandingPadInst :: (TypeC tp,ValueC fn) => Ptr tp -> Ptr fn -> CUInt -> Ptr Twine -> IO (Ptr LandingPadInst)
+newLandingPadInst = newLandingPadInst_
+
+newInsertValueInst :: (ValueC agg,ValueC val) => Ptr agg -> Ptr val -> Ptr (ArrayRef CUInt) -> Ptr Twine -> IO (Ptr InsertValueInst)
+newInsertValueInst = newInsertValueInst_
+
+newInsertElementInst :: (ValueC vec,ValueC newEl,ValueC idx) => Ptr vec -> Ptr newEl -> Ptr idx -> Ptr Twine -> IO (Ptr InsertElementInst)
+newInsertElementInst = newInsertElementInst_
+
+newGetElementPtrInst :: ValueC ptr => Ptr ptr -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr GetElementPtrInst)
+newGetElementPtrInst = newGetElementPtrInst_
+
+newFenceInst :: Ptr LLVMContext -> AtomicOrdering -> SynchronizationScope -> IO (Ptr FenceInst)
+newFenceInst ctx ord sync = newFenceInst_ ctx (fromAtomicOrdering ord) (fromSynchronizationScope sync)
 
 newExtractElementInst :: (ValueC vec,ValueC idx) => Ptr vec -> Ptr idx -> Ptr Twine -> IO (Ptr ExtractElementInst)
 newExtractElementInst = newExtractElementInst_
