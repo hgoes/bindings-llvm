@@ -463,112 +463,39 @@ callInstGetNumArgOperands ptr = fmap toInteger (callInstGetNumArgOperands_ ptr)
 callInstGetArgOperand :: Ptr CallInst -> Integer -> IO (Ptr Value)
 callInstGetArgOperand ptr idx = callInstGetArgOperand_ ptr (fromInteger idx)
 
-foreign import capi "extra.h FCMP_OEQ"
-  fCMP_OEQ :: CInt
-foreign import capi "extra.h FCMP_OGT"
-  fCMP_OGT :: CInt
-foreign import capi "extra.h FCMP_OGE"
-  fCMP_OGE :: CInt
-foreign import capi "extra.h FCMP_OLT"
-  fCMP_OLT :: CInt
-foreign import capi "extra.h FCMP_OLE"
-  fCMP_OLE :: CInt
-foreign import capi "extra.h FCMP_ONE"
-  fCMP_ONE :: CInt
-foreign import capi "extra.h FCMP_ORD"
-  fCMP_ORD :: CInt
-foreign import capi "extra.h FCMP_UNO"
-  fCMP_UNO :: CInt
-foreign import capi "extra.h FCMP_UEQ"
-  fCMP_UEQ :: CInt
-foreign import capi "extra.h FCMP_UGT"
-  fCMP_UGT :: CInt
-foreign import capi "extra.h FCMP_UGE"
-  fCMP_UGE :: CInt
-foreign import capi "extra.h FCMP_ULT"
-  fCMP_ULT :: CInt
-foreign import capi "extra.h FCMP_ULE"
-  fCMP_ULE :: CInt
-foreign import capi "extra.h FCMP_UNE"
-  fCMP_UNE :: CInt
-foreign import capi "extra.h ICMP_EQ"
-  iCMP_EQ :: CInt
-foreign import capi "extra.h ICMP_NE"
-  iCMP_NE :: CInt
-foreign import capi "extra.h ICMP_UGT"
-  iCMP_UGT :: CInt
-foreign import capi "extra.h ICMP_UGE"
-  iCMP_UGE :: CInt
-foreign import capi "extra.h ICMP_ULT"
-  iCMP_ULT :: CInt
-foreign import capi "extra.h ICMP_ULE"
-  iCMP_ULE :: CInt
-foreign import capi "extra.h ICMP_SGT"
-  iCMP_SGT :: CInt
-foreign import capi "extra.h ICMP_SGE"
-  iCMP_SGE :: CInt
-foreign import capi "extra.h ICMP_SLT"
-  iCMP_SLT :: CInt
-foreign import capi "extra.h ICMP_SLE"
-  iCMP_SLE :: CInt
+#define HANDLE_FPRED(name) foreign import capi _TO_STRING(extra.h FCMP_##name) fCMP_##name :: CInt
+#define HANDLE_IPRED(name) foreign import capi _TO_STRING(extra.h ICMP_##name) iCMP_##name :: CInt
+#include "Predicate.def"
 
-data FCmpOp = F_OEQ
-            | F_OGT
-            | F_OGE
-            | F_OLT
-            | F_OLE
-            | F_ONE
-            | F_ORD
-            | F_UNO
-            | F_UEQ
-            | F_UGT
-            | F_UGE
-            | F_ULT
-            | F_ULE
-            | F_UNE
-            deriving (Show,Eq,Ord)
+data FCmpOp = 
+#define HANDLE_FPRED(name) PRESERVE(  ) F_##name
+#define HANDLE_FSEP PRESERVE(  ) |
+#include "Predicate.def"
+  deriving (Show,Eq,Ord)
 
-data ICmpOp = I_EQ
-            | I_NE
-            | I_UGT
-            | I_UGE
-            | I_ULT
-            | I_ULE
-            | I_SGT
-            | I_SGE
-            | I_SLT
-            | I_SLE
-            deriving (Show,Eq,Ord)
+data ICmpOp = 
+#define HANDLE_IPRED(name) PRESERVE(  ) I_##name
+#define HANDLE_ISEP PRESERVE(  ) |
+#include "Predicate.def"
+  deriving (Show,Eq,Ord)
 
 toFCmpOp :: CInt -> FCmpOp
 toFCmpOp op
-  | op == fCMP_OEQ = F_OEQ
-  | op == fCMP_OGT = F_OGT
-  | op == fCMP_OGE = F_OGE
-  | op == fCMP_OLT = F_OLT
-  | op == fCMP_OLE = F_OLE
-  | op == fCMP_ONE = F_ONE
-  | op == fCMP_ORD = F_ORD
-  | op == fCMP_UNO = F_UNO
-  | op == fCMP_UEQ = F_UEQ
-  | op == fCMP_UGT = F_UGT
-  | op == fCMP_UGE = F_UGE
-  | op == fCMP_ULT = F_ULT
-  | op == fCMP_ULE = F_ULE
-  | op == fCMP_UNE = F_UNE
+#define HANDLE_FPRED(name) PRESERVE(  ) | op==fCMP_##name = F_##name
+#include "Predicate.def"
+
+fromFCmpOp :: FCmpOp -> CInt
+#define HANDLE_FPRED(name) fromFCmpOp F_##name = fCMP_##name
+#include "Predicate.def"
 
 toICmpOp :: CInt -> ICmpOp
 toICmpOp op
-  | op == iCMP_EQ = I_EQ
-  | op == iCMP_NE = I_NE
-  | op == iCMP_UGT = I_UGT
-  | op == iCMP_UGE = I_UGE
-  | op == iCMP_ULT = I_ULT
-  | op == iCMP_ULE = I_ULE
-  | op == iCMP_SGT = I_SGT
-  | op == iCMP_SGE = I_SGE
-  | op == iCMP_SLT = I_SLT
-  | op == iCMP_SLE = I_SLE
+#define HANDLE_IPRED(name) PRESERVE(  ) | op==iCMP_##name = I_##name
+#include "Predicate.def"
+
+fromICmpOp :: ICmpOp -> CInt
+#define HANDLE_IPRED(name) fromICmpOp I_##name = iCMP_##name
+#include "Predicate.def"
 
 getFCmpOp :: Ptr FCmpInst -> IO FCmpOp
 getFCmpOp ptr = fmap toFCmpOp (cmpInstGetPredicate_ ptr)
