@@ -1617,7 +1617,12 @@ llvm version
              , specNS = llvmNS
              , specName = "FunctionPass"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec 
+                          [(memberFun { ftReturnType = normalT bool
+                                      , ftName = "runOnFunction"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "Function")]
+                                      , ftOverloaded = True
+                                      },GenHS,"functionPassRun_")]
              }
        ,Spec { specHeader = "llvm/Pass.h"
              , specNS = llvmNS
@@ -1719,6 +1724,18 @@ llvm version
                                       , ftName = "getPassArgument"
                                       },GenHS,"passInfoGetPassArgument_")
                           ]
+             }
+       ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
+             , specNS = llvmNS
+             , specName = "LoopInfo"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(Constructor [],GenHS,"newLoopInfo")
+                          ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "LoopInfoBase" 
+                                                       [normalT $ llvmType "BasicBlock"
+                                                       ,normalT $ llvmType "Loop"]
+                                      , ftName = "getBase"
+                                      },GenHS,"loopInfoGetBase")]
              }
        ,Spec { specHeader = "llvm/Transforms/IPO/PassManagerBuilder.h"
              , specNS = llvmNS
@@ -1955,41 +1972,62 @@ llvm version
                                       },GenHS,"loopIsLoopInvariant_")]
              }
        ]++
-       [Spec { specHeader = "llvm/Analysis/LoopInfo.h"
-             , specNS = llvmNS
-             , specName = "LoopBase"
-             , specTemplateArgs = [blk,loop]
-             , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT unsigned
-                                      , ftName = "getLoopDepth"
-                                      , ftOverloaded = True
-                                      },GenHS,"loopGetDepth_")
-                          ,(memberFun { ftReturnType = toPtr blk
-                                      , ftName = "getHeader"
-                                      , ftOverloaded = True
-                                      },GenHS,"loopGetHeader_")
-                          ,(memberFun { ftReturnType = toPtr loop
-                                      , ftName = "getParentLoop"
-                                      , ftOverloaded = True
-                                      },GenHS,"loopGetParent_")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "contains"
-                                      , ftArgs = [(False,toConstPtr loop)]
-                                      , ftOverloaded = True
-                                      },GenHS,"loopContainsLoop_")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "contains"
-                                      , ftArgs = [(False,toConstPtr blk)]
-                                      , ftOverloaded = True
-                                      },GenHS,"loopContainsBlock_")
-                          ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr loop]
-                                      , ftName = "getSubLoops"
-                                      , ftOverloaded = True
-                                      },GenHS,"loopGetSubLoops_")
-                          ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr blk]
-                                      , ftName = "getBlocks"
-                                      , ftOverloaded = True
-                                      },GenHS,"loopGetBlocks_")]
+    concat
+    [[Spec { specHeader = "llvm/Analysis/LoopInfo.h"
+           , specNS = llvmNS
+           , specName = "LoopBase"
+           , specTemplateArgs = [blk,loop]
+           , specType = ClassSpec
+                        [(memberFun { ftReturnType = normalT unsigned
+                                    , ftName = "getLoopDepth"
+                                    , ftOverloaded = True
+                                    },GenHS,"loopGetDepth_")
+                        ,(memberFun { ftReturnType = toPtr blk
+                                    , ftName = "getHeader"
+                                    , ftOverloaded = True
+                                    },GenHS,"loopGetHeader_")
+                        ,(memberFun { ftReturnType = toPtr loop
+                                    , ftName = "getParentLoop"
+                                    , ftOverloaded = True
+                                    },GenHS,"loopGetParent_")
+                        ,(memberFun { ftReturnType = normalT bool
+                                    , ftName = "contains"
+                                    , ftArgs = [(False,toConstPtr loop)]
+                                    , ftOverloaded = True
+                                    },GenHS,"loopContainsLoop_")
+                        ,(memberFun { ftReturnType = normalT bool
+                                    , ftName = "contains"
+                                    , ftArgs = [(False,toConstPtr blk)]
+                                    , ftOverloaded = True
+                                    },GenHS,"loopContainsBlock_")
+                        ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr loop]
+                                    , ftName = "getSubLoops"
+                                    , ftOverloaded = True
+                                    },GenHS,"loopGetSubLoops_")
+                        ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr blk]
+                                    , ftName = "getBlocks"
+                                    , ftOverloaded = True
+                                    },GenHS,"loopGetBlocks_")]
              }
-        | (blk,loop) <- [(normalT $ llvmType "BasicBlock",normalT $ llvmType "Loop")]
-       ]
+     ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
+           , specNS = llvmNS
+           , specName = "LoopInfoBase"
+           , specTemplateArgs = [blk,loop]
+           , specType = ClassSpec
+                        [(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" []
+                                                                         ,ClassName "vector" [toPtr loop]
+                                                                         ] "const_iterator" []
+                                    , ftName = "begin"
+                                    },GenHS,"loopInfoBaseBegin_")
+                        ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" []
+                                                                         ,ClassName "vector" [toPtr loop]
+                                                                         ] "const_iterator" []
+                                    , ftName = "end"
+                                    },GenHS,"loopInfoBaseEnd_")
+                        ,(memberFun { ftReturnType = toPtr loop
+                                    , ftName = "getLoopFor"
+                                    , ftArgs = [(False,toConstPtr blk)]
+                                    },GenHS,"loopInfoBaseGetLoopFor_")]
+           }]
+     | (blk,loop) <- [(normalT $ llvmType "BasicBlock",normalT $ llvmType "Loop")]
+    ]

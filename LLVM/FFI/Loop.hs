@@ -3,6 +3,8 @@ module LLVM.FFI.Loop
        ,LoopBase()
        ,Loop()
        ,loopIsLoopInvariant
+       ,LoopInfoBaseC(..)
+       ,LoopInfoBase()
        ) where
 
 import LLVM.FFI.Interface
@@ -38,6 +40,16 @@ instance LoopBaseC Loop BasicBlock Loop where
   loopContainsBlock = loopContainsBlock_
   loopGetSubLoops = loopGetSubLoops_
   loopGetBlocks = loopGetBlocks_
+
+class LoopInfoBaseC blk loop where
+  loopInfoBaseBegin :: Ptr (LoopInfoBase blk loop) -> IO (Ptr (Const_iterator (Ptr loop)))
+  loopInfoBaseEnd :: Ptr (LoopInfoBase blk loop) -> IO (Ptr (Const_iterator (Ptr loop)))
+  loopInfoBaseGetLoopFor :: Ptr (LoopInfoBase blk loop) -> Ptr blk -> IO (Ptr loop)
+
+instance LoopInfoBaseC BasicBlock Loop where
+  loopInfoBaseBegin = loopInfoBaseBegin_
+  loopInfoBaseEnd = loopInfoBaseEnd_
+  loopInfoBaseGetLoopFor = loopInfoBaseGetLoopFor_
 
 loopIsLoopInvariant :: ValueC v => Ptr Loop -> Ptr v -> IO Bool
 loopIsLoopInvariant = loopIsLoopInvariant_

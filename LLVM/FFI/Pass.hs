@@ -4,6 +4,8 @@ module LLVM.FFI.Pass
        ,deletePass
        ,passLookupPassInfo
        ,FunctionPass()
+       ,FunctionPassC()
+       ,functionPassRun
        ,ModulePass()
        ,ModulePassC()
        ,modulePassRunOnModule
@@ -37,6 +39,9 @@ module LLVM.FFI.Pass
        ,targetDataIsLittleEndian
        ,targetDataIsBigEndian
 #endif
+       ,LoopInfo()
+       ,newLoopInfo
+       ,loopInfoGetBase
        ,createCFGSimplificationPass
        ) where
 
@@ -56,6 +61,7 @@ instance PassC ModulePass
 instance PassC ImmutablePass
 instance PassC FindUsedTypes
 instance PassC TargetLibraryInfo
+instance PassC LoopInfo
 
 class ModulePassC t
 
@@ -66,6 +72,10 @@ instance ModulePassC TargetLibraryInfo
 
 class ImmutablePassC t
 instance ImmutablePassC TargetLibraryInfo
+
+class FunctionPassC t
+instance FunctionPassC FunctionPass
+instance FunctionPassC LoopInfo
 
 #if HS_LLVM_VERSION >= 303
 instance PassC DataLayout
@@ -82,6 +92,9 @@ deletePass = deletePass_
 
 modulePassRunOnModule :: ModulePassC p => Ptr p -> Ptr Module -> IO Bool
 modulePassRunOnModule = modulePassRunOnModule_
+
+functionPassRun :: FunctionPassC p => Ptr p -> Ptr Function -> IO Bool
+functionPassRun = functionPassRun_
 
 #if HS_LLVM_VERSION >= 303
 targetLibraryInfoGetLibFunc :: Ptr TargetLibraryInfo -> Ptr StringRef -> IO (Maybe LibFunc)
