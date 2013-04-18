@@ -1944,4 +1944,52 @@ llvm version
                           ,(Constructor [(False,constT $ ptr char)],GenHS,"newTwineString_")
                           ]
              }
+       ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
+             , specNS = llvmNS
+             , specName = "Loop"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isLoopInvariant"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                      },GenHS,"loopIsLoopInvariant_")]
+             }
+       ]++
+       [Spec { specHeader = "llvm/Analysis/LoopInfo.h"
+             , specNS = llvmNS
+             , specName = "LoopBase"
+             , specTemplateArgs = [blk,loop]
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getLoopDepth"
+                                      , ftOverloaded = True
+                                      },GenHS,"loopGetDepth_")
+                          ,(memberFun { ftReturnType = toPtr blk
+                                      , ftName = "getHeader"
+                                      , ftOverloaded = True
+                                      },GenHS,"loopGetHeader_")
+                          ,(memberFun { ftReturnType = toPtr loop
+                                      , ftName = "getParentLoop"
+                                      , ftOverloaded = True
+                                      },GenHS,"loopGetParent_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "contains"
+                                      , ftArgs = [(False,toConstPtr loop)]
+                                      , ftOverloaded = True
+                                      },GenHS,"loopContainsLoop_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "contains"
+                                      , ftArgs = [(False,toConstPtr blk)]
+                                      , ftOverloaded = True
+                                      },GenHS,"loopContainsBlock_")
+                          ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr loop]
+                                      , ftName = "getSubLoops"
+                                      , ftOverloaded = True
+                                      },GenHS,"loopGetSubLoops_")
+                          ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr blk]
+                                      , ftName = "getBlocks"
+                                      , ftOverloaded = True
+                                      },GenHS,"loopGetBlocks_")]
+             }
+        | (blk,loop) <- [(normalT $ llvmType "BasicBlock",normalT $ llvmType "Loop")]
        ]
