@@ -1050,7 +1050,14 @@ llvm version
                                       },GenHS,"extractElementInstGetVectorOperand")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getIndexOperand"
-                                      },GenHS,"extractElementInstGetIndexOperand")]
+                                      },GenHS,"extractElementInstGetIndexOperand")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExtractElementInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },GenHS,"newExtractElementInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS

@@ -70,6 +70,9 @@ module LLVM.FFI.Instruction
          getICmpOp,
          -- ** Extract Element Instruction
          ExtractElementInst(),
+         newExtractElementInst,
+         extractElementInstGetVectorOperand,
+         extractElementInstGetIndexOperand,
          -- ** Fence Instruction
          FenceInst(),
          fenceInstGetOrdering,
@@ -211,6 +214,9 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+newExtractElementInst :: (ValueC vec,ValueC idx) => Ptr vec -> Ptr idx -> Ptr Twine -> IO (Ptr ExtractElementInst)
+newExtractElementInst = newExtractElementInst_
 
 newICmpInst :: (ValueC v1,ValueC v2) => ICmpOp -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr ICmpInst)
 newICmpInst op = newICmpInst_ (fromICmpOp op)
