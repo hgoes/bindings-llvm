@@ -66,6 +66,7 @@ module LLVM.FFI.Instruction
          -- *** Integer Compare Instruction
          ICmpInst(),
          ICmpOp(..),
+         newICmpInst,
          getICmpOp,
          -- ** Extract Element Instruction
          ExtractElementInst(),
@@ -210,6 +211,9 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+newICmpInst :: (ValueC v1,ValueC v2) => ICmpOp -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr ICmpInst)
+newICmpInst op = newICmpInst_ (fromICmpOp op)
 
 newFCmpInst :: (ValueC v1,ValueC v2) => FCmpOp -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr FCmpInst)
 newFCmpInst op = newFCmpInst_ (fromFCmpOp op)
