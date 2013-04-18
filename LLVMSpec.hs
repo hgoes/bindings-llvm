@@ -139,16 +139,30 @@ llvm version
                                ]
                   }
             ,Spec { specHeader = "vector"
+                  , specNS = [ClassName "std" []]
+                  , specName = "vector"
+                  , specTemplateArgs = [rtp]
+                  , specType = ClassSpec
+                               [(memberFun { ftReturnType = constT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
+                                           , ftName = "begin"
+                                           , ftOverloaded = True
+                                           },GenHS,"vector"++tp++"Begin")
+                               ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
+                                           , ftName = "end"
+                                           , ftOverloaded = True
+                                           },GenHS,"vector"++tp++"End")]
+                  }
+            ,Spec { specHeader = "vector"
                   , specNS = [ClassName "std" [],ClassName "vector" [rtp]]
                   , specName = "const_iterator"
                   , specTemplateArgs = []
                   , specType = ClassSpec
                                [(memberFun { ftReturnType = rtp
                                            , ftName = "operator*"
-                                           },GenHS,"setVectorIterator"++tp++"Deref")
+                                           },GenHS,"vectorIterator"++tp++"Deref")
                                ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
                                            , ftName = "operator++"
-                                           },GenHS,"setVectorIterator"++tp++"Next")
+                                           },GenHS,"vectorIterator"++tp++"Next")
                                ]
                   }
             ,Spec { specHeader = "vector"
@@ -158,7 +172,7 @@ llvm version
                   , specType = GlobalFunSpec { gfunReturnType = normalT bool
                                              , gfunArgs = [(False,constT $ ref $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" [])
                                                           ,(False,constT $ ref $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" [])]
-                                             , gfunHSName = "setVectorIterator"++tp++"Eq"
+                                             , gfunHSName = "vectorIterator"++tp++"Eq"
                                              }
                   }
             ]

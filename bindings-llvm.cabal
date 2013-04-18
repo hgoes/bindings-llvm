@@ -69,5 +69,6 @@ library
     LLVM.FFI.OStream
     LLVM.FFI.AliasAnalysis
     LLVM.FFI.Twine
+    LLVM.FFI.CPP
   other-modules:
     LLVM.FFI.Interface

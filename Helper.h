@@ -61,16 +61,20 @@ instance ArrayRefC (Ptr name) where {\
   deleteArrayRef = deleteArrayRef##name\
 }
 
-#define SPECIALIZE_SETVECTOR(name,cconv)\
+#define SPECIALIZE_SETVECTOR(name)\
 instance SetVectorC (Ptr name) where {\
   setVectorEmpty = setVector##name##Empty ;\
   setVectorBegin = setVector##name##Begin ;\
-  setVectorEnd = setVector##name##End ;\
-} ;\
-instance SetVectorIteratorC (Ptr name) where {\
-  setVectorIteratorDeref = setVectorIterator##name##Deref ;\
-  setVectorIteratorNext = setVectorIterator##name##Next ;\
-  setVectorIteratorEq = setVectorIterator##name##Eq\
+  setVectorEnd = setVector##name##End\
+}
+
+#define SPECIALIZE_VECTOR(name)\
+instance VectorC (Ptr name) where {\
+  vectorBegin = vector##name##Begin ;\
+  vectorEnd = vector##name##End ;\
+  vectorIteratorDeref = vectorIterator##name##Deref ;\
+  vectorIteratorNext = vectorIterator##name##Next ;\
+  vectorIteratorEq = vectorIterator##name##Eq\
 }
 
 #define FUN(cls,name,sig)\
