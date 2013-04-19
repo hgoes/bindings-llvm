@@ -2034,4 +2034,28 @@ llvm version
                                     },GenHS,"loopInfoBaseGetLoopFor_")]
            }]
      | (blk,loop) <- [(normalT $ llvmType "BasicBlock",normalT $ llvmType "Loop")]
+    ]++
+    [Spec { specHeader = "llvm/PassAnalysisSupport.h"
+          , specNS = llvmNS
+          , specName = "AnalysisUsage"
+          , specTemplateArgs = []
+          , specType = ClassSpec
+                       [(Constructor [],GenHS,"newAnalysisUsage")
+                       ,(memberFun { ftName = "addRequiredID"
+                                   , ftArgs = [(False,normalT $ ref char)]
+                                   , ftIgnoreReturn = True
+                                   },GenHS,"analysisUsageAddRequired")
+                       ,(memberFun { ftName = "addRequiredTransitiveID"
+                                   , ftArgs = [(False,normalT $ ref char)]
+                                   , ftIgnoreReturn = True
+                                   },GenHS,"analysisUsageAddRequiredTransitive")
+                       ,(memberFun { ftName = "addPreservedID"
+                                   , ftArgs = [(False,normalT $ ref char)]
+                                   , ftIgnoreReturn = True
+                                   },GenHS,"analysisUsageAddPreserved")
+                       ,(memberFun { ftName = "setPreservesAll"
+                                   },GenHS,"analysisUsagePreservesAll")
+                       ,(memberFun { ftName = "setPreservesCFG"
+                                   },GenHS,"analysisUsagePreservesCFG")]
+          }
     ]

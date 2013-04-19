@@ -44,6 +44,7 @@ data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                          , ftStatic :: Bool
                          , ftOverloaded :: Bool
                          , ftPure :: Bool
+                         , ftIgnoreReturn :: Bool
                          }
              | Setter { ftSetVar :: String
                       , ftSetType :: Type
@@ -63,6 +64,7 @@ memberFun = MemberFun { ftReturnType = normalT void
                       , ftStatic = False
                       , ftOverloaded = False
                       , ftPure = False
+                      , ftIgnoreReturn = False
                       }
 
 idOut :: OutConverter
@@ -235,8 +237,8 @@ generateWrapper inc_sym spec
                        concat (fmap snd all_cont) ++ ["}"]
     in (header_cont,wrapper_cont)
   where
-    generateWrapperFunction' :: Type -> String -> [(Type,String)] -> ([(Type,String)] -> ([String],String)) -> ([String],[String])
-    generateWrapperFunction' rtp name args body
+    generateWrapperFunction' :: Type -> String -> [(Type,String)] -> ([(Type,String)] -> ([String],String)) -> Bool -> ([String],[String])
+    generateWrapperFunction' rtp name args body ignore
       = let sig = renderType rtp'++" "++name++
                   "("++(paramList $ fmap (\(tp,n,_) -> (tp,n)) args')++")"
             (rtp',outC,_) = toCType rtp
@@ -250,13 +252,15 @@ generateWrapper inc_sym spec
                        concat cmds++
                        act++
                        conv++
-                       ["  return "++res2++";"
+                       [if ignore
+                        then "  "++res2++";"
+                        else "  return "++res2++";"
                        ,"}"])
     
     generateGlobalWrapper :: Spec -> Type -> [(Bool,Type)] -> String -> ([String],[String])
     generateGlobalWrapper cls rtp args hsname
       = generateWrapperFunction' rtp hsname (mkArgs (fmap snd args))
-        (\args' -> ([],specFullName cls++"("++argList args'++")"))
+        (\args' -> ([],specFullName cls++"("++argList args'++")")) False
     
     generateWrapperFunction :: Spec -> (FunSpec,GenSpec,String) -> ([String],[String])
     generateWrapperFunction cls (fun,_,as)
@@ -301,7 +305,10 @@ generateWrapper inc_sym spec
               Setter { ftSetVar = name
                      , ftSetType = tp
                      } -> \[(_,self),(_,val)] -> (["("++self++")->"++name++" = "++val++";"],"")
-        in generateWrapperFunction' rt as args body
+            ignore = case fun of
+              MemberFun { ftIgnoreReturn = i } -> i
+              _ -> False
+        in generateWrapperFunction' rt as args body ignore
 
 generateFFI :: [String] -> String -> [Spec] -> String
 generateFFI mname header specs 

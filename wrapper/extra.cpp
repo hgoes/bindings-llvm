@@ -2,15 +2,19 @@
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/CallingConv.h>
+#include <llvm/IR/DataLayout.h>
 #else
 #include <llvm/InstrTypes.h>
 #include <llvm/Instructions.h>
 #include <llvm/CallingConv.h>
+#include <llvm/Target/TargetData.h>
 #endif
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/Target/TargetLibraryInfo.h>
 #include <llvm/Analysis/AliasAnalysis.h>
+#include <llvm/Analysis/LoopInfo.h>
+#include <llvm/Analysis/FindUsedTypes.h>
 
 extern "C" {
 #define HANDLE_FPRED(name) int FCMP_##name() { return llvm::CmpInst::FCMP_##name; }
@@ -34,6 +38,15 @@ extern "C" {
 
 #define HANDLE_SYNC_SCOPE(name) int SynchronizationScope_##name() { return llvm::name; }
 #include "SyncScope.def"
+
+  char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
+  char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
+  char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }
+#if HS_LLVM_VERSION >= 303
+  char* passId_DataLayout() { return &llvm::DataLayout::ID; }
+#else
+  char* passId_TargetData() { return &llvm::TargetData::ID; }
+#endif
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;
