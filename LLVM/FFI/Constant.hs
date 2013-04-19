@@ -34,6 +34,7 @@ module LLVM.FFI.Constant
         ConstantVector(),
         GlobalValue(),
         GlobalValueC(),
+        globalValueIsDeclaration,
         GlobalAlias(),
         GlobalVariable(),
         globalVariableIsConstant,
@@ -60,6 +61,9 @@ import Foreign
 import Foreign.C
 
 #include "Helper.h"
+
+globalValueIsDeclaration :: GlobalValueC v => Ptr v -> IO Bool
+globalValueIsDeclaration = globalValueIsDeclaration_
 
 constantExprGetOpcode :: Ptr ConstantExpr -> IO OpType
 constantExprGetOpcode ptr = do

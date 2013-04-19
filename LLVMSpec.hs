@@ -624,7 +624,11 @@ llvm version
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "PointerType" []
                                       , ftName = "getType"
                                       , ftOverloaded = True
-                                      },GenHS,"globalValueGetType")]
+                                      },GenHS,"globalValueGetType")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isDeclaration"
+                                      , ftOverloaded = True
+                                      },GenHS,"globalValueIsDeclaration_")]
              }
        ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = llvmNS
