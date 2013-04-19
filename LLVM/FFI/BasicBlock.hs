@@ -11,6 +11,7 @@ import LLVM.FFI.Value
 import LLVM.FFI.Constant
 import LLVM.FFI.Instruction
 import LLVM.FFI.IPList
+import LLVM.FFI.CPP
 
 import Foreign
 import Foreign.C
@@ -21,3 +22,4 @@ TYPE_LEAF(BasicBlock)
 SUBTYPE(Value,BasicBlock)
 
 SPECIALIZE_IPLIST(BasicBlock,capi)
+SPECIALIZE_VECTOR(BasicBlock)

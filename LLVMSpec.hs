@@ -176,7 +176,7 @@ llvm version
                                              }
                   }
             ]
-            | tp <- ["Type"]
+            | tp <- ["Type","Loop","BasicBlock"]
            , let rtp = Type [] (ptr $ llvmType tp)
            ]++
        [Spec { specHeader = "llvm/ADT/APFloat.h"
