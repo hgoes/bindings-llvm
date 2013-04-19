@@ -1615,6 +1615,10 @@ llvm version
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
                                       , ftStatic = True
                                       },GenHS,"passLookupPassInfo")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "AnalysisResolver"
+                                      , ftName = "getResolver"
+                                      , ftOverloaded = True
+                                      },GenHS,"passGetResolver_")
                            ]
              }
        ,Spec { specHeader = "llvm/Pass.h"
@@ -2057,5 +2061,15 @@ llvm version
                                    },GenHS,"analysisUsagePreservesAll")
                        ,(memberFun { ftName = "setPreservesCFG"
                                    },GenHS,"analysisUsagePreservesCFG")]
+          }
+    ,Spec { specHeader = "llvm/PassAnalysisSupport.h"
+          , specNS = llvmNS
+          , specName = "AnalysisResolver"
+          , specTemplateArgs = []
+          , specType = ClassSpec
+                       [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Pass"
+                                   , ftName = "findImplPass"
+                                   , ftArgs = [(False,constT $ ptr void)]
+                                   },GenHS,"analysisResolverFindImplPass")]
           }
     ]

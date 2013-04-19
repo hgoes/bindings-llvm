@@ -3,6 +3,7 @@ module LLVM.FFI.Pass
        ,PassC()
        ,PassId(..)
        ,deletePass
+       ,passGetResolver
        ,passLookupPassInfo
        ,FunctionPass()
        ,FunctionPassC()
@@ -19,6 +20,8 @@ module LLVM.FFI.Pass
        ,analysisUsageAddPreserved
        ,analysisUsagePreservesAll
        ,analysisUsagePreservesCFG
+       ,AnalysisResolver()
+       ,analysisResolverFindImplPass
        ,FindUsedTypes()
        ,newFindUsedTypes
        ,deleteFindUsedTypes
@@ -61,6 +64,9 @@ import Foreign.Storable
 import Data.Proxy
 
 #include "Helper.h"
+
+passGetResolver :: PassC t => Ptr t -> IO (Ptr AnalysisResolver)
+passGetResolver = passGetResolver_
 
 class PassC t
 
