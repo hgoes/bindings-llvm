@@ -8,13 +8,13 @@ library
   build-tools:    cpphs,llvm-config
   build-depends: base,tagged>=0.4,unix
   includes:             
-    --wrapper/llvm_proxy.h
     wrapper/extra.h
+    wrapper/HaskellPassC.h
   include-dirs:         wrapper .
   extra-libraries:      stdc++
   c-sources:
-    --wrapper/llvm_wrap.cxx
     wrapper/extra.cpp
+    wrapper/HaskellPass.cpp
   ghc-options: -cpp -pgmPcpphs -optP--cpp
   extensions:
     ForeignFunctionInterface
@@ -71,5 +71,6 @@ library
     LLVM.FFI.Twine
     LLVM.FFI.Loop
     LLVM.FFI.CPP
+    LLVM.FFI.Pass.Haskell
   other-modules:
     LLVM.FFI.Interface

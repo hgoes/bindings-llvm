@@ -1619,6 +1619,11 @@ llvm version
                                       , ftName = "getResolver"
                                       , ftOverloaded = True
                                       },GenHS,"passGetResolver_")
+                          ,(memberFun { ftReturnType = normalT $ ptr void
+                                      , ftName = "getAdjustedAnalysisPointer"
+                                      , ftArgs = [(False,constT $ ptr void)]
+                                      , ftOverloaded = True
+                                      },GenHS,"passGetAdjustedAnalysisPointer_")
                            ]
              }
        ,Spec { specHeader = "llvm/Pass.h"
@@ -1743,7 +1748,8 @@ llvm version
                                                        [normalT $ llvmType "BasicBlock"
                                                        ,normalT $ llvmType "Loop"]
                                       , ftName = "getBase"
-                                      },GenHS,"loopInfoGetBase")]
+                                      },GenHS,"loopInfoGetBase")
+                          ]
              }
        ,Spec { specHeader = "llvm/Transforms/IPO/PassManagerBuilder.h"
              , specNS = llvmNS
@@ -2050,15 +2056,15 @@ llvm version
                        ,(memberFun { ftName = "addRequiredID"
                                    , ftArgs = [(False,normalT $ ref char)]
                                    , ftIgnoreReturn = True
-                                   },GenHS,"analysisUsageAddRequired")
+                                   },GenHS,"analysisUsageAddRequired_")
                        ,(memberFun { ftName = "addRequiredTransitiveID"
                                    , ftArgs = [(False,normalT $ ref char)]
                                    , ftIgnoreReturn = True
-                                   },GenHS,"analysisUsageAddRequiredTransitive")
+                                   },GenHS,"analysisUsageAddRequiredTransitive_")
                        ,(memberFun { ftName = "addPreservedID"
                                    , ftArgs = [(False,normalT $ ref char)]
                                    , ftIgnoreReturn = True
-                                   },GenHS,"analysisUsageAddPreserved")
+                                   },GenHS,"analysisUsageAddPreserved_")
                        ,(memberFun { ftName = "setPreservesAll"
                                    },GenHS,"analysisUsagePreservesAll")
                        ,(memberFun { ftName = "setPreservesCFG"
@@ -2072,6 +2078,12 @@ llvm version
                        [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Pass"
                                    , ftName = "findImplPass"
                                    , ftArgs = [(False,constT $ ptr void)]
-                                   },GenHS,"analysisResolverFindImplPass")]
+                                   },GenHS,"analysisResolverFindImplPass_")
+                       ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Pass"
+                                   , ftName = "findImplPass"
+                                   , ftArgs = [(True,normalT $ ptr $ llvmType "Pass")
+                                              ,(False,constT $ ptr void)
+                                              ,(False,normalT $ ref $ llvmType "Function")]
+                                   },GenHS,"analysisResolverFindImplPassFun_")]
           }
     ]

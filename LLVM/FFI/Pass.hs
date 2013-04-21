@@ -4,6 +4,7 @@ module LLVM.FFI.Pass
        ,PassId(..)
        ,PassKind(..)
        ,deletePass
+       ,passGetAnalysis
        ,passGetResolver
        ,passLookupPassInfo
        ,FunctionPass()
@@ -23,6 +24,7 @@ module LLVM.FFI.Pass
        ,analysisUsagePreservesCFG
        ,AnalysisResolver()
        ,analysisResolverFindImplPass
+       ,analysisResolverFindImplPassFun
        ,FindUsedTypes()
        ,newFindUsedTypes
        ,deleteFindUsedTypes
@@ -141,11 +143,36 @@ foreign import capi _TO_STRING(extra.h passId_TargetData)
 deletePass :: PassC t => Ptr t -> IO ()
 deletePass = deletePass_
 
+passGetAnalysis :: (PassC t,PassId analysis) => Ptr t -> IO (Ptr analysis)
+passGetAnalysis pass = get Proxy
+  where
+    get :: PassId a => Proxy a -> IO (Ptr a)
+    get p = do
+      ptr <- passGetAdjustedAnalysisPointer_ pass (castPtr $ passId p)
+      return (castPtr ptr)
+
 modulePassRunOnModule :: ModulePassC p => Ptr p -> Ptr Module -> IO Bool
 modulePassRunOnModule = modulePassRunOnModule_
 
 functionPassRun :: FunctionPassC p => Ptr p -> Ptr Function -> IO Bool
 functionPassRun = functionPassRun_
+
+analysisUsageAddRequired :: PassId p => Ptr AnalysisUsage -> Proxy p -> IO ()
+analysisUsageAddRequired au p = analysisUsageAddRequired_ au (passId p)
+
+analysisUsageAddRequiredTransitive :: PassId p => Ptr AnalysisUsage -> Proxy p -> IO ()
+analysisUsageAddRequiredTransitive au p = analysisUsageAddRequiredTransitive_ au (passId p)
+
+analysisUsageAddPreserved :: PassId p => Ptr AnalysisUsage -> Proxy p -> IO ()
+analysisUsageAddPreserved au p = analysisUsageAddPreserved_ au (passId p)
+
+analysisResolverFindImplPass :: PassId p => Ptr AnalysisResolver -> Proxy p -> IO (Ptr Pass)
+analysisResolverFindImplPass res p = analysisResolverFindImplPass_ res (castPtr $ passId p)
+
+analysisResolverFindImplPassFun :: (PassC t,PassId p) => Ptr AnalysisResolver
+                                   -> Ptr t -> Proxy p -> Ptr Function -> IO (Ptr Pass)
+analysisResolverFindImplPassFun res pass p fun
+  = analysisResolverFindImplPassFun_ res pass (castPtr $ passId p) fun
 
 #if HS_LLVM_VERSION >= 303
 targetLibraryInfoGetLibFunc :: Ptr TargetLibraryInfo -> Ptr StringRef -> IO (Maybe LibFunc)
