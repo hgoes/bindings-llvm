@@ -1977,7 +1977,9 @@ llvm version
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isLoopInvariant"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
-                                      },GenHS,"loopIsLoopInvariant_")]
+                                      },GenHS,"loopIsLoopInvariant_")
+                          ,(memberFun { ftName = "dump"
+                                      },GenHS,"loopDump")]
              }
        ]++
     concat

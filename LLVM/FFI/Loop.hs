@@ -3,6 +3,7 @@ module LLVM.FFI.Loop
        ,LoopBase()
        ,Loop()
        ,loopIsLoopInvariant
+       ,loopDump
        ,LoopInfoBaseC(..)
        ,LoopInfoBase()
        ) where
