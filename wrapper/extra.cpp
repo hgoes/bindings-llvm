@@ -39,6 +39,9 @@ extern "C" {
 #define HANDLE_SYNC_SCOPE(name) int SynchronizationScope_##name() { return llvm::name; }
 #include "SyncScope.def"
 
+#define HANDLE_PASSKIND(name) int PassKind_##name() { return llvm::PT_##name; }
+#include "PassKind.def"
+
   char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
   char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
   char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }

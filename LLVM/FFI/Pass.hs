@@ -2,6 +2,7 @@ module LLVM.FFI.Pass
        (Pass()
        ,PassC()
        ,PassId(..)
+       ,PassKind(..)
        ,deletePass
        ,passGetResolver
        ,passLookupPassInfo
@@ -64,6 +65,24 @@ import Foreign.Storable
 import Data.Proxy
 
 #include "Helper.h"
+
+data PassKind =
+#define HANDLE_PASSKIND(name) PRESERVE(  ) PassKind##name
+#define HANDLE_SEP PRESERVE(  ) |
+#include "PassKind.def"
+  deriving (Show,Eq,Ord)
+
+toPassKind :: CInt -> PassKind
+toPassKind op
+#define HANDLE_PASSKIND(name) PRESERVE(  ) | op == passKind_##name = PassKind##name
+#include "PassKind.def"
+
+fromPassKind :: PassKind -> CInt
+#define HANDLE_PASSKIND(name) fromPassKind PassKind##name = passKind_##name
+#include "PassKind.def"
+
+#define HANDLE_PASSKIND(name) foreign import capi _TO_STRING(extra.h PassKind_##name) passKind_##name :: CInt
+#include "PassKind.def"
 
 passGetResolver :: PassC t => Ptr t -> IO (Ptr AnalysisResolver)
 passGetResolver = passGetResolver_

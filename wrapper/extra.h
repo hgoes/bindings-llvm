@@ -23,6 +23,9 @@
 #define HANDLE_SYNC_SCOPE(name) extern int SynchronizationScope_##name();
 #include "SyncScope.def"
 
+#define HANDLE_PASSKIND(name) extern int PassKind_##name();
+#include "PassKind.def"
+
 extern char* passId_LoopInfo();
 extern char* passId_FindUsedTypes();
 extern char* passId_TargetLibraryInfo();
@@ -31,7 +34,6 @@ extern char* passId_DataLayout();
 #else
 extern char* passId_TargetData();
 #endif
-
 
 extern int writeBitCodeToFile(void* m,const char* path);
 
