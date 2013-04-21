@@ -22,6 +22,9 @@ data SpecType
                   , gfunArgs :: [(Bool,Type)]
                   , gfunHSName :: String
                   }
+  | EnumSpec { enumHSName :: String
+             , enumElems :: [(String,String)]
+             }
 
 data GenSpec = GenOnlyC
              | GenHS
@@ -51,6 +54,7 @@ data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                       }
              | Getter { ftGetVar :: String
                       , ftGetType :: Type
+                      , ftGetStatic :: Bool
                       }
 
 type OutConverter = String -> ([String],String)
@@ -226,6 +230,7 @@ generateWrapper inc_sym spec
         all_cont = concat [ case specType cs of
                                ClassSpec funs -> fmap (generateWrapperFunction cs) funs
                                GlobalFunSpec rtp args hsname -> [generateGlobalWrapper cs rtp args hsname]
+                               EnumSpec _ elems -> [generateEnum cs elems]
                           | cs <- spec ]
         header_cont = unlines $ ["#ifndef "++inc_sym
                                 ,"#define "++inc_sym
@@ -273,7 +278,9 @@ generateWrapper inc_sym spec
                                                 else ((self_ptr,"self"):)) (mkArgs $ fmap snd $ args)
               Setter { ftSetVar = var
                      , ftSetType = tp } -> [(self_ptr,"self"),(tp,"value")]
-              Getter { } -> [(self_ptr,"self")]
+              Getter { ftGetStatic = stat } -> if stat
+                                               then []
+                                               else [(self_ptr,"self")]
             self_ptr = toPtr (specFullType cls)
             rt = case fun of
               Constructor _ -> normalT $ ptr void
@@ -301,7 +308,10 @@ generateWrapper inc_sym spec
                              in ([],call)
               Getter { ftGetVar = name
                      , ftGetType = tp
-                     } -> \[(_,self)] -> ([],"("++self++")->"++name)
+                     , ftGetStatic = stat
+                     } -> if stat
+                          then \_ -> ([],specFullName cls++"::"++name)
+                          else \[(_,self)] -> ([],"("++self++")->"++name)
               Setter { ftSetVar = name
                      , ftSetType = tp
                      } -> \[(_,self),(_,val)] -> (["("++self++")->"++name++" = "++val++";"],"")
@@ -309,6 +319,12 @@ generateWrapper inc_sym spec
               MemberFun { ftIgnoreReturn = i } -> i
               _ -> False
         in generateWrapperFunction' rt as args body ignore
+    generateEnum :: Spec -> [(String,String)] -> ([String],[String])
+    generateEnum cls elems
+      = (["extern int enum_"++specName cls++"_"++el++"();"
+         | (el,_) <- elems ],
+         ["int enum_"++specName cls++"_"++el++"() { return "++renderNS (specNS cls)++el++"; }"
+         | (el,_) <- elems ])
 
 generateFFI :: [String] -> String -> [Spec] -> String
 generateFFI mname header specs 
@@ -316,20 +332,36 @@ generateFFI mname header specs
              ,""
              ,"import Foreign"
              ,"import Foreign.C"
-             ,""]++dts++fns)
+             ,""]++dts++fns++conv)
   where
     dts = [ "data "++hsName (specName cs) ++
             concat (fmap (\(_,i) -> " a"++show i) (zip (specCollectTemplateArgs cs) [0..]))++
             " = "++hsName (specName cs)
           | cs@Spec { specType = ClassSpec {} } <- nubBy (\x y -> specName x == specName y) specs
-          ]
+          ] ++
+          [ "data "++hsname++" = "++(concat $ intersperse " | " [ el | (_,el) <- els ])++" deriving (Show,Eq,Ord)"
+          | Spec { specType = EnumSpec { enumHSName = hsname
+                                       , enumElems = els } } <- specs ]
+    conv = concat
+           [ ["to"++hsname++" :: CInt -> "++hsname
+             ,"to"++hsname++" op"
+             ]++[ "  | op == enum_"++cname++"_"++el++" = "++el_hs
+                | (el,el_hs) <- els ]++
+             ["","from"++hsname++" :: "++hsname++" -> CInt"]++
+             ["from"++hsname++" "++el_hs++" = enum_"++cname++"_"++el
+             | (el,el_hs) <- els ]
+           | Spec { specName = cname
+                  , specType = EnumSpec { enumHSName = hsname
+                                        , enumElems = els }
+                  } <- specs
+           ]
     fns = concat [ [""
                    ,"foreign import capi \""++header++" "++c_name++"\""
                    ,"  "++c_name++" :: "++sig]
                  | cs <- specs
                  , (tps,rtp,c_name) <- case specType cs of
                    ClassSpec { cspecFuns = funs } 
-                     -> fmap (\(fun,_,cname) 
+                     -> fmap (\(fun,_,cname)
                               -> case fun of
                                 MemberFun { ftArgs = r
                                           , ftOverloaded = isO 
@@ -369,8 +401,11 @@ generateFFI mname header specs
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
                                       toHaskellType True Nothing $ normalT void,
                                       cname)
-                                Getter { ftGetType = tp }
-                                  -> ([toHaskellType True Nothing $ toPtr $ specFullType cs],
+                                Getter { ftGetType = tp
+                                       , ftGetStatic = stat }
+                                  -> (if stat
+                                      then []
+                                      else [toHaskellType True Nothing $ toPtr $ specFullType cs],
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
                                       toHaskellType True Nothing tp,
                                       cname)
@@ -378,12 +413,16 @@ generateFFI mname header specs
                              ) funs
                    GlobalFunSpec { gfunReturnType = rtp
                                  , gfunArgs = args
-                                 , gfunHSName = hsname } -> [(fmap (\((isO',tp'),n) -> toHaskellType True (if isO'
-                                                                                                           then Just $ "t"++show n
-                                                                                                           else Nothing) tp') (zip args [0..]),
-                                                              HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                                              toHaskellType True Nothing rtp,
-                                                              hsname)]
+                                 , gfunHSName = hsname
+                                 } -> [(fmap (\((isO',tp'),n) -> toHaskellType True (if isO'
+                                                                                     then Just $ "t"++show n
+                                                                                     else Nothing) tp') (zip args [0..]),
+                                        HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
+                                        toHaskellType True Nothing rtp,
+                                        hsname)]
+                   EnumSpec { enumElems = els
+                            } -> [([],toHaskellType True Nothing $ normalT int,"enum_"++specName cs++"_"++el)
+                                 | (el,_) <- els ]
                  , let sig = (concat [ prettyPrint tp ++ " -> " 
                                      | tp <- tps
                                      ]) ++
