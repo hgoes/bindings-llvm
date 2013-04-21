@@ -283,24 +283,6 @@ newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
 newAtomicCmpXchgInst ptr cmp newVal ord sync
   = newAtomicCmpXchgInst_ ptr cmp newVal (fromAtomicOrdering ord) (fromSynchronizationScope sync)
 
-data SynchronizationScope =
-#define HANDLE_SYNC_SCOPE(name) PRESERVE(  ) name
-#define HANDLE_SEP PRESERVE(  ) |
-#include "SyncScope.def"
-  deriving (Show,Eq,Ord)
-
-#define HANDLE_SYNC_SCOPE(name) foreign import capi _TO_STRING(extra.h SynchronizationScope_##name) synchronizationScope_##name :: CInt
-#include "SyncScope.def"
-
-toSynchronizationScope :: CInt -> SynchronizationScope
-toSynchronizationScope op
-#define HANDLE_SYNC_SCOPE(name) PRESERVE(  ) | op == synchronizationScope_##name = name
-#include "SyncScope.def"
-
-fromSynchronizationScope :: SynchronizationScope -> CInt
-#define HANDLE_SYNC_SCOPE(name) fromSynchronizationScope name = synchronizationScope_##name
-#include "SyncScope.def"
-
 #if HS_LLVM_VERSION >= 303
 isMallocLikeFn :: ValueC t => Ptr t -> Ptr TargetLibraryInfo -> Bool -> IO Bool
 #else
@@ -320,47 +302,11 @@ atomicRMWInstGetOperation = fmap toRMWBinOp . atomicRMWInstGetOperation_
 atomicRMWInstGetOrdering :: Ptr AtomicRMWInst -> IO AtomicOrdering
 atomicRMWInstGetOrdering = fmap toAtomicOrdering . atomicRMWInstGetOrdering_
 
-data RMWBinOp =
-#define HANDLE_BINOP(name) PRESERVE(  ) RMW##name
-#define HANDLE_SEP PRESERVE(  ) |
-#include "RMWBinOp.def"
-  deriving (Show,Eq,Ord)
-
-#define HANDLE_BINOP(name) foreign import capi _TO_STRING(extra.h RMWBinOp_##name) rmwBinOp_##name :: CInt
-#include "RMWBinOp.def"
-
-toRMWBinOp :: CInt -> RMWBinOp
-toRMWBinOp op
-#define HANDLE_BINOP(name) PRESERVE(  ) | op == rmwBinOp_##name = RMW##name
-#include "RMWBinOp.def"
-
-fromRMWBinOp :: RMWBinOp -> CInt
-#define HANDLE_BINOP(name) fromRMWBinOp RMW##name = rmwBinOp_##name
-#include "RMWBinOp.def"
-
 atomicCmpXchgInstGetOrdering :: Ptr AtomicCmpXchgInst -> IO AtomicOrdering
 atomicCmpXchgInstGetOrdering = fmap toAtomicOrdering . atomicCmpXchgInstGetOrdering_
 
 fenceInstGetOrdering :: Ptr FenceInst -> IO AtomicOrdering
 fenceInstGetOrdering = fmap toAtomicOrdering . fenceInstGetOrdering_
-
-data AtomicOrdering =
-#define HANDLE_ORDERING(name) PRESERVE(  ) name
-#define HANDLE_SEP PRESERVE(  ) |
-#include "AtomicOrdering.def"
-  deriving (Show,Eq,Ord)
-
-#define HANDLE_ORDERING(name) foreign import capi _TO_STRING(extra.h AtomicOrdering_##name) atomicOrdering_##name :: CInt
-#include "AtomicOrdering.def"
-
-toAtomicOrdering :: CInt -> AtomicOrdering
-toAtomicOrdering op
-#define HANDLE_ORDERING(name) PRESERVE(  ) | op == atomicOrdering_##name = name
-#include "AtomicOrdering.def"
-
-fromAtomicOrdering :: AtomicOrdering -> CInt
-#define HANDLE_ORDERING(name) fromAtomicOrdering name = atomicOrdering_##name
-#include "AtomicOrdering.def"
 
 landingPadInstIsCatch :: Ptr LandingPadInst -> Integer -> IO Bool
 landingPadInstIsCatch ptr i = landingPadInstIsCatch_ ptr (fromInteger i)
@@ -379,20 +325,6 @@ callInstGetCallingConv = fmap toCallingConv . callInstGetCallingConv_
 
 invokeInstGetCallingConv :: Ptr InvokeInst -> IO CallingConv
 invokeInstGetCallingConv = fmap toCallingConv . invokeInstGetCallingConv_
-
-data CallingConv =
-#define HANDLE_CC(name) PRESERVE(  ) name
-#define HANDLE_SEP PRESERVE(  ) |
-#include "CConvs.def"
-  deriving (Show,Eq,Ord)
-
-#define HANDLE_CC(name) foreign import capi _TO_STRING(extra.h CConv_##name) cConv_##name :: CInt
-#include "CConvs.def"
-
-toCallingConv :: CInt -> CallingConv
-toCallingConv op
-#define HANDLE_CC(name) PRESERVE(  ) | op == cConv_##name = name
-#include "CConvs.def"
 
 invokeInstGetNumArgOperands :: Ptr InvokeInst -> IO Integer
 invokeInstGetNumArgOperands = fmap toInteger . invokeInstGetNumArgOperands_
@@ -514,40 +446,6 @@ callInstGetNumArgOperands ptr = fmap toInteger (callInstGetNumArgOperands_ ptr)
 
 callInstGetArgOperand :: Ptr CallInst -> Integer -> IO (Ptr Value)
 callInstGetArgOperand ptr idx = callInstGetArgOperand_ ptr (fromInteger idx)
-
-#define HANDLE_FPRED(name) foreign import capi _TO_STRING(extra.h FCMP_##name) fCMP_##name :: CInt
-#define HANDLE_IPRED(name) foreign import capi _TO_STRING(extra.h ICMP_##name) iCMP_##name :: CInt
-#include "Predicate.def"
-
-data FCmpOp = 
-#define HANDLE_FPRED(name) PRESERVE(  ) F_##name
-#define HANDLE_FSEP PRESERVE(  ) |
-#include "Predicate.def"
-  deriving (Show,Eq,Ord)
-
-data ICmpOp = 
-#define HANDLE_IPRED(name) PRESERVE(  ) I_##name
-#define HANDLE_ISEP PRESERVE(  ) |
-#include "Predicate.def"
-  deriving (Show,Eq,Ord)
-
-toFCmpOp :: CInt -> FCmpOp
-toFCmpOp op
-#define HANDLE_FPRED(name) PRESERVE(  ) | op==fCMP_##name = F_##name
-#include "Predicate.def"
-
-fromFCmpOp :: FCmpOp -> CInt
-#define HANDLE_FPRED(name) fromFCmpOp F_##name = fCMP_##name
-#include "Predicate.def"
-
-toICmpOp :: CInt -> ICmpOp
-toICmpOp op
-#define HANDLE_IPRED(name) PRESERVE(  ) | op==iCMP_##name = I_##name
-#include "Predicate.def"
-
-fromICmpOp :: ICmpOp -> CInt
-#define HANDLE_IPRED(name) fromICmpOp I_##name = iCMP_##name
-#include "Predicate.def"
 
 getFCmpOp :: Ptr FCmpInst -> IO FCmpOp
 getFCmpOp ptr = fmap toFCmpOp (cmpInstGetPredicate_ ptr)

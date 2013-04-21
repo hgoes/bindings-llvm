@@ -17,31 +17,6 @@
 #include <llvm/Analysis/FindUsedTypes.h>
 
 extern "C" {
-#define HANDLE_FPRED(name) int FCMP_##name() { return llvm::CmpInst::FCMP_##name; }
-#define HANDLE_IPRED(name) int ICMP_##name() { return llvm::CmpInst::ICMP_##name; }
-#include "Predicate.def"
-
-#define HANDLE_CC(name) int CConv_##name() { return llvm::CallingConv::name; }
-#include "CConvs.def"
-
-#define HANDLE_ORDERING(name) int AtomicOrdering_##name() { return llvm::name; }
-#include "AtomicOrdering.def"
-
-#define HANDLE_BINOP(name) int RMWBinOp_##name() { return llvm::AtomicRMWInst::name; }
-#include "RMWBinOp.def"
-
-#define HANDLE_LIBFUNC(name) int LibFunc_##name() { return llvm::LibFunc::name; }
-#include "LibFunc.def"
-
-#define HANDLE_ALIAS_RESULT(name) int AliasResult_##name() { return llvm::AliasAnalysis::name; }
-#include "Alias.def"
-
-#define HANDLE_SYNC_SCOPE(name) int SynchronizationScope_##name() { return llvm::name; }
-#include "SyncScope.def"
-
-#define HANDLE_PASSKIND(name) int PassKind_##name() { return llvm::PT_##name; }
-#include "PassKind.def"
-
   char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
   char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
   char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }

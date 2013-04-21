@@ -62,17 +62,3 @@ aliasAnalysisAlias ptr l1 l2 = fmap toAliasResult $ aliasAnalysisAlias_ ptr l1 l
 
 newLocation :: ValueC v => Ptr v -> Word64 -> Ptr MDNode -> IO (Ptr Location)
 newLocation ptr size tbaa = newLocation_ ptr size tbaa
-
-data AliasResult =
-#define HANDLE_ALIAS_RESULT(name) PRESERVE(  ) name
-#define HANDLE_SEP_ALIAS_RESULT PRESERVE(  ) |
-#include "Alias.def"
-  deriving (Show,Eq,Ord)
-
-#define HANDLE_ALIAS_RESULT(name) foreign import capi _TO_STRING(extra.h AliasResult_##name) aliasResult_##name :: CInt
-#include "Alias.def"
-
-toAliasResult :: CInt -> AliasResult
-toAliasResult op
-#define HANDLE_ALIAS_RESULT(name) PRESERVE (  ) | op == aliasResult_##name = name
-#include "Alias.def"

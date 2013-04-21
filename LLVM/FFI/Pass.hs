@@ -68,24 +68,6 @@ import Data.Proxy
 
 #include "Helper.h"
 
-data PassKind =
-#define HANDLE_PASSKIND(name) PRESERVE(  ) PassKind##name
-#define HANDLE_SEP PRESERVE(  ) |
-#include "PassKind.def"
-  deriving (Show,Eq,Ord)
-
-toPassKind :: CInt -> PassKind
-toPassKind op
-#define HANDLE_PASSKIND(name) PRESERVE(  ) | op == passKind_##name = PassKind##name
-#include "PassKind.def"
-
-fromPassKind :: PassKind -> CInt
-#define HANDLE_PASSKIND(name) fromPassKind PassKind##name = passKind_##name
-#include "PassKind.def"
-
-#define HANDLE_PASSKIND(name) foreign import capi _TO_STRING(extra.h PassKind_##name) passKind_##name :: CInt
-#include "PassKind.def"
-
 passGetResolver :: PassC t => Ptr t -> IO (Ptr AnalysisResolver)
 passGetResolver = passGetResolver_
 
@@ -193,24 +175,6 @@ targetLibraryInfoGetName ptr f = targetLibraryInfoGetName_ ptr (fromLibFunc f)
 
 targetLibraryInfoHas :: Ptr TargetLibraryInfo -> LibFunc -> IO Bool
 targetLibraryInfoHas ptr f = targetLibraryInfoHas_ ptr (fromLibFunc f)
-
-data LibFunc =
-#define HANDLE_LIBFUNC(name) PRESERVE(  ) Func_##name
-#define HANDLE_SEP PRESERVE(  ) |
-#include "LibFunc.def"
-  deriving (Show,Eq,Ord)
-
-toLibFunc :: CInt -> LibFunc
-toLibFunc op
-#define HANDLE_LIBFUNC(name) PRESERVE(  ) | op == libFunc_##name = Func_##name
-#include "LibFunc.def"
-
-fromLibFunc :: LibFunc -> CInt
-#define HANDLE_LIBFUNC(name) fromLibFunc Func_##name = libFunc_##name
-#include "LibFunc.def"
-
-#define HANDLE_LIBFUNC(name) foreign import capi _TO_STRING(extra.h LibFunc_##name) libFunc_##name :: CInt
-#include "LibFunc.def"
 
 foreign import capi _TO_STRING(extra.h passId_LoopInfo)
   passId_LoopInfo :: Ptr CChar
