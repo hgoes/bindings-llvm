@@ -1624,7 +1624,18 @@ llvm version
                                       , ftArgs = [(False,constT $ ptr void)]
                                       , ftOverloaded = True
                                       },GenHS,"passGetAdjustedAnalysisPointer_")
-                           ]
+                          ,(memberFun { ftReturnType = normalT $ EnumType llvmNS "PassKind"
+                                      , ftName = "getPassKind"
+                                      , ftOverloaded = True
+                                      },GenHS,"passGetKind_")
+                          ,(memberFun { ftReturnType = constT $ ptr char
+                                      , ftName = "getPassName"
+                                      , ftOverloaded = True
+                                      },GenHS,"passGetName_")
+                          ,(memberFun { ftName = "dump"
+                                      , ftOverloaded = True
+                                      },GenHS,"passDump_")
+                          ]
              }
        ,Spec { specHeader = "llvm/Pass.h"
              , specNS = llvmNS

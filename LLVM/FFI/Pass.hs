@@ -4,6 +4,9 @@ module LLVM.FFI.Pass
        ,PassId(..)
        ,PassKind(..)
        ,deletePass
+       ,passGetKind
+       ,passGetName
+       ,passDump
        ,passGetAnalysis
        ,passGetResolver
        ,passLookupPassInfo
@@ -67,6 +70,15 @@ import Foreign.Storable
 import Data.Proxy
 
 #include "Helper.h"
+
+passDump :: PassC t => Ptr t -> IO ()
+passDump = passDump_
+
+passGetName :: PassC t => Ptr t -> IO String
+passGetName pass = passGetName_ pass >>= peekCString
+
+passGetKind :: PassC t => Ptr t -> IO PassKind
+passGetKind = fmap toPassKind . passGetKind_
 
 passGetResolver :: PassC t => Ptr t -> IO (Ptr AnalysisResolver)
 passGetResolver = passGetResolver_
