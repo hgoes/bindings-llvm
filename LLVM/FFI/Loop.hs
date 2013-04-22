@@ -1,6 +1,7 @@
 module LLVM.FFI.Loop
        (LoopBaseC(..)
        ,LoopBase()
+       ,loopExitEdgeList
        ,Loop()
        ,loopIsLoopInvariant
        ,loopDump
