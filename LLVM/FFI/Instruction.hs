@@ -24,6 +24,7 @@ module LLVM.FFI.Instruction
          toSynchronizationScope,
          instructionGetParent,
          instructionGetDebugLoc,
+#if HS_LLVM_VERSION>=300
          -- ** Atomic Compare & Exchange Instruction
          AtomicCmpXchgInst(),
          newAtomicCmpXchgInst,
@@ -40,6 +41,7 @@ module LLVM.FFI.Instruction
          atomicRMWInstGetOrdering,
          atomicRMWInstGetPointerOperand,
          atomicRMWInstGetValOperand,
+#endif
          -- ** Binary Operator
          BinaryOperator(),
          newBinaryOperator,
@@ -73,10 +75,12 @@ module LLVM.FFI.Instruction
          newExtractElementInst,
          extractElementInstGetVectorOperand,
          extractElementInstGetIndexOperand,
+#if HS_LLVM_VERSION>=300
          -- ** Fence Instruction
          FenceInst(),
          newFenceInst,
          fenceInstGetOrdering,
+#endif
          -- ** Get Element Pointer Instruction
          GetElementPtrInst(),
          newGetElementPtrInst,
@@ -91,6 +95,7 @@ module LLVM.FFI.Instruction
          -- ** Insert Value Instruction
          InsertValueInst(),
          newInsertValueInst,
+#if HS_LLVM_VERSION>=300
          -- ** Landing Pad Instruction
          LandingPadInst(),
          newLandingPadInst,
@@ -102,6 +107,7 @@ module LLVM.FFI.Instruction
          landingPadInstAddClause,
          landingPadInstIsCatch,
          landingPadInstIsFilter,
+#endif
          -- ** PHI-Node
          PHINode(),
          newPhiNode,
@@ -143,9 +149,11 @@ module LLVM.FFI.Instruction
          invokeInstGetCalledValue,
          invokeInstGetNormalDest,
          invokeInstGetUnwindDest,
+#if HS_LLVM_VERSION>=300
          invokeInstGetLandingPadInst,
          -- *** Resume Instruction
          ResumeInst(),
+#endif
          -- *** Return Instruction
          ReturnInst(),
          returnInstGetReturnValue,
@@ -235,11 +243,13 @@ phiNodeAddIncoming = phiNodeAddIncoming_
 newPhiNode :: TypeC tp => Ptr tp -> CUInt -> Ptr Twine -> IO (Ptr PHINode)
 newPhiNode = newPhiNode_
 
+#if HS_LLVM_VERSION>=300
 landingPadInstAddClause :: ValueC clause => Ptr LandingPadInst -> Ptr clause -> IO ()
 landingPadInstAddClause = landingPadInstAddClause_
 
 newLandingPadInst :: (TypeC tp,ValueC fn) => Ptr tp -> Ptr fn -> CUInt -> Ptr Twine -> IO (Ptr LandingPadInst)
 newLandingPadInst = newLandingPadInst_
+#endif
 
 newInsertValueInst :: (ValueC agg,ValueC val) => Ptr agg -> Ptr val -> Ptr (ArrayRef CUInt) -> Ptr Twine -> IO (Ptr InsertValueInst)
 newInsertValueInst = newInsertValueInst_
@@ -250,8 +260,10 @@ newInsertElementInst = newInsertElementInst_
 newGetElementPtrInst :: ValueC ptr => Ptr ptr -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr GetElementPtrInst)
 newGetElementPtrInst = newGetElementPtrInst_
 
+#if HS_LLVM_VERSION>=300
 newFenceInst :: Ptr LLVMContext -> AtomicOrdering -> SynchronizationScope -> IO (Ptr FenceInst)
 newFenceInst ctx ord sync = newFenceInst_ ctx (fromAtomicOrdering ord) (fromSynchronizationScope sync)
+#endif
 
 newExtractElementInst :: (ValueC vec,ValueC idx) => Ptr vec -> Ptr idx -> Ptr Twine -> IO (Ptr ExtractElementInst)
 newExtractElementInst = newExtractElementInst_
@@ -268,6 +280,7 @@ newCallInst = newCallInst_
 newBinaryOperator :: (ValueC v1,ValueC v2) => BinOpType -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr BinaryOperator)
 newBinaryOperator op = newBinaryOperator_ (fromBinOpCode op)
 
+#if HS_LLVM_VERSION >= 300
 newAtomicRMWInst :: (ValueC ptr,ValueC value)
                     => RMWBinOp -> Ptr ptr -> Ptr value
                     -> AtomicOrdering -> SynchronizationScope
@@ -282,6 +295,7 @@ newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
                         -> IO (Ptr AtomicCmpXchgInst)
 newAtomicCmpXchgInst ptr cmp newVal ord sync
   = newAtomicCmpXchgInst_ ptr cmp newVal (fromAtomicOrdering ord) (fromSynchronizationScope sync)
+#endif
 
 #if HS_LLVM_VERSION >= 302
 isMallocLikeFn :: ValueC t => Ptr t -> Ptr TargetLibraryInfo -> Bool -> IO Bool
@@ -296,6 +310,7 @@ loadInstGetOrdering = fmap toAtomicOrdering . loadInstGetOrdering_
 storeInstGetOrdering :: Ptr StoreInst -> IO AtomicOrdering
 storeInstGetOrdering = fmap toAtomicOrdering . storeInstGetOrdering_
 
+#if HS_LLVM_VERSION >= 300
 atomicRMWInstGetOperation :: Ptr AtomicRMWInst -> IO RMWBinOp
 atomicRMWInstGetOperation = fmap toRMWBinOp . atomicRMWInstGetOperation_
 
@@ -319,6 +334,7 @@ landingPadInstGetClause ptr i = landingPadInstGetClause_ ptr (fromInteger i)
 
 landingPadInstGetNumClauses :: Ptr LandingPadInst -> IO Integer
 landingPadInstGetNumClauses = fmap toInteger . landingPadInstGetNumClauses_
+#endif
 
 callInstGetCallingConv :: Ptr CallInst -> IO CallingConv
 callInstGetCallingConv = fmap toCallingConv . callInstGetCallingConv_
@@ -455,10 +471,12 @@ getICmpOp ptr = fmap toICmpOp (cmpInstGetPredicate_ ptr)
 
 TYPE(Instruction)
 SUBTYPE2(Value,User,Instruction)
+#if HS_LLVM_VERSION >= 300
 TYPE_LEAF(AtomicCmpXchgInst)
 SUBTYPE3(Value,User,Instruction,AtomicCmpXchgInst)
 TYPE_LEAF(AtomicRMWInst)
 SUBTYPE3(Value,User,Instruction,AtomicRMWInst)
+#endif
 TYPE_LEAF(BinaryOperator)
 SUBTYPE3(Value,User,Instruction,BinaryOperator)
 TYPE_LEAF(CallInst)
@@ -471,16 +489,20 @@ TYPE_LEAF(ICmpInst)
 SUBTYPE4(Value,User,Instruction,CmpInst,ICmpInst)
 TYPE_LEAF(ExtractElementInst)
 SUBTYPE3(Value,User,Instruction,ExtractElementInst)
+#if HS_LLVM_VERSION>=300
 TYPE_LEAF(FenceInst)
 SUBTYPE3(Value,User,Instruction,FenceInst)
+#endif
 TYPE_LEAF(GetElementPtrInst)
 SUBTYPE3(Value,User,Instruction,GetElementPtrInst)
 TYPE_LEAF(InsertElementInst)
 SUBTYPE3(Value,User,Instruction,InsertElementInst)
 TYPE_LEAF(InsertValueInst)
 SUBTYPE3(Value,User,Instruction,InsertValueInst)
+#if HS_LLVM_VERSION>=300
 TYPE_LEAF(LandingPadInst)
 SUBTYPE3(Value,User,Instruction,LandingPadInst)
+#endif
 TYPE_LEAF(PHINode)
 SUBTYPE3(Value,User,Instruction,PHINode)
 TYPE_LEAF(SelectInst)
@@ -497,8 +519,10 @@ TYPE_LEAF(IndirectBrInst)
 SUBTYPE4(Value,User,Instruction,TerminatorInst,IndirectBrInst)
 TYPE_LEAF(InvokeInst)
 SUBTYPE4(Value,User,Instruction,TerminatorInst,InvokeInst)
+#if HS_LLVM_VERSION>=300
 TYPE_LEAF(ResumeInst)
 SUBTYPE4(Value,User,Instruction,TerminatorInst,ResumeInst)
+#endif
 TYPE_LEAF(ReturnInst)
 SUBTYPE4(Value,User,Instruction,TerminatorInst,ReturnInst)
 TYPE_LEAF(SwitchInst)
@@ -541,15 +565,19 @@ TYPE_LEAF(VAArgInst)
 SUBTYPE4(Value,User,Instruction,UnaryInstruction,VAArgInst)
 
 GETTYPE(Instruction)
+#if HS_LLVM_VERSION >= 300
 GETTYPE(AtomicCmpXchgInst)
 GETTYPE(AtomicRMWInst)
+#endif
 GETTYPE(BinaryOperator)
 GETTYPE(CallInst)
 GETTYPE(CmpInst)
 GETTYPE(FCmpInst)
 GETTYPE(ICmpInst)
 GETTYPE(ExtractElementInst)
+#if HS_LLVM_VERSION >= 300
 GETTYPE(FenceInst)
+#endif
 
 instance GetType GetElementPtrInst where
   type TypeOfValue GetElementPtrInst = PointerType
@@ -560,7 +588,9 @@ instance GetType InsertElementInst where
   getType = insertElementInstGetType
 
 GETTYPE(InsertValueInst)
+#if HS_LLVM_VERSION >= 300
 GETTYPE(LandingPadInst)
+#endif
 GETTYPE(PHINode)
 GETTYPE(SelectInst)
 
@@ -573,7 +603,9 @@ GETTYPE(TerminatorInst)
 GETTYPE(BranchInst)
 GETTYPE(IndirectBrInst)
 GETTYPE(InvokeInst)
+#if HS_LLVM_VERSION >= 300
 GETTYPE(ResumeInst)
+#endif
 GETTYPE(ReturnInst)
 GETTYPE(SwitchInst)
 GETTYPE(UnreachableInst)

@@ -24,7 +24,11 @@ getFileMemoryBufferSimple :: String -> IO (Maybe (Ptr MemoryBuffer))
 getFileMemoryBufferSimple name = do
   str <- newStringRef name
   ptr <- newOwningPtr nullPtr
+#if HS_LLVM_VERSION>=300
   errc <- getFileMemoryBuffer str ptr (-1) True
+#else
+  errc <- getFileMemoryBuffer str ptr (-1)
+#endif
   err_val <- errorCodeValue errc
   res <- if err_val == 0
          then (do

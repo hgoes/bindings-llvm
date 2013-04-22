@@ -51,6 +51,7 @@ instance IListIteratorC name where {\
   iListIteratorNEq = listIterator##name##NEq\
 }
 
+#if HS_LLVM_VERSION>=300
 #define SPECIALIZE_ARRAYREF(name)\
 instance ArrayRefC (Ptr name) where {\
   newArrayRef' = newArrayRef##name ;\
@@ -60,6 +61,16 @@ instance ArrayRefC (Ptr name) where {\
   arrayRefIndex' = arrayRefIndex##name ;\
   deleteArrayRef = deleteArrayRef##name\
 }
+#else
+#define SPECIALIZE_ARRAYREF(name)\
+instance ArrayRefC (Ptr name) where {\
+  newArrayRef' = newArrayRef##name ;\
+  newArrayRefEmpty = newArrayRefEmpty##name ;\
+  arrayRefSize' = arrayRefSize##name ;\
+  arrayRefIndex' = arrayRefIndex##name ;\
+  deleteArrayRef = deleteArrayRef##name\
+}
+#endif
 
 #define SPECIALIZE_SETVECTOR(name)\
 instance SetVectorC (Ptr name) where {\

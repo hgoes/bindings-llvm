@@ -10,8 +10,10 @@ module LLVM.FFI.AliasAnalysis
        ,aliasAnalysisGetLocationLoad
        ,aliasAnalysisGetLocationStore
        ,aliasAnalysisGetLocationVAArg
+#if HS_LLVM_VERSION >= 300
        ,aliasAnalysisGetLocationAtomicCmpXchg
        ,aliasAnalysisGetLocationAtomicRMWInst
+#endif
        ,aliasAnalysisAlias
        ,AliasResult(..)
        ,Location()
@@ -22,7 +24,11 @@ import LLVM.FFI.Interface
 import LLVM.FFI.Value
 import LLVM.FFI.Pass (TargetLibraryInfo)
 import LLVM.FFI.Type (TypeC)
+#if HS_LLVM_VERSION >= 300
 import LLVM.FFI.Instruction (LoadInst,StoreInst,VAArgInst,AtomicCmpXchgInst,AtomicRMWInst)
+#else
+import LLVM.FFI.Instruction (LoadInst,StoreInst,VAArgInst)
+#endif
 import Foreign.C
 import Foreign.Ptr
 import Data.Word
@@ -51,11 +57,13 @@ aliasAnalysisGetLocationStore = aliasAnalysisGetLocationStore_
 aliasAnalysisGetLocationVAArg :: AliasAnalysisC t => Ptr t -> Ptr VAArgInst -> IO (Ptr Location)
 aliasAnalysisGetLocationVAArg = aliasAnalysisGetLocationVAArg_
 
+#if HS_LLVM_VERSION >= 300
 aliasAnalysisGetLocationAtomicCmpXchg :: AliasAnalysisC t => Ptr t -> Ptr AtomicCmpXchgInst -> IO (Ptr Location)
 aliasAnalysisGetLocationAtomicCmpXchg = aliasAnalysisGetLocationAtomicCmpXchg_
 
 aliasAnalysisGetLocationAtomicRMWInst :: AliasAnalysisC t => Ptr t -> Ptr AtomicRMWInst -> IO (Ptr Location)
 aliasAnalysisGetLocationAtomicRMWInst = aliasAnalysisGetLocationAtomicRMW_
+#endif
 
 aliasAnalysisAlias :: AliasAnalysisC t => Ptr t -> Ptr Location -> Ptr Location -> IO AliasResult
 aliasAnalysisAlias ptr l1 l2 = fmap toAliasResult $ aliasAnalysisAlias_ ptr l1 l2

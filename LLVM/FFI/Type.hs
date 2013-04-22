@@ -37,8 +37,10 @@ module LLVM.FFI.Type
         ,StructType()
         ,newStructType
         ,structTypeIsPacked
+#if HS_LLVM_VERSION>=300
         ,structTypeHasName
         ,structTypeGetName
+#endif
         ,structTypeGetNumElements
         ,structTypeGetElementType
          -- *** Sequential Types
@@ -110,7 +112,11 @@ functionTypeGetNumParams ptr = fmap fromIntegral (functionTypeGetNumParams_ ptr)
 functionTypeGetParamType :: Ptr FunctionType -> Integer -> IO (Ptr Type)
 functionTypeGetParamType ptr i = functionTypeGetParamType_ ptr (fromIntegral i)
 
+#if HS_LLVM_VERSION>=300
 newFunctionType :: TypeC rtp => Ptr rtp -> Ptr (ArrayRef (Ptr Type)) -> Bool -> IO (Ptr FunctionType)
+#else
+newFunctionType :: TypeC rtp => Ptr rtp -> Ptr (Vector (Ptr Type)) -> Bool -> IO (Ptr FunctionType)
+#endif
 newFunctionType = newFunctionType_
 
 isVoidType :: TypeC t => Ptr t -> Bool

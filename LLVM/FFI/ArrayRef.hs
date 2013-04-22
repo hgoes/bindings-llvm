@@ -16,7 +16,9 @@ class ArrayRefC a where
   newArrayRef' :: Ptr a -> CSize -> IO (Ptr (ArrayRef a))
   newArrayRefEmpty :: IO (Ptr (ArrayRef a))
   arrayRefSize' :: Ptr (ArrayRef a) -> IO CSize
+#if HS_LLVM_VERSION >= 300
   arrayRefEquals :: Ptr (ArrayRef a) -> Ptr (ArrayRef a) -> IO Bool
+#endif
   arrayRefIndex' :: Ptr (ArrayRef a) -> CSize -> IO (Ptr a)
   deleteArrayRef :: Ptr (ArrayRef a) -> IO ()
 

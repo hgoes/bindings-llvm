@@ -1,5 +1,7 @@
 module LLVM.FFI.PassManagerBuilder
-       (PassManagerBuilder()
+       (
+#if HS_LLVM_VERSION >= 300
+         PassManagerBuilder()
        ,newPassManagerBuilder
        ,deletePassManagerBuilder
        ,populateFunctionPassManager
@@ -12,7 +14,7 @@ module LLVM.FFI.PassManagerBuilder
 #if HS_LLVM_VERSION >= 301
        ,setPassManagerBuilderVectorize
 #endif
-       --,setPassManagerBuilderLoopVectorize
+#endif
        ) where
 
 import LLVM.FFI.Interface

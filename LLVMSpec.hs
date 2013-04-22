@@ -19,6 +19,11 @@ llvm3_1 = Version { versionBranch = [3,1]
                   , versionTags = []
                   }
 
+llvm3_0 :: Version
+llvm3_0 = Version { versionBranch = [3,0]
+                  , versionTags = []
+                  }
+
 irInclude :: Version -> String -> String
 irInclude ver hdr = if ver >= llvm3_3
                     then "llvm/IR/"++hdr
@@ -61,19 +66,21 @@ llvm version
           , specNS = llvmNS
           , specName = "ArrayRef"
           , specTemplateArgs = [rtp]
-          , specType = ClassSpec
+          , specType = ClassSpec $
                        [(Constructor { ftConArgs = [] },GenHS,"newArrayRefEmpty"++tp)
                        ,(Constructor { ftConArgs = [(False,toPtr rtp)
                                                    ,(False,normalT size_t)] },GenHS,"newArrayRef"++tp)
                        ,(Destructor False,GenHS,"deleteArrayRef"++tp)
                        ,(memberFun { ftReturnType = normalT size_t
                                    , ftName = "size"
-                                   },GenHS,"arrayRefSize"++tp)
-                       ,(memberFun { ftReturnType = normalT bool
-                                   , ftName = "equals"
-                                   , ftArgs = [(False,normalT $ NamedType llvmNS "ArrayRef" [rtp])]
-                                   },GenHS,"arrayRefEquals"++tp)
-                       ,(memberFun { ftReturnType = toConstRef rtp
+                                   },GenHS,"arrayRefSize"++tp)]++
+                       (if version>=llvm3_0
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "equals"
+                                         , ftArgs = [(False,normalT $ NamedType llvmNS "ArrayRef" [rtp])]
+                                         },GenHS,"arrayRefEquals"++tp)]
+                        else [])++
+                       [(memberFun { ftReturnType = toConstRef rtp
                                    , ftName = "operator[]"
                                    , ftArgs = [(False,normalT size_t)]
                                    },GenHS,"arrayRefIndex"++tp)
@@ -212,7 +219,7 @@ llvm version
              , specNS = llvmNS
              , specName = "DebugLoc"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(Constructor { ftConArgs = [] },GenHS,"newDebugLoc")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isUnknown"
@@ -230,11 +237,12 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "MDNode" []
                                       , ftName = "getInlinedAt"
                                       , ftArgs = [(False,constT $ ref $ NamedType llvmNS "LLVMContext" [])]
-                                      },GenHS,"debugLocGetInlinedAt")
-                          ,(memberFun { ftName = "dump" 
-                                      , ftArgs = [(False,constT $ ref $ NamedType llvmNS "LLVMContext" [])]
-                                      },GenHS,"debugLocDump")
-                          ]
+                                      },GenHS,"debugLocGetInlinedAt")]++
+                          (if version>=llvm3_0
+                           then [(memberFun { ftName = "dump" 
+                                            , ftArgs = [(False,constT $ ref $ NamedType llvmNS "LLVMContext" [])]
+                                            },GenHS,"debugLocDump")]
+                           else [])
              }
        ]++
        [Spec { specHeader = irInclude version "Type.h"
@@ -348,17 +356,19 @@ llvm version
              , specNS = llvmNS
              , specName = "StructType"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isPacked"
-                                      },GenHS,"structTypeIsPacked")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "hasName"
-                                      },GenHS,"structTypeHasName")
-                          ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "StringRef" []
-                                      , ftName = "getName"
-                                      },GenHS,"structTypeGetName")
-                          ,(memberFun { ftReturnType = normalT unsigned
+                                      },GenHS,"structTypeIsPacked")]++
+                          (if version>=llvm3_0
+                           then [(memberFun { ftReturnType = normalT bool
+                                            , ftName = "hasName"
+                                            },GenHS,"structTypeHasName")
+                                ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "StringRef" []
+                                            , ftName = "getName"
+                                            },GenHS,"structTypeGetName")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumElements"
                                       },GenHS,"structTypeGetNumElements_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Type" []
@@ -368,8 +378,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
                                       , ftName = "get"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef"
-                                                        [normalT $ ptr $ llvmType "Type"])
+                                                 ,(False,if version>=llvm3_0
+                                                         then normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Type"]
+                                                         else constT $ ref $ NamedType [ClassName "std" []] "vector" [constT $ ptr $ llvmType "Type"])
                                                  ,(False,normalT bool)]
                                       , ftStatic = True
                                       },GenHS,"newStructType")
@@ -396,8 +407,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionType"
                                       , ftName = "get"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef" 
-                                                            [normalT $ ptr $ llvmType "Type"])
+                                                 ,(False,if version>=llvm3_0
+                                                         then normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Type"]
+                                                         else constT $ ref $ NamedType [ClassName "std" []] "vector" [constT $ ptr $ llvmType "Type"])
                                                  ,(False,normalT bool)
                                                  ]
                                       , ftStatic = True
@@ -711,8 +723,10 @@ llvm version
                                       , ftArgs = [(False,normalT (NamedType llvmNS "StringRef" []))
                                                  ,(False,normalT (RefType $ NamedType llvmNS "OwningPtr" 
                                                                   [normalT (NamedType llvmNS "MemoryBuffer" [])]))
-                                                 ,(False,normalT (NamedType [] "int64_t" []))
-                                                 ,(False,normalT (NamedType [] "bool" []))]
+                                                 ,(False,normalT (NamedType [] "int64_t" []))]++
+                                                 (if version>=llvm3_0
+                                                  then [(False,normalT (NamedType [] "bool" []))]
+                                                  else [])
                                       , ftStatic = True
                                       },GenHS,"getFileMemoryBuffer")]
              }
@@ -841,30 +855,38 @@ llvm version
                                                       ,"GlobalAlias"
                                                       ,"GlobalVariable"
                                                       ,"UndefValue"
-                                                      ,"Instruction"
-                                                      ,"AtomicCmpXchgInst"
-                                                      ,"AtomicRMWInst"
-                                                      ,"BinaryOperator"
+                                                      ,"Instruction"]++
+                                                      (if version>=llvm3_0
+                                                       then ["AtomicCmpXchgInst"
+                                                            ,"AtomicRMWInst"]
+                                                       else [])++
+                                                      ["BinaryOperator"
                                                       ,"CallInst"
                                                       ,"CmpInst"
                                                       ,"FCmpInst"
                                                       ,"ICmpInst"
-                                                      ,"ExtractElementInst"
-                                                      ,"FenceInst"
-                                                      ,"GetElementPtrInst"
+                                                      ,"ExtractElementInst"]++
+                                                      (if version>=llvm3_0
+                                                       then ["FenceInst"]
+                                                       else [])++
+                                                      ["GetElementPtrInst"
                                                       ,"InsertElementInst"
-                                                      ,"InsertValueInst"
-                                                      ,"LandingPadInst"
-                                                      ,"PHINode"
+                                                      ,"InsertValueInst"]++
+                                                      (if version>=llvm3_0
+                                                       then ["LandingPadInst"]
+                                                       else [])++
+                                                      ["PHINode"
                                                       ,"SelectInst"
                                                       ,"ShuffleVectorInst"
                                                       ,"StoreInst"
                                                       ,"TerminatorInst"
                                                       ,"BranchInst"
                                                       ,"IndirectBrInst"
-                                                      ,"InvokeInst"
-                                                      ,"ResumeInst"
-                                                      ,"ReturnInst"
+                                                      ,"InvokeInst"]++
+                                                      (if version>=llvm3_0
+                                                       then ["ResumeInst"]
+                                                       else [])++
+                                                      ["ReturnInst"
                                                       ,"SwitchInst"
                                                       ,"UnreachableInst"
                                                       ,"UnaryInstruction"
@@ -924,62 +946,64 @@ llvm version
                           ,(memberFun { ftReturnType = constT $ ref $ NamedType llvmNS "DebugLoc" []
                                       , ftName = "getDebugLoc"
                                       },GenHS,"instructionGetDebugLoc")]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
-             , specNS = llvmNS
-             , specName = "AtomicCmpXchgInst"
-             , specTemplateArgs = []
-             , specType = ClassSpec 
-                          [(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isVolatile"
-                                      },GenHS,"atomicCmpXchgInstIsVolatile")
-                          ,(memberFun { ftReturnType = normalT int
-                                      , ftName = "getOrdering"
-                                      },GenHS,"atomicCmpXchgInstGetOrdering_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getPointerOperand"
-                                      },GenHS,"atomicCmpXchgInstGetPointerOperand")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getCompareOperand"
-                                      },GenHS,"atomicCmpXchgInstGetCompareOperand")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getNewValOperand"
-                                      },GenHS,"atomicCmpXchgInstGetNewValOperand")
-                          ,(Constructor [(True,normalT $ ptr $ llvmType "Value")
-                                        ,(True,normalT $ ptr $ llvmType "Value")
-                                        ,(True,normalT $ ptr $ llvmType "Value")
-                                        ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
-                                        ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                                        ],GenHS,"newAtomicCmpXchgInst_")]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
-             , specNS = llvmNS
-             , specName = "AtomicRMWInst"
-             , specTemplateArgs = []
-             , specType = ClassSpec 
-                          [(memberFun { ftReturnType = normalT int
-                                      , ftName = "getOperation"
-                                      },GenHS,"atomicRMWInstGetOperation_")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isVolatile"
-                                      },GenHS,"atomicRMWInstIsVolatile")
-                          ,(memberFun { ftReturnType = normalT int
-                                      , ftName = "getOrdering"
-                                      },GenHS,"atomicRMWInstGetOrdering_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getPointerOperand"
-                                      },GenHS,"atomicRMWInstGetPointerOperand")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getValOperand"
-                                      },GenHS,"atomicRMWInstGetValOperand")
-                          ,(Constructor [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "AtomicRMWInst" []] "BinOp")
-                                        ,(True,normalT $ ptr $ llvmType "Value")
-                                        ,(True,normalT $ ptr $ llvmType "Value")
-                                        ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
-                                        ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                                        ],GenHS,"newAtomicRMWInst_")]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
+             }]++
+    (if version>=llvm3_0
+     then [Spec { specHeader = irInclude version "Instructions.h"
+                , specNS = llvmNS
+                , specName = "AtomicCmpXchgInst"
+                , specTemplateArgs = []
+                , specType = ClassSpec 
+                             [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isVolatile"
+                                         },GenHS,"atomicCmpXchgInstIsVolatile")
+                             ,(memberFun { ftReturnType = normalT int
+                                         , ftName = "getOrdering"
+                                         },GenHS,"atomicCmpXchgInstGetOrdering_")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getPointerOperand"
+                                         },GenHS,"atomicCmpXchgInstGetPointerOperand")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getCompareOperand"
+                                         },GenHS,"atomicCmpXchgInstGetCompareOperand")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getNewValOperand"
+                                         },GenHS,"atomicCmpXchgInstGetNewValOperand")
+                             ,(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                           ,(True,normalT $ ptr $ llvmType "Value")
+                                           ,(True,normalT $ ptr $ llvmType "Value")
+                                           ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
+                                           ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
+                                           ],GenHS,"newAtomicCmpXchgInst_")]
+                }
+          ,Spec { specHeader = irInclude version "Instructions.h"
+                , specNS = llvmNS
+                , specName = "AtomicRMWInst"
+                , specTemplateArgs = []
+                , specType = ClassSpec 
+                             [(memberFun { ftReturnType = normalT int
+                                         , ftName = "getOperation"
+                                         },GenHS,"atomicRMWInstGetOperation_")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isVolatile"
+                                         },GenHS,"atomicRMWInstIsVolatile")
+                             ,(memberFun { ftReturnType = normalT int
+                                         , ftName = "getOrdering"
+                                         },GenHS,"atomicRMWInstGetOrdering_")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getPointerOperand"
+                                         },GenHS,"atomicRMWInstGetPointerOperand")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getValOperand"
+                                         },GenHS,"atomicRMWInstGetValOperand")
+                             ,(Constructor [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "AtomicRMWInst" []] "BinOp")
+                                           ,(True,normalT $ ptr $ llvmType "Value")
+                                           ,(True,normalT $ ptr $ llvmType "Value")
+                                           ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
+                                           ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
+                                           ],GenHS,"newAtomicRMWInst_")]
+                }]
+     else [])++
+       [Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "BinaryOperator"
              , specTemplateArgs = []
@@ -1081,22 +1105,24 @@ llvm version
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
                                       },GenHS,"newExtractElementInst_")]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
-             , specNS = llvmNS
-             , specName = "FenceInst"
-             , specTemplateArgs = []
-             , specType = ClassSpec 
-                          [(memberFun { ftReturnType = normalT int
-                                      , ftName = "getOrdering"
-                                      },GenHS,"fenceInstGetOrdering_")
-                          ,(Constructor
-                            [(False,normalT $ ref $ llvmType "LLVMContext")
-                            ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
-                            ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                            ],GenHS,"newFenceInst_")]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
+             }]++
+    (if version>=llvm3_0
+     then [Spec { specHeader = irInclude version "Instructions.h"
+                , specNS = llvmNS
+                , specName = "FenceInst"
+                , specTemplateArgs = []
+                , specType = ClassSpec 
+                             [(memberFun { ftReturnType = normalT int
+                                         , ftName = "getOrdering"
+                                         },GenHS,"fenceInstGetOrdering_")
+                             ,(Constructor
+                               [(False,normalT $ ref $ llvmType "LLVMContext")
+                               ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
+                               ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
+                               ],GenHS,"newFenceInst_")]
+                }]
+     else [])++
+       [Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "GetElementPtrInst"
              , specTemplateArgs = []
@@ -1158,50 +1184,52 @@ llvm version
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
                                       },GenHS,"newInsertValueInst_")]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
-             , specNS = llvmNS
-             , specName = "LandingPadInst"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getPersonalityFn"
-                                      },GenHS,"landingPadInstGetPersonaliteFn")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isCleanup"
-                                      },GenHS,"landingPadInstIsCleanup")
-                          ,(memberFun { ftReturnType = normalT unsigned
-                                      , ftName = "getNumClauses"
-                                      },GenHS,"landingPadInstGetNumClauses_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getClause"
-                                      , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"landingPadInstGetClause_")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isCatch"
-                                      , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"landingPadInstIsCatch_")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isFilter"
-                                      , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"landingPadInstIsFilter_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
-                                      , ftName = "Create"
-                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
-                                                 ,(True,normalT $ ptr $ llvmType "Value")
-                                                 ,(False,normalT unsigned)
-                                                 ,(False,constT $ ref $ llvmType "Twine")]
-                                      , ftStatic = True
-                                      },GenHS,"newLandingPadInst_")
-                          ,(memberFun { ftName = "setCleanup"
-                                      , ftArgs = [(False,normalT bool)]
-                                      },GenHS,"landingPadInstSetCleanup")
-                          ,(memberFun { ftName = "addClause"
-                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
-                                      },GenHS,"landingPadInstAddClause_")
-                          ]
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
+             }]++
+    (if version>=llvm3_0
+     then [Spec { specHeader = irInclude version "Instructions.h"
+                , specNS = llvmNS
+                , specName = "LandingPadInst"
+                , specTemplateArgs = []
+                , specType = ClassSpec
+                             [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getPersonalityFn"
+                                         },GenHS,"landingPadInstGetPersonaliteFn")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isCleanup"
+                                         },GenHS,"landingPadInstIsCleanup")
+                             ,(memberFun { ftReturnType = normalT unsigned
+                                         , ftName = "getNumClauses"
+                                         },GenHS,"landingPadInstGetNumClauses_")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getClause"
+                                         , ftArgs = [(False,normalT unsigned)]
+                                         },GenHS,"landingPadInstGetClause_")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isCatch"
+                                         , ftArgs = [(False,normalT unsigned)]
+                                         },GenHS,"landingPadInstIsCatch_")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isFilter"
+                                         , ftArgs = [(False,normalT unsigned)]
+                                         },GenHS,"landingPadInstIsFilter_")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
+                                         , ftName = "Create"
+                                         , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
+                                                    ,(True,normalT $ ptr $ llvmType "Value")
+                                                    ,(False,normalT unsigned)
+                                                    ,(False,constT $ ref $ llvmType "Twine")]
+                                         , ftStatic = True
+                                         },GenHS,"newLandingPadInst_")
+                             ,(memberFun { ftName = "setCleanup"
+                                         , ftArgs = [(False,normalT bool)]
+                                         },GenHS,"landingPadInstSetCleanup")
+                             ,(memberFun { ftName = "addClause"
+                                         , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                         },GenHS,"landingPadInstAddClause_")
+                             ]
+                }]
+     else [])++
+       [Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "PHINode"
              , specTemplateArgs = []
@@ -1321,7 +1349,7 @@ llvm version
              , specNS = llvmNS
              , specName = "InvokeInst"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumArgOperands"
                                       },GenHS,"invokeInstGetNumArgOperands_")
@@ -1340,19 +1368,22 @@ llvm version
                                       },GenHS,"invokeInstGetNormalDest")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                       , ftName = "getUnwindDest"
-                                      },GenHS,"invokeInstGetUnwindDest")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
-                                      , ftName = "getLandingPadInst"
-                                      },GenHS,"invokeInstGetLandingPadInst")
-                          ]
-             }
-       ,Spec { specHeader = irInclude version "InstrTypes.h"
-             , specNS = llvmNS
-             , specName = "ResumeInst"
-             , specTemplateArgs = []
-             , specType = ClassSpec []
-             }
-       ,Spec { specHeader = irInclude version "InstrTypes.h"
+                                      },GenHS,"invokeInstGetUnwindDest")]++
+                          (if version>=llvm3_0
+                           then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
+                                            , ftName = "getLandingPadInst"
+                                            },GenHS,"invokeInstGetLandingPadInst")]
+                           else [])
+             }]++
+    (if version>=llvm3_0
+     then [Spec { specHeader = irInclude version "InstrTypes.h"
+                , specNS = llvmNS
+                , specName = "ResumeInst"
+                , specTemplateArgs = []
+                , specType = ClassSpec []
+                }]
+     else [])++
+       [Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = llvmNS
              , specName = "ReturnInst"
              , specTemplateArgs = []
@@ -1767,42 +1798,44 @@ llvm version
                                       },GenHS,"loopInfoGetBase")
                           ]
              }
-       ,Spec { specHeader = "llvm/Transforms/IPO/PassManagerBuilder.h"
-             , specNS = llvmNS
-             , specName = "PassManagerBuilder"
-             , specTemplateArgs = []
-             , specType = ClassSpec $
-                          [(Constructor [],GenHS,"newPassManagerBuilder")
-                          ,(Destructor False,GenHS,"deletePassManagerBuilder")
-                          ,(memberFun { ftName = "populateFunctionPassManager"
-                                      , ftArgs = [(False,normalT $ ref $ llvmType "FunctionPassManager")
-                                                 ]
-                                      },GenHS,"populateFunctionPassManager")
-                          ,(Setter { ftSetVar = "OptLevel"
-                                   , ftSetType = normalT unsigned
-                                   },GenHS,"setPassManagerBuilderOptLevel")
-                          ,(Setter { ftSetVar = "SizeLevel"
-                                   , ftSetType = normalT unsigned
-                                   },GenHS,"setPassManagerBuilderSizeLevel")
-                          ,(Setter { ftSetVar = "Inliner"
-                                   , ftSetType = normalT $ ptr $ llvmType "Pass"
-                                   },GenHS,"setPassManagerBuilderInliner")
-                          ,(Setter { ftSetVar = "DisableSimplifyLibCalls"
-                                   , ftSetType = normalT bool
-                                   },GenHS,"setPassManagerBuilderDisableSimplifyLibCalls")
-                          ,(Setter { ftSetVar = "DisableUnitAtATime"
-                                   , ftSetType = normalT bool
-                                   },GenHS,"setPassManagerBuilderDisableUnitAtATime")
-                          ,(Setter { ftSetVar = "DisableUnrollLoops"
-                                   , ftSetType = normalT bool
-                                   },GenHS,"setPassManagerBuilderDisableUnrollLoops")]++
-               (if version>=llvm3_1
-                then [(Setter { ftSetVar = "Vectorize"
-                              , ftSetType = normalT bool
-                              },GenHS,"setPassManagerBuilderVectorize")]
-                else [])
-             }
        ]++
+    (if version>=llvm3_0
+     then [Spec { specHeader = "llvm/Transforms/IPO/PassManagerBuilder.h"
+                , specNS = llvmNS
+                , specName = "PassManagerBuilder"
+                , specTemplateArgs = []
+                , specType = ClassSpec $
+                             [(Constructor [],GenHS,"newPassManagerBuilder")
+                             ,(Destructor False,GenHS,"deletePassManagerBuilder")
+                             ,(memberFun { ftName = "populateFunctionPassManager"
+                                         , ftArgs = [(False,normalT $ ref $ llvmType "FunctionPassManager")
+                                                    ]
+                                         },GenHS,"populateFunctionPassManager")
+                             ,(Setter { ftSetVar = "OptLevel"
+                                      , ftSetType = normalT unsigned
+                                      },GenHS,"setPassManagerBuilderOptLevel")
+                             ,(Setter { ftSetVar = "SizeLevel"
+                                      , ftSetType = normalT unsigned
+                                      },GenHS,"setPassManagerBuilderSizeLevel")
+                             ,(Setter { ftSetVar = "Inliner"
+                                      , ftSetType = normalT $ ptr $ llvmType "Pass"
+                                      },GenHS,"setPassManagerBuilderInliner")
+                             ,(Setter { ftSetVar = "DisableSimplifyLibCalls"
+                                      , ftSetType = normalT bool
+                                      },GenHS,"setPassManagerBuilderDisableSimplifyLibCalls")
+                             ,(Setter { ftSetVar = "DisableUnitAtATime"
+                                      , ftSetType = normalT bool
+                                      },GenHS,"setPassManagerBuilderDisableUnitAtATime")
+                             ,(Setter { ftSetVar = "DisableUnrollLoops"
+                                      , ftSetType = normalT bool
+                                      },GenHS,"setPassManagerBuilderDisableUnrollLoops")]++
+                             (if version>=llvm3_1
+                              then [(Setter { ftSetVar = "Vectorize"
+                                            , ftSetType = normalT bool
+                                            },GenHS,"setPassManagerBuilderVectorize")]
+                              else [])
+                }]
+     else [])++
        [Spec { specHeader = "llvm/Transforms/Scalar.h"
              , specNS = llvmNS
              , specName = f
@@ -1922,7 +1955,9 @@ llvm version
                                       , ftArgs = [(False,constT $ ptr $ llvmType (inst++"Inst"))]
                                       , ftOverloaded = True
                                       },GenHS,"aliasAnalysisGetLocation"++inst++"_")
-                           | inst <- ["Load","Store","VAArg","AtomicCmpXchg","AtomicRMW"]]++
+                           | inst <- ["Load","Store","VAArg"]++(if version>=llvm3_0
+                                                               then ["AtomicCmpXchg","AtomicRMW"]
+                                                               else [])]++
                           [(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "AliasResult"
                                       , ftName = "alias"
                                       , ftArgs = [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [])
