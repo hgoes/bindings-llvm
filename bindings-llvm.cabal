@@ -73,5 +73,6 @@ library
     LLVM.FFI.CPP
     LLVM.FFI.Pass.Haskell
     LLVM.FFI.SmallVector
+    LLVM.FFI.GenericValue
   other-modules:
     LLVM.FFI.Interface

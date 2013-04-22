@@ -84,6 +84,9 @@ enumCastIn ns name x = ([],"static_cast<"++renderType (normalT $ EnumType ns nam
 copyOut :: Type -> OutConverter
 copyOut tp x = ([],"new "++renderType tp++"("++x++")")
 
+addressOut :: OutConverter
+addressOut x = ([],"&("++x++")")
+
 passAsPointer :: Type -> InConverter
 passAsPointer tp x = ([],"*(("++renderType tp++"*)"++x++")")
 
@@ -133,6 +136,7 @@ int = NamedType [] "int" []
 uint64_t = NamedType [] "uint64_t" []
 int64_t = NamedType [] "int64_t" []
 double = NamedType [] "double" []
+float = NamedType [] "float" []
 ptr = PtrType
 ref = RefType
 llvmType name = NamedType llvmNS name []
@@ -162,6 +166,7 @@ isCType (NamedType [] name []) = case name of
   "bool" -> True
   "unsigned" -> True
   "double" -> True
+  "float" -> True
   _ -> False
 isCType (PtrType tp) = isCType tp
 isCType _ = False
@@ -206,6 +211,7 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
       "bool" -> HsTyCon $ UnQual $ HsIdent "Bool"
       "unsigned" -> HsTyCon $ UnQual $ HsIdent "CUInt"
       "double" -> HsTyCon $ UnQual $ HsIdent "CDouble"
+      "float" -> HsTyCon $ UnQual $ HsIdent "CFloat"
       _ -> (if isP
             then id 
             else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
@@ -294,7 +300,11 @@ generateWrapper inc_sym spec
               Destructor _ -> normalT void
               MemberFun { ftReturnType = tp } -> tp
               Setter {} -> normalT void
-              Getter { ftGetType = tp } -> tp
+              Getter { ftGetType = tp } 
+                -> case tp of
+                Type _ tp' -> if isCType tp'
+                              then tp
+                              else toPtr tp
               SizeOf -> normalT size_t
             body = case fun of
               Constructor _ -> \args' -> ([],"new "++specFullName cls++"("++argList args'++")")
@@ -319,7 +329,11 @@ generateWrapper inc_sym spec
                      , ftGetStatic = stat
                      } -> if stat
                           then \_ -> ([],specFullName cls++"::"++name)
-                          else \[(_,self)] -> ([],"("++self++")->"++name)
+                          else \[(_,self)] 
+                               -> case tp of
+                                 Type _ tp' -> if isCType tp'
+                                               then ([],"("++self++")->"++name)
+                                               else ([],"&(("++self++")->"++name++")")
               Setter { ftSetVar = name
                      , ftSetType = tp
                      } -> \[(_,self),(_,val)] -> (["("++self++")->"++name++" = "++val++";"],"")

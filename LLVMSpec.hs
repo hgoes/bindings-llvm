@@ -2183,6 +2183,52 @@ llvm version
                                               ,(False,normalT $ ref $ llvmType "Function")]
                                    },GenHS,"analysisResolverFindImplPassFun_")]
           }
+    ,Spec { specHeader = "llvm/ExecutionEngine/GenericValue.h"
+          , specNS = llvmNS
+          , specName = "GenericValue"
+          , specTemplateArgs = []
+          , specType = ClassSpec $
+                       [(Constructor [],GenHS,"newGenericValue")
+                       ,(Getter { ftGetVar = "DoubleVal"
+                                , ftGetType = normalT double
+                                , ftGetStatic = False
+                                },GenHS,"genericValueGetDouble")
+                       ,(Setter { ftSetVar = "DoubleVal"
+                                , ftSetType = normalT double
+                                },GenHS,"genericValueSetDouble")
+                       ,(Getter { ftGetVar = "FloatVal"
+                                , ftGetType = normalT float
+                                , ftGetStatic = False
+                                },GenHS,"genericValueGetFloat")
+                       ,(Setter { ftSetVar = "FloatVal"
+                                , ftSetType = normalT float
+                                },GenHS,"genericValueSetFloat")
+                       ,(Getter { ftGetVar = "PointerVal"
+                                , ftGetType = normalT $ ptr void
+                                , ftGetStatic = False
+                                },GenHS,"genericValueGetPointer")
+                       ,(Setter { ftSetVar = "PointerVal"
+                                , ftSetType = normalT $ ptr void
+                                },GenHS,"genericValueSetPointer")
+                       ,(Getter { ftGetVar = "IntVal"
+                                , ftGetType = normalT $ llvmType "APInt"
+                                , ftGetStatic = False
+                                },GenHS,"genericValueGetInt")
+                       ,(Setter { ftSetVar = "IntVal"
+                                , ftSetType = normalT $ llvmType "APInt"
+                                },GenHS,"genericValueSetInt")]++
+                       (if version>=llvm3_2
+                        then [(Getter { ftGetVar = "AggregateVal"
+                                      , ftGetType = normalT $ NamedType [ClassName "std" []] "vector"
+                                                    [normalT $ llvmType "GenericValue"]
+                                      , ftGetStatic = False
+                                      },GenHS,"genericValueGetAggregate")
+                             ,(Setter { ftSetVar = "AggregateVal"
+                                      , ftSetType = normalT $ NamedType [ClassName "std" []] "vector"
+                                                    [normalT $ llvmType "GenericValue"]
+                                      },GenHS,"genericValueSetAggregate")]
+                        else [])
+          }
     ,Spec { specHeader = "llvm/Pass.h"
           , specNS = llvmNS
           , specName = "PassKind"
