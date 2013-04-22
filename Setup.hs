@@ -104,7 +104,7 @@ getLLVMVersion db = do
 
 getLLVMCFlags :: ProgramConfiguration -> IO [String]
 getLLVMCFlags db = do
-  outp <- getDbProgramOutput normal llvmConfigProgram db ["--cflags"]
+  outp <- getDbProgramOutput normal llvmConfigProgram db ["--cxxflags"]
   return $ words outp
 
 getLLVMLibdir :: ProgramConfiguration -> IO String
