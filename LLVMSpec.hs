@@ -9,6 +9,11 @@ llvm3_3 = Version { versionBranch = [3,3]
                   , versionTags = []
                   }
 
+llvm3_2 :: Version
+llvm3_2 = Version { versionBranch = [3,2]
+                  , versionTags = []
+                  }
+
 llvm3_1 :: Version
 llvm3_1 = Version { versionBranch = [3,1]
                   , versionTags = []
@@ -1703,7 +1708,7 @@ llvm version
                                       },GenHS,"targetLibraryInfoHas_")
                           ]
              }]++
-       (if version >= llvm3_3 
+       (if version >= llvm3_2
         then [Spec { specHeader = irInclude version "DataLayout.h"
                    , specNS = llvmNS
                    , specName = "DataLayout"
@@ -1942,7 +1947,7 @@ llvm version
              , specTemplateArgs = []
              , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Type"
                                         , gfunArgs = [(False,constT $ ptr $ llvmType "CallInst")]++
-                                                     (if version>=llvm3_3
+                                                     (if version>=llvm3_2
                                                       then [(False,constT $ ptr $ llvmType "TargetLibraryInfo")]
                                                       else [])
                                         , gfunHSName = "getMallocAllocatedType"
@@ -1954,7 +1959,7 @@ llvm version
              , specTemplateArgs = []
              , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Value"
                                         , gfunArgs = [(False,normalT $ ptr $ llvmType "CallInst")]++
-                                                     (if version >= llvm3_3
+                                                     (if version >= llvm3_2
                                                       then [(False,constT $ ptr $ llvmType "DataLayout")
                                                            ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")]
                                                       else [(False,constT $ ptr $ llvmType "TargetData")])++
@@ -1964,13 +1969,13 @@ llvm version
              }
        ,Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
              , specNS = llvmNS
-             , specName = if version>=llvm3_3
+             , specName = if version>=llvm3_2
                           then "isMallocLikeFn"
                           else "isMalloc"
              , specTemplateArgs = []
              , specType = GlobalFunSpec { gfunReturnType = normalT bool
                                         , gfunArgs = [(True,constT $ ptr $ llvmType "Value")]++
-                                                     (if version>=llvm3_3
+                                                     (if version>=llvm3_2
                                                       then [(False,constT $ ptr $ llvmType "TargetLibraryInfo")
                                                            ,(False,normalT bool)]
                                                       else [])

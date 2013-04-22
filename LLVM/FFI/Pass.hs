@@ -43,7 +43,7 @@ module LLVM.FFI.Pass
        ,targetLibraryInfoGetName
 #endif
        ,targetLibraryInfoHas
-#if HS_LLVM_VERSION >= 303
+#if HS_LLVM_VERSION >= 302
        ,DataLayout()
        ,newDataLayoutFromString
        ,newDataLayoutFromModule
@@ -116,7 +116,7 @@ class FunctionPassC t
 instance FunctionPassC FunctionPass
 instance FunctionPassC LoopInfo
 
-#if HS_LLVM_VERSION >= 303
+#if HS_LLVM_VERSION >= 302
 instance PassC DataLayout
 instance ModulePassC DataLayout
 instance ImmutablePassC DataLayout

@@ -283,7 +283,7 @@ newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
 newAtomicCmpXchgInst ptr cmp newVal ord sync
   = newAtomicCmpXchgInst_ ptr cmp newVal (fromAtomicOrdering ord) (fromSynchronizationScope sync)
 
-#if HS_LLVM_VERSION >= 303
+#if HS_LLVM_VERSION >= 302
 isMallocLikeFn :: ValueC t => Ptr t -> Ptr TargetLibraryInfo -> Bool -> IO Bool
 #else
 isMallocLikeFn :: ValueC t => Ptr t -> IO Bool

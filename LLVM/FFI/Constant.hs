@@ -41,7 +41,7 @@ module LLVM.FFI.Constant
         globalVariableIsThreadLocal,
         globalVariableGetInitializer,
         UndefValue(),
-#if HS_LLVM_VERSION > 301
+#if HS_LLVM_VERSION >= 303
         isNullValue,
         canTrap,
         isThreadDependent,
