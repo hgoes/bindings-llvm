@@ -2131,7 +2131,7 @@ llvm version
                                  ,"ULT","ULE","SGT","SGE"
                                  ,"SLT","SLE"]]
           }
-    ,Spec { specHeader = "llvm/CallingConv.h"
+    ,Spec { specHeader = irInclude version "CallingConv.h"
           , specNS = [ClassName "llvm" [],ClassName "CallingConv" []]
           , specName = "ID"
           , specTemplateArgs = []
