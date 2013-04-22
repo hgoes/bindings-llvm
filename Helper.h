@@ -95,6 +95,12 @@ instance SmallVectorC (Ptr name) where {\
   smallVectorData = smallVectorData##name\
 }
 
+#define SPECIALIZE_PAIR(name1,name2)\
+instance PairC (Ptr name1) (Ptr name2) where {\
+  pairFirst = pairFirst##name1##_##name2 ;\
+  pairSecond = pairSecond##name1##_##name2\
+}
+
 #define FUN(cls,name,sig)\
 foreign import capi unsafe _TO_STRING(llvm_proxy.h cls##_##name)\
   _##name :: Ptr t -> sig ;\

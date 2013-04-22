@@ -209,6 +209,24 @@ llvm version
      | tp <- ["Loop"]
     , let rtp = normalT $ ptr $ llvmType tp
     ]++
+    [Spec { specHeader = "utility"
+          , specNS = [ClassName "std" []]
+          , specName = "pair"
+          , specTemplateArgs = [rtp1,rtp2]
+          , specType = ClassSpec
+                       [(Getter { ftGetType = rtp1
+                                , ftGetVar = "first"
+                                , ftGetStatic = False
+                                },GenHS,"pairFirst"++tp1++"_"++tp2)
+                       ,(Getter { ftGetType = rtp2
+                                , ftGetVar = "second"
+                                , ftGetStatic = False
+                                },GenHS,"pairSecond"++tp1++"_"++tp2)
+                       ]
+          }
+     | (tp1,tp2) <- [("BasicBlock","BasicBlock")]
+    , let rtp1 = normalT $ ptr $ llvmType tp1
+          rtp2 = normalT $ ptr $ llvmType tp2 ]++
        [Spec { specHeader = "llvm/ADT/APFloat.h"
              , specNS = llvmNS
              , specName = "APFloat"

@@ -3,8 +3,11 @@ module LLVM.FFI.CPP
        ,VectorC(..)
        ,Const_iterator()
        ,vectorToList
-       ,vectorIteratorToList)
-       where
+       ,vectorIteratorToList
+       ,Pair()
+       ,PairC(..)
+       ,pairToTuple
+       ) where
 
 import LLVM.FFI.Interface
 import Foreign.Ptr
@@ -32,3 +35,13 @@ vectorIteratorToList cur end = do
              nxt <- vectorIteratorNext cur
              vs <- vectorIteratorToList nxt end
              return (v:vs))
+
+class PairC a b where
+  pairFirst :: Ptr (Pair a b) -> IO a
+  pairSecond :: Ptr (Pair a b) -> IO b
+
+pairToTuple :: PairC a b => Ptr (Pair a b) -> IO (a,b)
+pairToTuple pair = do
+  x <- pairFirst pair
+  y <- pairSecond pair
+  return (x,y)

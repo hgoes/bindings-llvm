@@ -23,3 +23,4 @@ SUBTYPE(Value,BasicBlock)
 
 SPECIALIZE_IPLIST(BasicBlock,capi)
 SPECIALIZE_VECTOR(BasicBlock)
+SPECIALIZE_PAIR(BasicBlock,BasicBlock)
