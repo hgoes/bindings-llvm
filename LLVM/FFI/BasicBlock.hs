@@ -12,6 +12,7 @@ import LLVM.FFI.Constant
 import LLVM.FFI.Instruction
 import LLVM.FFI.IPList
 import LLVM.FFI.CPP
+import LLVM.FFI.SmallVector
 
 import Foreign
 import Foreign.C
@@ -24,3 +25,9 @@ SUBTYPE(Value,BasicBlock)
 SPECIALIZE_IPLIST(BasicBlock,capi)
 SPECIALIZE_VECTOR(BasicBlock)
 SPECIALIZE_PAIR(BasicBlock,BasicBlock)
+
+instance SmallVectorC (Pair (Ptr BasicBlock) (Ptr BasicBlock)) where
+  newSmallVector = newSmallVectorEdge
+  deleteSmallVector = deleteSmallVectorEdge
+  smallVectorSize = smallVectorSizeEdge
+  smallVectorData = smallVectorDataEdge

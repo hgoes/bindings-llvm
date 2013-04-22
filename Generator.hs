@@ -56,6 +56,7 @@ data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                       , ftGetType :: Type
                       , ftGetStatic :: Bool
                       }
+             | SizeOf
 
 type OutConverter = String -> ([String],String)
 type InConverter = String -> ([String],String)
@@ -115,7 +116,7 @@ renderNS = concat . fmap (\ns -> className ns++renderTempl (classArgs ns)++"::")
 
 renderTempl :: [Type] -> String
 renderTempl [] = ""
-renderTempl xs = "<"++concat (intersperse "," $ fmap renderType xs)++">"
+renderTempl xs = "<"++concat (intersperse "," $ fmap renderType xs)++" >"
 
 normalT :: TypeC -> Type
 normalT = Type []
@@ -286,6 +287,7 @@ generateWrapper inc_sym spec
               Getter { ftGetStatic = stat } -> if stat
                                                then []
                                                else [(self_ptr,"self")]
+              SizeOf -> []
             self_ptr = toPtr (specFullType cls)
             rt = case fun of
               Constructor _ -> normalT $ ptr void
@@ -293,6 +295,7 @@ generateWrapper inc_sym spec
               MemberFun { ftReturnType = tp } -> tp
               Setter {} -> normalT void
               Getter { ftGetType = tp } -> tp
+              SizeOf -> normalT size_t
             body = case fun of
               Constructor _ -> \args' -> ([],"new "++specFullName cls++"("++argList args'++")")
               Destructor _ -> \[(_,n)] -> (["delete "++n++";"],"")
@@ -320,6 +323,7 @@ generateWrapper inc_sym spec
               Setter { ftSetVar = name
                      , ftSetType = tp
                      } -> \[(_,self),(_,val)] -> (["("++self++")->"++name++" = "++val++";"],"")
+              SizeOf -> \[] -> ([],"sizeof("++specFullName cls++")")
             ignore = case fun of
               MemberFun { ftIgnoreReturn = i } -> i
               _ -> False
@@ -414,7 +418,7 @@ generateFFI mname header specs
                                       HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
                                       toHaskellType True Nothing tp,
                                       cname)
-                                      
+                                SizeOf -> ([],toHaskellType True Nothing (normalT size_t),cname)
                              ) funs
                    GlobalFunSpec { gfunReturnType = rtp
                                  , gfunArgs = args

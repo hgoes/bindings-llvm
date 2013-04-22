@@ -12,9 +12,11 @@ import LLVM.FFI.Interface
 import LLVM.FFI.Value
 import LLVM.FFI.SmallVector
 import LLVM.FFI.CPP
+import LLVM.FFI.BasicBlock
 
 import Foreign.Ptr
 import Foreign.C
+import Foreign.Marshal.Array
 
 #include "Helper.h"
 
@@ -30,6 +32,20 @@ class LoopBaseC t where
   loopContainsBlock :: Ptr t -> Ptr (LoopBaseBlock t) -> IO Bool
   loopGetSubLoops :: Ptr t -> IO (Ptr (Vector (Ptr (LoopBaseLoop t))))
   loopGetBlocks :: Ptr t -> IO (Ptr (Vector (Ptr (LoopBaseBlock t))))
+  loopGetExitEdges :: Ptr t -> Ptr (SmallVector (Pair (Ptr BasicBlock) (Ptr BasicBlock))) -> IO ()
+
+loopExitEdgeList :: LoopBaseC t => Ptr t -> IO [(Ptr BasicBlock,Ptr BasicBlock)]
+loopExitEdgeList loop = do
+  vec <- newSmallVector
+  loopGetExitEdges loop vec
+  sz <- smallVectorSize vec
+  dat <- smallVectorData vec
+  res <- mapM (peekPair undefined dat . fromIntegral) [0..(sz-1)]
+  deleteSmallVector vec
+  return res
+  where
+    peekPair :: PairC a b => Pair a b -> Ptr (Pair a b) -> Int -> IO (a,b)
+    peekPair u ptr off = pairToTuple (ptr `plusPtr` (off*(fromIntegral $ pairSize u)))
 
 instance LoopBaseC (LoopBase BasicBlock Loop) where
   type LoopBaseBlock (LoopBase BasicBlock Loop) = BasicBlock
@@ -41,6 +57,7 @@ instance LoopBaseC (LoopBase BasicBlock Loop) where
   loopContainsBlock = loopContainsBlock_
   loopGetSubLoops = loopGetSubLoops_
   loopGetBlocks = loopGetBlocks_
+  loopGetExitEdges = loopGetExitEdges_
   
 instance LoopBaseC Loop where
   type LoopBaseBlock Loop = BasicBlock
@@ -52,6 +69,7 @@ instance LoopBaseC Loop where
   loopContainsBlock = loopContainsBlock_
   loopGetSubLoops = loopGetSubLoops_
   loopGetBlocks = loopGetBlocks_
+  loopGetExitEdges = loopGetExitEdges_
 
 class LoopInfoBaseC blk loop where
   loopInfoBaseBegin :: Ptr (LoopInfoBase blk loop) -> IO (Ptr (Const_iterator (Ptr loop)))

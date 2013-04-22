@@ -197,17 +197,19 @@ llvm version
           , specTemplateArgs = [rtp,TypeInt 16]
           , specType = ClassSpec
                        [(Constructor [],GenHS,"newSmallVector"++tp)
+                       ,(Destructor False,GenHS,"deleteSmallVector"++tp)
                        ,(memberFun { ftReturnType = normalT size_t
                                    , ftName = "size"
                                    , ftOverloaded = True
                                    },GenHS,"smallVectorSize"++tp)
-                       ,(memberFun { ftReturnType = normalT $ ptr $ ptr $ llvmType tp
+                       ,(memberFun { ftReturnType = toPtr rtp
                                    , ftName = "data"
                                    , ftOverloaded = True
                                    },GenHS,"smallVectorData"++tp)]
           }
-     | tp <- ["Loop"]
-    , let rtp = normalT $ ptr $ llvmType tp
+     | (tp,rtp) <- [("Loop",normalT $ ptr $ llvmType "Loop")
+                  ,("Edge",normalT $ NamedType [ClassName "std" []] "pair" [normalT $ ptr $ llvmType "BasicBlock"
+                                                                           ,normalT $ ptr $ llvmType "BasicBlock"])]
     ]++
     [Spec { specHeader = "utility"
           , specNS = [ClassName "std" []]
@@ -222,6 +224,7 @@ llvm version
                                 , ftGetVar = "second"
                                 , ftGetStatic = False
                                 },GenHS,"pairSecond"++tp1++"_"++tp2)
+                       ,(SizeOf,GenHS,"sizeofPair"++tp1++"_"++tp2)
                        ]
           }
      | (tp1,tp2) <- [("BasicBlock","BasicBlock")]
@@ -2110,7 +2113,14 @@ llvm version
                         ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr blk]
                                     , ftName = "getBlocks"
                                     , ftOverloaded = True
-                                    },GenHS,"loopGetBlocks_")]
+                                    },GenHS,"loopGetBlocks_")
+                        ,(memberFun { ftName = "getExitEdges"
+                                    , ftArgs = [(False,normalT $ ref $ NamedType llvmNS "SmallVector"
+                                                          [normalT $ NamedType [ClassName "std" []] "pair" [constT $ ptr $ llvmType "BasicBlock"
+                                                                                                           ,constT $ ptr $ llvmType "BasicBlock"]
+                                                          ,TypeInt 16])]
+                                    , ftOverloaded = True
+                                    },GenHS,"loopGetExitEdges_")]
              }
      ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
            , specNS = llvmNS

@@ -11,6 +11,7 @@ module LLVM.FFI.CPP
 
 import LLVM.FFI.Interface
 import Foreign.Ptr
+import Foreign.C
 
 class VectorC c where
   vectorBegin :: Ptr (Vector c) -> IO (Ptr (Const_iterator c))
@@ -37,6 +38,7 @@ vectorIteratorToList cur end = do
              return (v:vs))
 
 class PairC a b where
+  pairSize :: Pair a b -> CSize
   pairFirst :: Ptr (Pair a b) -> IO a
   pairSecond :: Ptr (Pair a b) -> IO b
 

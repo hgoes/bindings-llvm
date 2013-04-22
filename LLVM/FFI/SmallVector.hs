@@ -13,6 +13,7 @@ import Foreign.Marshal.Array
 
 class SmallVectorC t where
   newSmallVector :: IO (Ptr (SmallVector t))
+  deleteSmallVector :: Ptr (SmallVector t) -> IO ()
   smallVectorSize :: Ptr (SmallVector t) -> IO CSize
   smallVectorData :: Ptr (SmallVector t) -> IO (Ptr t)
 

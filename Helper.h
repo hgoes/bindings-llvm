@@ -91,12 +91,14 @@ instance VectorC (Ptr name) where {\
 #define SPECIALIZE_SMALLVECTOR(name)\
 instance SmallVectorC (Ptr name) where {\
   newSmallVector = newSmallVector##name ;\
+  deleteSmallVector = deleteSmallVector##name ;\
   smallVectorSize = smallVectorSize##name ;\
   smallVectorData = smallVectorData##name\
 }
 
 #define SPECIALIZE_PAIR(name1,name2)\
 instance PairC (Ptr name1) (Ptr name2) where {\
+  pairSize _ = sizeofPair##name1##_##name2 ;\
   pairFirst = pairFirst##name1##_##name2 ;\
   pairSecond = pairSecond##name1##_##name2\
 }
