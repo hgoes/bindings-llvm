@@ -10,6 +10,7 @@ module LLVM.FFI.Loop
 
 import LLVM.FFI.Interface
 import LLVM.FFI.Value
+import LLVM.FFI.SmallVector
 import LLVM.FFI.CPP
 
 import Foreign.Ptr
@@ -64,3 +65,5 @@ instance LoopInfoBaseC BasicBlock Loop where
 
 loopIsLoopInvariant :: ValueC v => Ptr Loop -> Ptr v -> IO Bool
 loopIsLoopInvariant = loopIsLoopInvariant_
+
+SPECIALIZE_SMALLVECTOR(Loop)

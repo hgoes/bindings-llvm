@@ -72,5 +72,6 @@ library
     LLVM.FFI.Loop
     LLVM.FFI.CPP
     LLVM.FFI.Pass.Haskell
+    LLVM.FFI.SmallVector
   other-modules:
     LLVM.FFI.Interface

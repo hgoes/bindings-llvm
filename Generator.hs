@@ -108,6 +108,7 @@ renderType (Type qual tp)
     renderC (EnumType ns str) = renderNS ns ++ str
     renderC (PtrType tp) = renderC tp++"*"
     renderC (RefType tp) = renderC tp++"&"
+renderType (TypeInt n) = show n
 
 renderNS :: NS -> String
 renderNS = concat . fmap (\ns -> className ns++renderTempl (classArgs ns)++"::")
@@ -212,7 +213,11 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
       = (if isP
          then id
          else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
-        ) $ foldl HsTyApp (toHSType True (NamedType [] name [])) (fmap (toHaskellType False Nothing) $ concat (fmap classArgs ns)++tmpl)
+        ) $ foldl HsTyApp (toHSType True (NamedType [] name [])) (fmap (toHaskellType False Nothing) $
+                                                                  filter (\tp -> case tp of
+                                                                             Type _ _ -> True
+                                                                             _ -> False) $
+                                                                  concat (fmap classArgs ns)++tmpl)
     toHSType isP (EnumType ns name)
       = HsTyCon $ UnQual $ HsIdent "CInt"
 
@@ -448,5 +453,8 @@ argList = comma . fmap (\(_,arg) -> arg)
 
 specCollectTemplateArgs :: Spec -> [Type]
 specCollectTemplateArgs spec 
-  = concat (fmap classArgs (specNS spec)) ++
+  = filter (\tp -> case tp of
+               Type _ _ -> True
+               _ -> False) $
+    concat (fmap classArgs (specNS spec)) ++
     specTemplateArgs spec

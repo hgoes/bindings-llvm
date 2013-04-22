@@ -191,6 +191,24 @@ llvm version
             | tp <- ["Type","Loop","BasicBlock"]
            , let rtp = Type [] (ptr $ llvmType tp)
            ]++
+    [Spec { specHeader = "llvm/ADT/SmallVector.h"
+          , specNS = llvmNS
+          , specName = "SmallVector"
+          , specTemplateArgs = [rtp,TypeInt 16]
+          , specType = ClassSpec
+                       [(Constructor [],GenHS,"newSmallVector"++tp)
+                       ,(memberFun { ftReturnType = normalT size_t
+                                   , ftName = "size"
+                                   , ftOverloaded = True
+                                   },GenHS,"smallVectorSize"++tp)
+                       ,(memberFun { ftReturnType = normalT $ ptr $ ptr $ llvmType tp
+                                   , ftName = "data"
+                                   , ftOverloaded = True
+                                   },GenHS,"smallVectorData"++tp)]
+          }
+     | tp <- ["Loop"]
+    , let rtp = normalT $ ptr $ llvmType tp
+    ]++
        [Spec { specHeader = "llvm/ADT/APFloat.h"
              , specNS = llvmNS
              , specName = "APFloat"

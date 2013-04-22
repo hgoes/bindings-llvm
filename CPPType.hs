@@ -10,7 +10,9 @@ data ClassName = ClassName { className :: String
 
 type NS = [ClassName]
 
-data Type = Type [TypeQualifier] TypeC deriving (Eq,Ord,Show)
+data Type = Type [TypeQualifier] TypeC 
+          | TypeInt Integer
+          deriving (Eq,Ord,Show)
 
 data TypeQualifier = QConst deriving (Eq,Ord,Show)
 

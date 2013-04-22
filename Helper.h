@@ -88,6 +88,13 @@ instance VectorC (Ptr name) where {\
   vectorIteratorEq = vectorIterator##name##Eq\
 }
 
+#define SPECIALIZE_SMALLVECTOR(name)\
+instance SmallVectorC (Ptr name) where {\
+  newSmallVector = newSmallVector##name ;\
+  smallVectorSize = smallVectorSize##name ;\
+  smallVectorData = smallVectorData##name\
+}
+
 #define FUN(cls,name,sig)\
 foreign import capi unsafe _TO_STRING(llvm_proxy.h cls##_##name)\
   _##name :: Ptr t -> sig ;\
