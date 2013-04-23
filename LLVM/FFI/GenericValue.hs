@@ -9,7 +9,7 @@ module LLVM.FFI.GenericValue
        ,genericValueSetPointer
        ,genericValueGetInt
        ,genericValueSetInt
-#if HS_LLVM_VERSION>=302
+#if HS_LLVM_VERSION>=303
        ,genericValueGetAggregate
        ,genericValueSetAggregate
 #endif

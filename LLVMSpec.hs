@@ -2230,7 +2230,7 @@ llvm version
                        ,(Setter { ftSetVar = "IntVal"
                                 , ftSetType = normalT $ llvmType "APInt"
                                 },GenHS,"genericValueSetInt")]++
-                       (if version>=llvm3_2
+                       (if version>=llvm3_3
                         then [(Getter { ftGetVar = "AggregateVal"
                                       , ftGetType = normalT $ NamedType [ClassName "std" []] "vector"
                                                     [normalT $ llvmType "GenericValue"]
