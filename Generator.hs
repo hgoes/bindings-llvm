@@ -134,6 +134,7 @@ bool = NamedType [] "bool" []
 unsigned = NamedType [] "unsigned" []
 int = NamedType [] "int" []
 uint64_t = NamedType [] "uint64_t" []
+uint8_t = NamedType [] "uint8_t" []
 int64_t = NamedType [] "int64_t" []
 double = NamedType [] "double" []
 float = NamedType [] "float" []
@@ -163,6 +164,7 @@ isCType (NamedType [] name []) = case name of
   "int" -> True
   "int64_t" -> True
   "uint64_t" -> True
+  "uint8_t" -> True
   "bool" -> True
   "unsigned" -> True
   "double" -> True
@@ -208,6 +210,7 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
       "int" -> HsTyCon $ UnQual $ HsIdent "CInt"
       "int64_t" -> HsTyCon $ UnQual $ HsIdent "Int64"
       "uint64_t" -> HsTyCon $ UnQual $ HsIdent "Word64"
+      "uint8_t" -> HsTyCon $ UnQual $ HsIdent "Word8"
       "bool" -> HsTyCon $ UnQual $ HsIdent "Bool"
       "unsigned" -> HsTyCon $ UnQual $ HsIdent "CUInt"
       "double" -> HsTyCon $ UnQual $ HsIdent "CDouble"

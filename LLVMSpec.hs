@@ -244,9 +244,22 @@ llvm version
              , specName = "APInt"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(memberFun { ftReturnType = normalT unsigned
+                          [(Constructor [(False,normalT unsigned)
+                                        ,(False,normalT uint64_t)
+                                        ,(False,normalT bool)]
+                           ,GenHS,"newAPIntLimited")
+                          ,(Constructor [(False,normalT unsigned)
+                                        ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                               [normalT uint64_t])]
+                           ,GenHS,"newAPInt")
+                          ,(Constructor [(False,normalT unsigned)
+                                        ,(False,normalT $ llvmType "StringRef")
+                                        ,(False,normalT uint8_t)]
+                           ,GenHS,"newAPIntFromString")
+                          ,(Destructor False,GenHS,"deleteAPInt")
+                          ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getBitWidth"
-                                      },GenHS,"apIntGetBitWidth_")
+                                      },GenHS,"apIntGetBitWidth")
                           ,(memberFun { ftReturnType = normalT uint64_t
                                       , ftName = "getZExtValue"
                                       },GenHS,"apIntGetZExtValue")

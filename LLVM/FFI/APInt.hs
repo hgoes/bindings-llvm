@@ -1,5 +1,9 @@
 module LLVM.FFI.APInt
        (APInt()
+       ,newAPInt
+       ,newAPIntLimited
+       ,newAPIntFromString
+       ,deleteAPInt
        ,apIntGetBitWidth
        ,apIntGetZExtValue
        ,apIntGetSExtValue
@@ -7,6 +11,3 @@ module LLVM.FFI.APInt
 
 import LLVM.FFI.Interface
 import Foreign
-
-apIntGetBitWidth :: Ptr APInt -> IO Integer
-apIntGetBitWidth ptr = fmap toInteger (apIntGetBitWidth_ ptr)
