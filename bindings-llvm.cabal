@@ -9,7 +9,7 @@ library
   build-depends: base,tagged>=0.4,unix
   includes:             
     wrapper/extra.h
-    wrapper/HaskellPassC.h
+    wrapper/HaskellPass.h
   include-dirs:         wrapper .
   extra-libraries:      stdc++
   c-sources:

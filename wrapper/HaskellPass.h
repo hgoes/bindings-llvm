@@ -1,66 +1,67 @@
 #ifndef LLVM_HASKELL_PASS_H
 #define LLVM_HASKELL_PASS_H
 
-#include <llvm/Pass.h>
 #include <HsFFI.h>
+#ifdef __cplusplus
+#include <llvm/Pass.h>
+#else
+#include <stdbool.h>
+#endif
 
-class HaskellPassBase {
-  HsFunPtr GetUsageFunction;
-public:
-  HaskellPassBase(HsFunPtr usage);
-  ~HaskellPassBase();
-  void getAnalysisUsage(const void* self,llvm::AnalysisUsage &Info) const;
-};
+typedef void (*GetUsageFunctionT)(const void*,void*);
+typedef bool (*RunOnModuleFunctionT)(void*,void*);
+typedef bool (*InitializationFunctionT)(void*,void*);
+typedef bool (*FinalizationFunctionT)(void*,void*);
+typedef bool (*RunOnFunctionFunctionT)(void*,void*);
 
-class HaskellPassInitBase {
-  HsFunPtr InitializationFunction;
-  HsFunPtr FinalizationFunction;
-public:
-  HaskellPassInitBase(HsFunPtr init,HsFunPtr fin);
-  ~HaskellPassInitBase();
-  bool doInitialization(void* self,llvm::Module& m);
-  bool doFinalization(void* self,llvm::Module& m);
-};
 
-class HaskellModulePassBase {
-  HsFunPtr RunOnModuleFunction;
-public:
-  HaskellModulePassBase(HsFunPtr run);
-  ~HaskellModulePassBase();
-  bool runOnModule(void* self,llvm::Module& m);
-};
-
-class HaskellFunctionPassBase {
-  HsFunPtr RunOnFunctionFunction;
-public:
-  HaskellFunctionPassBase(HsFunPtr run);
-  ~HaskellFunctionPassBase();
-  bool runOnFunction(void* self,llvm::Function& f);
-};
+#ifdef __cplusplus
 
 class HaskellModulePass : public llvm::ModulePass {
-  HaskellPassBase base;
-  HaskellModulePassBase base_module;
+  GetUsageFunctionT GetUsage;
+  RunOnModuleFunctionT RunOnModule;
 public:
   HaskellModulePass();
-  HaskellModulePass(HsFunPtr usage,HsFunPtr run);
+  HaskellModulePass(GetUsageFunctionT usage,RunOnModuleFunctionT run);
+  ~HaskellModulePass();
   void getAnalysisUsage(llvm::AnalysisUsage &Info) const;
   bool runOnModule(llvm::Module& m);
   static char ID;
 };
 
 class HaskellFunctionPass : public llvm::FunctionPass {
-  HaskellPassBase base;
-  HaskellPassInitBase base_init;
-  HaskellFunctionPassBase base_function;
+  GetUsageFunctionT GetUsage;
+  InitializationFunctionT Initialization;
+  FinalizationFunctionT Finalization;
+  RunOnFunctionFunctionT RunOnFunction;
 public:
   HaskellFunctionPass();
-  HaskellFunctionPass(HsFunPtr usage,HsFunPtr init,HsFunPtr fin,HsFunPtr run);
+  HaskellFunctionPass(GetUsageFunctionT usage,
+                        InitializationFunctionT init,
+                        FinalizationFunctionT fin,
+                        RunOnFunctionFunctionT run);
+  ~HaskellFunctionPass();
   void getAnalysisUsage(llvm::AnalysisUsage &Info) const;
   bool doInitialization(llvm::Module& m);
   bool doFinalization(llvm::Module& m);
   bool runOnFunction(llvm::Function& f);
-  static char ID;  
+  static char ID;
 };
+
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void* newHaskellModulePass(GetUsageFunctionT,RunOnModuleFunctionT);
+void deleteHaskellModulePass(void*);
+
+void* newHaskellFunctionPass(GetUsageFunctionT,InitializationFunctionT,FinalizationFunctionT,RunOnFunctionFunctionT);
+void deleteHaskellFunctionPass(void*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -44,22 +44,22 @@ newHaskellFunctionPass usage init fin run = do
   pass <- newHaskellFunctionPass_ usage_f init_f fin_f run_f
   return pass
 
-foreign import ccall "HaskellPassC.h newHaskellModulePass"
+foreign import capi "HaskellPass.h newHaskellModulePass"
   newHaskellModulePass_ :: FunPtr (Ptr HaskellModulePass -> Ptr AnalysisUsage -> IO ())
                            -> FunPtr (Ptr HaskellModulePass -> Ptr Module -> IO Bool)
                            -> IO (Ptr HaskellModulePass)
 
-foreign import ccall "HaskellPassC.h newHaskellFunctionPass"
+foreign import capi "HaskellPass.h newHaskellFunctionPass"
   newHaskellFunctionPass_ :: FunPtr (Ptr HaskellFunctionPass -> Ptr AnalysisUsage -> IO ())
                              -> FunPtr (Ptr HaskellFunctionPass -> Ptr Module -> IO Bool)
                              -> FunPtr (Ptr HaskellFunctionPass -> Ptr Module -> IO Bool)
                              -> FunPtr (Ptr HaskellFunctionPass -> Ptr Function -> IO Bool)
                              -> IO (Ptr HaskellFunctionPass)
 
-foreign import ccall "HaskellPassC.h deleteHaskellModulePass"
+foreign import capi "HaskellPass.h deleteHaskellModulePass"
   deleteHaskellModulePass :: Ptr HaskellModulePass -> IO ()
 
-foreign import ccall "HaskellPassC.h deleteHaskellFunctionPass"
+foreign import capi "HaskellPass.h deleteHaskellFunctionPass"
   deleteHaskellFunctionPass :: Ptr HaskellFunctionPass -> IO ()
 
 foreign import ccall "wrapper"

@@ -1,84 +1,35 @@
 #include "HaskellPass.h"
 #include <iostream>
 
-HaskellPassBase::HaskellPassBase(HsFunPtr usage)
-  : GetUsageFunction(usage) {}
-
-HaskellPassBase::~HaskellPassBase() {
-  hs_free_fun_ptr(GetUsageFunction);
-}
-
-void HaskellPassBase::getAnalysisUsage(const void* self,llvm::AnalysisUsage &Info) const {
-  reinterpret_cast<void (*)(const void*,void*)>(GetUsageFunction)(self,(void*)&Info);
-}
-
-HaskellPassInitBase::HaskellPassInitBase(HsFunPtr init,HsFunPtr fin) 
-  : InitializationFunction(init),
-    FinalizationFunction(fin) {
-}
-
-HaskellPassInitBase::~HaskellPassInitBase() {
-  hs_free_fun_ptr(InitializationFunction);
-  hs_free_fun_ptr(FinalizationFunction);
-}
-
-bool HaskellPassInitBase::doInitialization(void* self,llvm::Module& m) {
-  return reinterpret_cast<bool (*)(void*,void*)>(InitializationFunction)(self,(void*)&m);
-}
-
-bool HaskellPassInitBase::doFinalization(void* self,llvm::Module& m) {
-  return reinterpret_cast<bool (*)(void*,void*)>(FinalizationFunction)(self,(void*)&m);
-}
-
-HaskellModulePassBase::HaskellModulePassBase(HsFunPtr run) 
-  : RunOnModuleFunction(run) {
-}
-
-HaskellModulePassBase::~HaskellModulePassBase() {
-  hs_free_fun_ptr(RunOnModuleFunction);
-}
-
-bool HaskellModulePassBase::runOnModule(void* self,llvm::Module& m) {
-  return reinterpret_cast<bool (*)(void*,void*)>(RunOnModuleFunction)(self,(void*)&m);
-}
-
-HaskellFunctionPassBase::HaskellFunctionPassBase(HsFunPtr run)
-  : RunOnFunctionFunction(run) {
-}
-
-HaskellFunctionPassBase::~HaskellFunctionPassBase() {
-  hs_free_fun_ptr(RunOnFunctionFunction);
-}
-
-bool HaskellFunctionPassBase::runOnFunction(void* self,llvm::Function& f) {
-  return reinterpret_cast<bool (*)(void*,void*)>(RunOnFunctionFunction)(self,(void*)&f);
-}
-
 static llvm::RegisterPass<HaskellModulePass> X1("haskell-module","Haskell module pass",false,false);
 
 char HaskellModulePass::ID = 0;
 
 HaskellModulePass::HaskellModulePass() 
   : llvm::ModulePass(ID),
-    base(0),
-    base_module(0) {}
+    GetUsage(0),
+    RunOnModule(0) {}
 
-HaskellModulePass::HaskellModulePass(HsFunPtr usage,HsFunPtr run)
+HaskellModulePass::HaskellModulePass(GetUsageFunctionT usage,RunOnModuleFunctionT run)
   : llvm::ModulePass(ID),
-    base(usage),
-    base_module(run) {
+    GetUsage(usage),
+    RunOnModule(run) {}
+
+HaskellModulePass::~HaskellModulePass() {
+  hs_free_fun_ptr(reinterpret_cast<HsFunPtr>(GetUsage));
+  hs_free_fun_ptr(reinterpret_cast<HsFunPtr>(RunOnModule));
 }
 
 void HaskellModulePass::getAnalysisUsage(llvm::AnalysisUsage &Info) const {
-  base.getAnalysisUsage(this,Info);
+  GetUsage(this,(void*)&Info);
 }
 
 bool HaskellModulePass::runOnModule(llvm::Module& m) {
-  return base_module.runOnModule(this,m);
+  return RunOnModule(this,(void*)&m);
 }
 
 extern "C" {
-  void* newHaskellModulePass(HsFunPtr usage,HsFunPtr run) {
+  void* newHaskellModulePass(GetUsageFunctionT usage,RunOnModuleFunctionT run) {
     return (void*)new HaskellModulePass(usage,run);
   }
   void deleteHaskellModulePass(void* pass) {
@@ -92,38 +43,49 @@ char HaskellFunctionPass::ID = 0;
 
 HaskellFunctionPass::HaskellFunctionPass() 
   : llvm::FunctionPass(ID),
-    base(0),
-    base_init(0,0),
-    base_function(0) {}
+    GetUsage(0),
+    Initialization(0),
+    Finalization(0),
+    RunOnFunction(0) {}
 
-HaskellFunctionPass::HaskellFunctionPass(HsFunPtr usage,
-                                         HsFunPtr init,
-                                         HsFunPtr fin,
-                                         HsFunPtr run) 
+HaskellFunctionPass::HaskellFunctionPass(GetUsageFunctionT usage,
+                                         InitializationFunctionT init,
+                                         FinalizationFunctionT fin,
+                                         RunOnFunctionFunctionT run)
   : llvm::FunctionPass(ID),
-    base(usage),
-    base_init(init,fin),
-    base_function(run) {
+    GetUsage(usage),
+    Initialization(init),
+    Finalization(fin),
+    RunOnFunction(run) {}
+
+HaskellFunctionPass::~HaskellFunctionPass() {
+  hs_free_fun_ptr(reinterpret_cast<HsFunPtr>(GetUsage));
+  hs_free_fun_ptr(reinterpret_cast<HsFunPtr>(Initialization));
+  hs_free_fun_ptr(reinterpret_cast<HsFunPtr>(Finalization));
+  hs_free_fun_ptr(reinterpret_cast<HsFunPtr>(RunOnFunction));
 }
 
 void HaskellFunctionPass::getAnalysisUsage(llvm::AnalysisUsage &Info) const {
-  base.getAnalysisUsage(this,Info);
+  GetUsage(this,&Info);
 }
 
 bool HaskellFunctionPass::doInitialization(llvm::Module& m) {
-  base_init.doInitialization(this,m);
+  return Initialization(this,&m);
 }
 
 bool HaskellFunctionPass::doFinalization(llvm::Module& m) {
-  base_init.doFinalization(this,m);
+  return Finalization(this,&m);
 }
 
 bool HaskellFunctionPass::runOnFunction(llvm::Function& f) {
-  base_function.runOnFunction(this,f);
+  return RunOnFunction(this,&f);
 }
 
 extern "C" {
-  void* newHaskellFunctionPass(HsFunPtr usage,HsFunPtr init,HsFunPtr fin,HsFunPtr run) {
+  void* newHaskellFunctionPass(GetUsageFunctionT usage,
+                               InitializationFunctionT init,
+                               FinalizationFunctionT fin,
+                               RunOnFunctionFunctionT run) {
     return (void*)new HaskellFunctionPass(usage,init,fin,run);
   }
   void deleteHaskellFunctionPass(void* pass) {
