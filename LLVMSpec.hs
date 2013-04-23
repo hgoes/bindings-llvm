@@ -2242,6 +2242,34 @@ llvm version
                                       },GenHS,"genericValueSetAggregate")]
                         else [])
           }
+    ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
+          , specNS = llvmNS
+          , specName = "ExecutionEngine"
+          , specTemplateArgs = []
+          , specType = ClassSpec
+                       [(Destructor True,GenHS,"deleteExecutionEngine_")
+                       ,(memberFun { ftName = "addModule"
+                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineAddModule_")
+                       ,(memberFun { ftReturnType = normalT bool
+                                   , ftName = "removeModule"
+                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineDeleteModule_")
+                       ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
+                                   , ftName = "FindFunctionNamed"
+                                   , ftArgs = [(False,constT $ ptr char)]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineFindFunctionNamed_")
+                       ,(memberFun { ftReturnType = normalT $ llvmType "GenericValue"
+                                   , ftName = "runFunction"
+                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Function")
+                                              ,(False,constT $ ref $ NamedType [ClassName "std" []] "vector"
+                                                         [normalT $ llvmType "GenericValue"])]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineRunFunction_")]
+          }
     ,Spec { specHeader = "llvm/Pass.h"
           , specNS = llvmNS
           , specName = "PassKind"

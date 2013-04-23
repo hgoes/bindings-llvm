@@ -74,5 +74,6 @@ library
     LLVM.FFI.Pass.Haskell
     LLVM.FFI.SmallVector
     LLVM.FFI.GenericValue
+    LLVM.FFI.ExecutionEngine
   other-modules:
     LLVM.FFI.Interface
