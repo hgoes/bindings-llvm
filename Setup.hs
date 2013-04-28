@@ -61,34 +61,36 @@ adaptLocalBuildInfo bi = do
   let db = configPrograms $ configFlags bi
   version <- getLLVMVersion db
   cflags <- getLLVMCFlags db
+  ldflags <- getLLVMLDFlags db
   libs <- getLLVMLibs db
   libdir <- getLLVMLibdir db
   incdir <- getLLVMIncludedir db
   return $ bi { localPkgDescr = adaptPackageDescription 
                                 (localPkgDescr bi)
-                                version cflags 
+                                version cflags ldflags
                                 libs libdir incdir }
 
-adaptPackageDescription :: PackageDescription -> Version -> [String] -> [String] -> String -> String -> PackageDescription
-adaptPackageDescription pkg vers cflags ldflags libdir incdir
+adaptPackageDescription :: PackageDescription -> Version -> [String] -> [String] -> [String] -> String -> String -> PackageDescription
+adaptPackageDescription pkg vers cflags ldflags libs libdir incdir
   = case library pkg of
     Just lib 
       -> pkg { library = Just $ 
                          lib { libBuildInfo = adaptBuildInfo 
                                               (libBuildInfo lib) 
                                               vers cflags 
-                                              ldflags libdir incdir
+                                              ldflags libs libdir incdir
                              }
              , description = (description pkg) ++ "\n%LLVM_VERSION="++show vers++"%"
              }
 
-adaptBuildInfo :: BuildInfo -> Version -> [String] -> [String] -> String -> String -> BuildInfo
-adaptBuildInfo bi vers cflags libs libdir incdir
+adaptBuildInfo :: BuildInfo -> Version -> [String] -> [String] -> [String] -> String -> String -> BuildInfo
+adaptBuildInfo bi vers cflags ldflags libs libdir incdir
   = bi { cppOptions = ["-DHS_LLVM_VERSION="++versionToDefine vers]++
                       cppOptions bi
        , ccOptions = cflags++
                      ["-DHS_LLVM_VERSION="++versionToDefine vers]++
                      ccOptions bi
+       , ldOptions = ldflags++(ldOptions bi)
        , includeDirs = incdir:includeDirs bi
        , extraLibs = libs++extraLibs bi
        , extraLibDirs = libdir:extraLibDirs bi
@@ -105,6 +107,11 @@ getLLVMVersion db = do
 getLLVMCFlags :: ProgramConfiguration -> IO [String]
 getLLVMCFlags db = do
   outp <- getDbProgramOutput normal llvmConfigProgram db ["--cxxflags"]
+  return $ words outp
+
+getLLVMLDFlags :: ProgramConfiguration -> IO [String]
+getLLVMLDFlags db = do
+  outp <- getDbProgramOutput normal llvmConfigProgram db ["--ldflags"]
   return $ words outp
 
 getLLVMLibdir :: ProgramConfiguration -> IO String
