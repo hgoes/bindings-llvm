@@ -2354,9 +2354,9 @@ llvm version
                        ,(Destructor False,GenHS,"deleteEngineBuilder")
                        ,(memberFun { ftIgnoreReturn = True
                                    , ftName = "setEngineKind"
-                                   , ftArgs = [(False,normalT $ Type [] (EnumType [ClassName "llvm" []
-                                                                                  ,ClassName "EngineKind" []
-                                                                                  ] "Kind"))]
+                                   , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
+                                                                         ,ClassName "EngineKind" []
+                                                                         ] "Kind")]
                                    },GenHS,"engineBuilderSetKind")
                        ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
                                    , ftName = "create"
