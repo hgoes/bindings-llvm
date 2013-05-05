@@ -2252,11 +2252,15 @@ llvm version
                                    , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]
                                    , ftOverloaded = True
                                    },GenHS,"executionEngineAddModule_")
+                       ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "DataLayout"
+                                   , ftName = "getDataLayout"
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetDataLayout_")
                        ,(memberFun { ftReturnType = normalT bool
                                    , ftName = "removeModule"
                                    , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]
                                    , ftOverloaded = True
-                                   },GenHS,"executionEngineDeleteModule_")
+                                   },GenHS,"executionEngineRemoveModule_")
                        ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
                                    , ftName = "FindFunctionNamed"
                                    , ftArgs = [(False,constT $ ptr char)]
@@ -2268,7 +2272,97 @@ llvm version
                                               ,(False,constT $ ref $ NamedType [ClassName "std" []] "vector"
                                                          [normalT $ llvmType "GenericValue"])]
                                    , ftOverloaded = True
-                                   },GenHS,"executionEngineRunFunction_")]
+                                   },GenHS,"executionEngineRunFunction_")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "getPointerToNamedFunction"
+                                   , ftArgs = [(False,constT $ ptr char)
+                                              ,(False,normalT bool)]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetPointerToNamedFunction_")
+                       ,(memberFun { ftName = "mapSectionAddress"
+                                   , ftArgs = [(False,constT $ ptr void)
+                                              ,(False,normalT uint64_t)]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineMapSectionAddress_")
+                       ,(memberFun { ftName = "runStaticConstructorsDestructors"
+                                   , ftArgs = [(False,normalT bool)]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineRunStaticConstructorsDestructors_")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "getPointerToFunction"
+                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetPointerToFunction_")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "getPointerToFunctionOrStub"
+                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetPointerToFunctionOrStub_")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "getPointerToGlobal"
+                                   , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetPointerToGlobal_")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "getPointerToGlobalIfAvailable"
+                                   , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetPointerToGlobalIfAvailable_")
+                       ,(memberFun { ftName = "addGlobalMapping"
+                                   , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")
+                                              ,(False,normalT $ ptr void)]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineAddGlobalMapping_")
+                       ,(memberFun { ftName = "clearAllGlobalMappings"
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineClearAllGlobalMappings_")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "updateGlobalMapping"
+                                   , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")
+                                              ,(False,normalT $ ptr void)]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineUpdateGlobalMapping_")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "getPointerToBasicBlock"
+                                   , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetPointerToBasicBlock_")
+                       ,(memberFun { ftName = "runJITOnFunction"
+                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Function")
+                                              ,(False,normalT $ ptr $ llvmType "MachineCodeInfo")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineRunJITOnFunction_")
+                       ,(memberFun { ftReturnType = constT $ ptr $ llvmType "GlobalValue"
+                                   , ftName = "getGlobalValueAtAddress"
+                                   , ftArgs = [(False,normalT $ ptr void)]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineGetGlobalValueAtAddress_")
+                       ,(memberFun { ftName = "StoreValueToMemory"
+                                   , ftArgs = [(False,constT $ ref $ llvmType "GenericValue")
+                                              ,(False,normalT $ ptr $ llvmType "GenericValue")
+                                              ,(True,normalT $ ptr $ llvmType "Type")]
+                                   , ftOverloaded = True
+                                   },GenHS,"executionEngineStoreValueToMemory_")
+                       ]
+          }
+    ,Spec { specHeader = "llvm/CodeGen/MachineCodeInfo.h"
+          , specNS = llvmNS
+          , specName = "MachineCodeInfo"
+          , specTemplateArgs = []
+          , specType = ClassSpec
+                       [(Constructor [],GenHS,"newMachineCodeInfo")
+                       ,(memberFun { ftName = "setSize"
+                                   , ftArgs = [(False,normalT size_t)]
+                                   },GenHS,"machineCodeInfoSetSize")
+                       ,(memberFun { ftName = "setAddress"
+                                   , ftArgs = [(False,normalT $ ptr void)]
+                                   },GenHS,"machineCodeInfoSetAddress")
+                       ,(memberFun { ftReturnType = normalT size_t
+                                   , ftName = "size"
+                                   },GenHS,"machineCodeInfoGetSize")
+                       ,(memberFun { ftReturnType = normalT $ ptr void
+                                   , ftName = "address"
+                                   },GenHS,"machineCodeInfoGetAddress")]
           }
     ,Spec { specHeader = "llvm/Pass.h"
           , specNS = llvmNS

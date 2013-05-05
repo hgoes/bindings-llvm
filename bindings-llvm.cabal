@@ -75,5 +75,6 @@ library
     LLVM.FFI.SmallVector
     LLVM.FFI.GenericValue
     LLVM.FFI.ExecutionEngine
+    LLVM.FFI.MachineCodeInfo
   other-modules:
     LLVM.FFI.Interface
