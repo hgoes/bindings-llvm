@@ -2345,6 +2345,32 @@ llvm version
                                    },GenHS,"executionEngineStoreValueToMemory_")
                        ]
           }
+    ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
+          , specNS = llvmNS
+          , specName = "EngineBuilder"
+          , specTemplateArgs = []
+          , specType = ClassSpec
+                       [(Constructor [(False,normalT $ ptr $ llvmType "Module")],GenHS,"newEngineBuilder")
+                       ,(Destructor False,GenHS,"deleteEngineBuilder")
+                       ,(memberFun { ftIgnoreReturn = True
+                                   , ftName = "setEngineKind"
+                                   , ftArgs = [(False,normalT $ Type [] (EnumType [ClassName "llvm" []
+                                                                                  ,ClassName "EngineKind" []
+                                                                                  ] "Kind"))]
+                                   },GenHS,"engineBuilderSetKind")
+                       ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
+                                   , ftName = "create"
+                                   },GenHS,"engineBuilderCreate")
+                       ]
+          }
+    ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
+          , specNS = [ClassName "llvm" [],ClassName "EngineKind" []]
+          , specName = "Kind"
+          , specTemplateArgs = []
+          , specType = EnumSpec "EngineKind" [("JIT","JIT")
+                                             ,("Interpreter","Interpreter")
+                                             ,("Either","EitherEngine")]
+          }
     ,Spec { specHeader = "llvm/CodeGen/MachineCodeInfo.h"
           , specNS = llvmNS
           , specName = "MachineCodeInfo"
