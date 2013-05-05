@@ -96,8 +96,10 @@ refToPtr tp x = ([],"("++(renderType tp)++"*) &"++x)
 ptrToRef :: Type -> InConverter
 ptrToRef tp x = ([],"*("++x++")")
 
-voidCastOut :: OutConverter
-voidCastOut x = ([],"(void*)("++x++")")
+voidCastOut :: Bool -> OutConverter
+voidCastOut isConst x = ([],"("++(if isConst
+                                  then "const "
+                                  else "")++"void*)("++x++")")
 
 voidCastIn :: Type -> InConverter
 voidCastIn tp x = ([],"("++renderType tp++"*)("++x++")")
@@ -186,7 +188,7 @@ toCType (Type q c) = let (x,out,inC) = toCType' c
                                      in (out1++out2,r2))
     toCType' (PtrType t) = if isCType t
                            then (PtrType t,idOut,idIn)
-                           else (PtrType void,voidCastOut,voidCastIn (Type q t))
+                           else (PtrType void,voidCastOut (QConst `elem` q),voidCastIn (Type q t))
     toCType' (EnumType ns name) = (NamedType [] "int" [],idOut,enumCastIn ns name)
     toCType' t = if isCType t
                  then (t,idOut,idIn)
