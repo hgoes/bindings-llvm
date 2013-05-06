@@ -23,6 +23,7 @@ SPECIALIZE_OWNINGPTR(MemoryBuffer,capi)
 getFileMemoryBufferSimple :: String -> IO (Maybe (Ptr MemoryBuffer))
 getFileMemoryBufferSimple name = do
   str <- newStringRef name
+#if HS_LLVM_VERSION>=209
   ptr <- newOwningPtr nullPtr
 #if HS_LLVM_VERSION>=300
   errc <- getFileMemoryBuffer str ptr (-1) True
@@ -37,5 +38,11 @@ getFileMemoryBufferSimple name = do
          else return Nothing
   deleteErrorCode errc
   deleteOwningPtr ptr
+#else
+  res' <- getFileMemoryBuffer str
+  let res = if res'==nullPtr
+            then Nothing
+            else Just res'
+#endif
   deleteStringRef str
   return res

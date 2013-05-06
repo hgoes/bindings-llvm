@@ -1,3 +1,4 @@
+#if HS_LLVM_VERSION >= 209
 module LLVM.FFI.ArrayRef 
        (ArrayRef()
        ,ArrayRefC(..)
@@ -29,3 +30,6 @@ arrayRefSize :: ArrayRefC a => Ptr (ArrayRef a) -> IO Integer
 arrayRefSize ptr = fmap fromIntegral (arrayRefSize' ptr)
 
 SPECIALIZE_ARRAYREF(CChar)
+#else
+module LLVM.FFI.ArrayRef () where
+#endif

@@ -24,6 +24,11 @@ llvm3_0 = Version { versionBranch = [3,0]
                   , versionTags = []
                   }
 
+llvm2_9 :: Version
+llvm2_9 = Version { versionBranch = [2,9]
+                  , versionTags = []
+                  }
+
 irInclude :: Version -> String -> String
 irInclude ver hdr = if ver >= llvm3_3
                     then "llvm/IR/"++hdr
@@ -62,33 +67,35 @@ llvm version
      | tp <- ["MemoryBuffer"]
     , let rtp = Type [] (NamedType llvmNS tp [])
     ]++
-    [Spec { specHeader = "llvm/ADT/ArrayRef.h"
-          , specNS = llvmNS
-          , specName = "ArrayRef"
-          , specTemplateArgs = [rtp]
-          , specType = ClassSpec $
-                       [(Constructor { ftConArgs = [] },GenHS,"newArrayRefEmpty"++tp)
-                       ,(Constructor { ftConArgs = [(False,toPtr rtp)
-                                                   ,(False,normalT size_t)] },GenHS,"newArrayRef"++tp)
-                       ,(Destructor False,GenHS,"deleteArrayRef"++tp)
-                       ,(memberFun { ftReturnType = normalT size_t
-                                   , ftName = "size"
-                                   },GenHS,"arrayRefSize"++tp)]++
-                       (if version>=llvm3_0
-                        then [(memberFun { ftReturnType = normalT bool
-                                         , ftName = "equals"
-                                         , ftArgs = [(False,normalT $ NamedType llvmNS "ArrayRef" [rtp])]
-                                         },GenHS,"arrayRefEquals"++tp)]
-                        else [])++
-                       [(memberFun { ftReturnType = toConstRef rtp
-                                   , ftName = "operator[]"
-                                   , ftArgs = [(False,normalT size_t)]
-                                   },GenHS,"arrayRefIndex"++tp)
-                       ]
-          }
-     | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
-                  ,("CChar",constT $ ptr char)]
-    ]++
+    (if version>=llvm2_9
+     then [Spec { specHeader = "llvm/ADT/ArrayRef.h"
+                , specNS = llvmNS
+                , specName = "ArrayRef"
+                , specTemplateArgs = [rtp]
+                , specType = ClassSpec $
+                             [(Constructor { ftConArgs = [] },GenHS,"newArrayRefEmpty"++tp)
+                             ,(Constructor { ftConArgs = [(False,toPtr rtp)
+                                                         ,(False,normalT size_t)] },GenHS,"newArrayRef"++tp)
+                             ,(Destructor False,GenHS,"deleteArrayRef"++tp)
+                             ,(memberFun { ftReturnType = normalT size_t
+                                         , ftName = "size"
+                                         },GenHS,"arrayRefSize"++tp)]++
+                             (if version>=llvm3_0
+                              then [(memberFun { ftReturnType = normalT bool
+                                               , ftName = "equals"
+                                               , ftArgs = [(False,normalT $ NamedType llvmNS "ArrayRef" [rtp])]
+                                               },GenHS,"arrayRefEquals"++tp)]
+                              else [])++
+                             [(memberFun { ftReturnType = toConstRef rtp
+                                         , ftName = "operator[]"
+                                         , ftArgs = [(False,normalT size_t)]
+                                         },GenHS,"arrayRefIndex"++tp)
+                             ]
+                }
+           | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
+                        ,("CChar",constT $ ptr char)]
+          ]
+     else [])++
     concat [[Spec { specHeader = "llvm/ADT/ilist.h"
                   , specNS = llvmNS
                   , specName = "iplist"
@@ -325,7 +332,11 @@ llvm version
                                              then ["Half"]
                                              else [])++
                                   ["Float","Double","X86_FP80","FP128","PPC_FP128"
-                                  ,"FloatingPoint","X86_MMX","Label","Metadata"]
+                                  ,"FloatingPoint"]++
+                                  (if version>=llvm2_9
+                                   then ["X86_MMX"]
+                                   else [])++
+                                  ["Label","Metadata"]
                           ]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
@@ -755,18 +766,20 @@ llvm version
              , specName = "UndefValue"
              , specTemplateArgs = []
              , specType = ClassSpec []
-             }
-       ,Spec { specHeader = "llvm/Support/system_error.h"
-             , specNS = llvmNS
-             , specName = "error_code"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(Destructor False,GenHS,"deleteErrorCode")
-                          ,(memberFun { ftReturnType = normalT (NamedType [] "int" [])
-                                      , ftName = "value"
-                                      },GenHS,"errorCodeValue_")]
-             }
-       ,Spec { specHeader = "llvm/Support/MemoryBuffer.h"
+             }]++
+    (if version>=llvm2_9
+     then [Spec { specHeader = "llvm/Support/system_error.h"
+                , specNS = llvmNS
+                , specName = "error_code"
+                , specTemplateArgs = []
+                , specType = ClassSpec
+                             [(Destructor False,GenHS,"deleteErrorCode")
+                             ,(memberFun { ftReturnType = normalT (NamedType [] "int" [])
+                                         , ftName = "value"
+                                         },GenHS,"errorCodeValue_")]
+                }]
+     else [])++
+       [Spec { specHeader = "llvm/Support/MemoryBuffer.h"
              , specNS = llvmNS
              , specName = "MemoryBuffer"
              , specTemplateArgs = []
@@ -775,17 +788,24 @@ llvm version
                           ,(memberFun { ftReturnType = normalT size_t 
                                       , ftName = "getBufferSize"
                                       },GenHS,"getBufferSize_")
-                          ,(memberFun { ftReturnType = normalT (NamedType llvmNS "error_code" []) 
-                                      , ftName = "getFile"
-                                      , ftArgs = [(False,normalT (NamedType llvmNS "StringRef" []))
-                                                 ,(False,normalT (RefType $ NamedType llvmNS "OwningPtr" 
-                                                                  [normalT (NamedType llvmNS "MemoryBuffer" [])]))
-                                                 ,(False,normalT (NamedType [] "int64_t" []))]++
-                                                 (if version>=llvm3_0
-                                                  then [(False,normalT (NamedType [] "bool" []))]
-                                                  else [])
-                                      , ftStatic = True
-                                      },GenHS,"getFileMemoryBuffer")]
+                          ,if version>=llvm2_9
+                           then (memberFun { ftReturnType = normalT (NamedType llvmNS "error_code" []) 
+                                           , ftName = "getFile"
+                                           , ftArgs = [(False,normalT (NamedType llvmNS "StringRef" []))
+                                                      ,(False,normalT (RefType $ NamedType llvmNS "OwningPtr" 
+                                                                                   [normalT (NamedType llvmNS "MemoryBuffer" [])]))
+                                                      ,(False,normalT (NamedType [] "int64_t" []))]++
+                                                      (if version>=llvm3_0
+                                                       then [(False,normalT (NamedType [] "bool" []))]
+                                                       else [])
+                                           , ftStatic = True
+                                           },GenHS,"getFileMemoryBuffer")
+                           else (memberFun { ftReturnType = normalT $ ptr $ llvmType "MemoryBuffer"
+                                           , ftName = "getFile"
+                                           , ftArgs = [(False,normalT (NamedType llvmNS "StringRef" []))]
+                                           , ftStatic = True
+                                           },GenHS,"getFileMemoryBuffer")
+                          ]
              }
        ,Spec { specHeader = "llvm/Support/SourceMgr.h"
              , specNS = llvmNS
@@ -1781,33 +1801,35 @@ llvm version
                           ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "llvm" []] "SetVector" [normalT $ ptr $ llvmType "Type"]
                                       , ftName = "getTypes"
                                       },GenHS,"findUsedTypesGetTypes")]
-             }
-       ,Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
-             , specNS = llvmNS
-             , specName = "TargetLibraryInfo"
-             , specTemplateArgs = []
-             , specType = ClassSpec $
-                          [(Constructor [],GenHS,"newTargetLibraryInfo")
-                          ,(Destructor False,GenHS,"deleteTargetLibraryInfo")]++
-                          (if version>=llvm3_3
-                           then [(memberFun { ftReturnType = normalT bool
-                                            , ftName = "getLibFunc"
-                                            , ftArgs = [(False,normalT $ llvmType "StringRef")
-                                                       ,(False,normalT $ ref $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                            },GenHS,"targetLibraryInfoGetLibFunc_")]
-                           else [])++
-                          (if version>=llvm3_1
-                           then [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
-                                            , ftName = "getName"
-                                            , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                            },GenHS,"targetLibraryInfoGetName_")]
-                           else [])++
-                          [(memberFun { ftReturnType = normalT bool
-                                      , ftName = "has"
-                                      , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                      },GenHS,"targetLibraryInfoHas_")
-                          ]
              }]++
+    (if version>=llvm2_9
+     then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
+                , specNS = llvmNS
+                , specName = "TargetLibraryInfo"
+                , specTemplateArgs = []
+                , specType = ClassSpec $
+                             [(Constructor [],GenHS,"newTargetLibraryInfo")
+                             ,(Destructor False,GenHS,"deleteTargetLibraryInfo")]++
+                             (if version>=llvm3_3
+                              then [(memberFun { ftReturnType = normalT bool
+                                               , ftName = "getLibFunc"
+                                               , ftArgs = [(False,normalT $ llvmType "StringRef")
+                                                          ,(False,normalT $ ref $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                               },GenHS,"targetLibraryInfoGetLibFunc_")]
+                              else [])++
+                             (if version>=llvm3_1
+                              then [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                               , ftName = "getName"
+                                               , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                               },GenHS,"targetLibraryInfoGetName_")]
+                              else [])++
+                             [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "has"
+                                         , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
+                                         },GenHS,"targetLibraryInfoHas_")
+                             ]
+                }]
+     else [])++
        (if version >= llvm3_2
         then [Spec { specHeader = irInclude version "DataLayout.h"
                    , specNS = llvmNS
@@ -2021,33 +2043,42 @@ llvm version
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
                                       , ftOverloaded = True
                                       },GenHS,"aliasAnalysisGetTypeStoreSize_")]++
-                          [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" []
-                                      , ftName = "getLocation"
-                                      , ftArgs = [(False,constT $ ptr $ llvmType (inst++"Inst"))]
-                                      , ftOverloaded = True
-                                      },GenHS,"aliasAnalysisGetLocation"++inst++"_")
-                           | inst <- ["Load","Store","VAArg"]++(if version>=llvm3_0
-                                                               then ["AtomicCmpXchg","AtomicRMW"]
-                                                               else [])]++
+                          (if version>=llvm2_9
+                           then [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" []
+                                            , ftName = "getLocation"
+                                            , ftArgs = [(False,constT $ ptr $ llvmType (inst++"Inst"))]
+                                            , ftOverloaded = True
+                                            },GenHS,"aliasAnalysisGetLocation"++inst++"_")
+                                 | inst <- ["Load","Store","VAArg"]++(if version>=llvm3_0
+                                                                     then ["AtomicCmpXchg","AtomicRMW"]
+                                                                     else [])]
+                           else [])++
                           [(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "AliasResult"
                                       , ftName = "alias"
-                                      , ftArgs = [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [])
-                                                 ,(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [])]
+                                      , ftArgs = if version>=llvm2_9
+                                                 then [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [])
+                                                      ,(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [])]
+                                                 else [(False,constT $ ptr $ llvmType "Value")
+                                                      ,(False,normalT unsigned)
+                                                      ,(False,constT $ ptr $ llvmType "Value")
+                                                      ,(False,normalT unsigned)]
                                       , ftOverloaded = True
                                       },GenHS,"aliasAnalysisAlias_")
                           ]
-             }
-       ,Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
-             , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
-             , specName = "Location"
-             , specTemplateArgs = []
-             , specType = ClassSpec
-                          [(Constructor [(True,constT $ ptr $ llvmType "Value")
-                                        ,(False,normalT uint64_t)
-                                        ,(False,constT $ ptr $ llvmType "MDNode")
-                                        ],GenHS,"newLocation_")]
-             }
-       ,Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
+             }]++
+    (if version>=llvm2_9
+     then [Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
+                , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
+                , specName = "Location"
+                , specTemplateArgs = []
+                , specType = ClassSpec
+                             [(Constructor [(True,constT $ ptr $ llvmType "Value")
+                                           ,(False,normalT uint64_t)
+                                           ,(False,constT $ ptr $ llvmType "MDNode")
+                                           ],GenHS,"newLocation_")]
+                }]
+     else [])++
+       [Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
              , specNS = llvmNS
              , specName = "getMallocAllocatedType"
              , specTemplateArgs = []
@@ -2423,9 +2454,11 @@ llvm version
           , specName = "PassKind"
           , specTemplateArgs = []
           , specType = EnumSpec "PassKind" [("PT_"++name,"PassKind"++name)
-                                            | name <- ["BasicBlock"
-                                                     ,"Region"
-                                                     ,"Loop"
+                                            | name <- ["BasicBlock"]++
+                                                     (if version>=llvm2_9
+                                                      then ["Region"]
+                                                      else [])++
+                                                     ["Loop"
                                                      ,"Function"
                                                      ,"CallGraphSCC"
                                                      ,"Module"
@@ -2464,10 +2497,11 @@ llvm version
                                  ,"ARM_APCS","ARM_AAPCS"
                                  ,"ARM_AAPCS_VFP"
                                  ,"MSP430_INTR"
-                                 ,"X86_ThisCall"
-                                 ,"PTX_Kernel","PTX_Device"
-                                 ,"MBLAZE_INTR","MBLAZE_SVOL"
-                                 ]++
+                                 ,"X86_ThisCall"]++
+                                 (if version>=llvm2_9
+                                  then ["PTX_Kernel","PTX_Device"
+                                       ,"MBLAZE_INTR","MBLAZE_SVOL"]
+                                  else [])++
                                  (if version>llvm3_1
                                   then ["SPIR_FUNC"
                                        ,"SPIR_KERNEL"
@@ -2519,323 +2553,327 @@ llvm version
           , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
           , specName = "AliasResult"
           , specTemplateArgs = []
-          , specType = EnumSpec "AliasResult"
+          , specType = EnumSpec "AliasResult" $
                        [("NoAlias","NoAlias")
-                       ,("MayAlias","MayAlias")
-                       ,("PartialAlias","PartialAlias")
-                       ,("MustAlias","MustAlias")]
-          }
-    ,Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
-          , specNS = [ClassName "llvm" [],ClassName "LibFunc" []]
-          , specName = "Func"
-          , specTemplateArgs = []
-          , specType = EnumSpec "LibFunc"
-                       [(name,"Func_"++name)
-                        | name <- ["fiprintf"
-                                 ,"iprintf"
-                                 ,"memcpy"
-                                 ,"memset"
-                                 ,"memset_pattern16"
-                                 ,"siprintf"]++
-                                 (if version>=llvm3_0
-                                  then ["memmove"]
-                                  else [])++
-                                 (if version>=llvm3_1
-                                  then ["cxa_atexit"
-                                       ,"cxa_guard_abort"
-                                       ,"cxa_guard_acquire"
-                                       ,"cxa_guard_release"
-                                       ,"acos"
-                                       ,"acosf"
-                                       ,"acosl"
-                                       ,"asin"
-                                       ,"asinf"
-                                       ,"asinl"
-                                       ,"atan"
-                                       ,"atan2"
-                                       ,"atan2f"
-                                       ,"atan2l"
-                                       ,"atanf"
-                                       ,"atanl"
-                                       ,"ceil"
-                                       ,"ceilf"
-                                       ,"ceill"
-                                       ,"copysign"
-                                       ,"copysignf"
-                                       ,"copysignl"
-                                       ,"cos"
-                                       ,"cosf"
-                                       ,"cosh"
-                                       ,"coshf"
-                                       ,"coshl"
-                                       ,"cosl"
-                                       ,"exp"
-                                       ,"exp2"
-                                       ,"exp2f"
-                                       ,"exp2l"
-                                       ,"expf"
-                                       ,"expl"
-                                       ,"expm1"
-                                       ,"expm1f"
-                                       ,"expm1l"
-                                       ,"fabs"
-                                       ,"fabsf"
-                                       ,"fabsl"
-                                       ,"floor"
-                                       ,"floorf"
-                                       ,"floorl"
-                                       ,"fmod"
-                                       ,"fmodf"
-                                       ,"fmodl"
-                                       ,"fputs"
-                                       ,"fwrite"
-                                       ,"log"
-                                       ,"log10"
-                                       ,"log10f"
-                                       ,"log10l"
-                                       ,"log1p"
-                                       ,"log1pf"
-                                       ,"log1pl"
-                                       ,"log2"
-                                       ,"log2f"
-                                       ,"log2l"
-                                       ,"logf"
-                                       ,"logl"
-                                       ,"nearbyint"
-                                       ,"nearbyintf"
-                                       ,"nearbyintl"
-                                       ,"pow"
-                                       ,"powf"
-                                       ,"powl"
-                                       ,"rint"
-                                       ,"rintf"
-                                       ,"rintl"
-                                       ,"round"
-                                       ,"roundf"
-                                       ,"roundl"
-                                       ,"sin"
-                                       ,"sinf"
-                                       ,"sinh"
-                                       ,"sinhf"
-                                       ,"sinhl"
-                                       ,"sinl"
-                                       ,"sqrt"
-                                       ,"sqrtf"
-                                       ,"sqrtl"
-                                       ,"tan"
-                                       ,"tanf"
-                                       ,"tanh"
-                                       ,"tanhf"
-                                       ,"tanhl"
-                                       ,"tanl"
-                                       ,"trunc"
-                                       ,"truncf"
-                                       ,"truncl"]++
-                                  (if version>=llvm3_3
-                                   then ["under_IO_getc"
-                                        ,"under_IO_putc"
-                                        ,"ZdaPv"
-                                        ,"ZdlPv"
-                                        ,"Znaj"
-                                        ,"ZnajRKSt9nothrow_t"
-                                        ,"Znam"
-                                        ,"ZnamRKSt9nothrow_t"
-                                        ,"Znwj"
-                                        ,"ZnwjRKSt9nothrow_t"
-                                        ,"Znwm"
-                                        ,"ZnwmRKSt9nothrow_t"
-                                        ,"dunder_isoc99_scanf"
-                                        ,"dunder_isoc99_sscanf"
-                                        ,"memcpy_chk"
-                                        ,"dunder_strdup"
-                                        ,"dunder_strndup"
-                                        ,"dunder_strtok_r"
-                                        ,"abs"
-                                        ,"access"
-                                        ,"acosh"
-                                        ,"acoshf"
-                                        ,"acoshl"
-                                        ,"asinh"
-                                        ,"asinhf"
-                                        ,"asinhl"
-                                        ,"atanh"
-                                        ,"atanhf"
-                                        ,"atanhl"
-                                        ,"atof"
-                                        ,"atoi"
-                                        ,"atol"
-                                        ,"atoll"
-                                        ,"bcmp"
-                                        ,"bcopy"
-                                        ,"bzero"
-                                        ,"calloc"
-                                        ,"cbrt"
-                                        ,"cbrtf"
-                                        ,"cbrtl"
-                                        ,"chmod"
-                                        ,"chown"
-                                        ,"clearerr"
-                                        ,"closedir"
-                                        ,"ctermid"
-                                        ,"exp10"
-                                        ,"exp10f"
-                                        ,"exp10l"
-                                        ,"fclose"
-                                        ,"fdopen"
-                                        ,"feof"
-                                        ,"ferror"
-                                        ,"fflush"
-                                        ,"ffs"
-                                        ,"ffsl"
-                                        ,"ffsll"
-                                        ,"fgetc"
-                                        ,"fgetpos"
-                                        ,"fgets"
-                                        ,"fileno"
-                                        ,"flockfile"
-                                        ,"fopen"
-                                        ,"fopen64"
-                                        ,"fprintf"
-                                        ,"fputc"
-                                        ,"fread"
-                                        ,"free"
-                                        ,"frexp"
-                                        ,"frexpf"
-                                        ,"frexpl"
-                                        ,"fscanf"
-                                        ,"fseek"
-                                        ,"fseeko"
-                                        ,"fseeko64"
-                                        ,"fsetpos"
-                                        ,"fstat"
-                                        ,"fstat64"
-                                        ,"fstatvfs"
-                                        ,"fstatvfs64"
-                                        ,"ftell"
-                                        ,"ftello"
-                                        ,"ftello64"
-                                        ,"ftrylockfile"
-                                        ,"funlockfile"
-                                        ,"getc"
-                                        ,"getc_unlocked"
-                                        ,"getchar"
-                                        ,"getenv"
-                                        ,"getitimer"
-                                        ,"getlogin_r"
-                                        ,"getpwnam"
-                                        ,"gets"
-                                        ,"htonl"
-                                        ,"htons"
-                                        ,"isascii"
-                                        ,"isdigit"
-                                        ,"labs"
-                                        ,"lchown"
-                                        ,"llabs"
-                                        ,"logb"
-                                        ,"logbf"
-                                        ,"logbl"
-                                        ,"lstat"
-                                        ,"lstat64"
-                                        ,"malloc"
-                                        ,"memalign"
-                                        ,"memccpy"
-                                        ,"memchr"
-                                        ,"memcmp"
-                                        ,"memrchr"
-                                        ,"mkdir"
-                                        ,"mktime"
-                                        ,"modf"
-                                        ,"modff"
-                                        ,"modfl"
-                                        ,"ntohl"
-                                        ,"ntohs"
-                                        ,"open"
-                                        ,"open64"
-                                        ,"opendir"
-                                        ,"pclose"
-                                        ,"perror"
-                                        ,"popen"
-                                        ,"posix_memalign"
-                                        ,"pread"
-                                        ,"printf"
-                                        ,"putc"
-                                        ,"putchar"
-                                        ,"puts"
-                                        ,"pwrite"
-                                        ,"qsort"
-                                        ,"read"
-                                        ,"readlink"
-                                        ,"realloc"
-                                        ,"reallocf"
-                                        ,"realpath"
-                                        ,"remove"
-                                        ,"rename"
-                                        ,"rewind"
-                                        ,"rmdir"
-                                        ,"scanf"
-                                        ,"setbuf"
-                                        ,"setitimer"
-                                        ,"setvbuf"
-                                        ,"snprintf"
-                                        ,"sprintf"
-                                        ,"sscanf"
-                                        ,"stat"
-                                        ,"stat64"
-                                        ,"statvfs"
-                                        ,"statvfs64"
-                                        ,"stpcpy"
-                                        ,"stpncpy"
-                                        ,"strcasecmp"
-                                        ,"strcat"
-                                        ,"strchr"
-                                        ,"strcmp"
-                                        ,"strcoll"
-                                        ,"strcpy"
-                                        ,"strcspn"
-                                        ,"strdup"
-                                        ,"strlen"
-                                        ,"strncasecmp"
-                                        ,"strncat"
-                                        ,"strncmp"
-                                        ,"strncpy"
-                                        ,"strndup"
-                                        ,"strnlen"
-                                        ,"strpbrk"
-                                        ,"strrchr"
-                                        ,"strspn"
-                                        ,"strstr"
-                                        ,"strtod"
-                                        ,"strtof"
-                                        ,"strtok"
-                                        ,"strtok_r"
-                                        ,"strtol"
-                                        ,"strtold"
-                                        ,"strtoll"
-                                        ,"strtoul"
-                                        ,"strtoull"
-                                        ,"strxfrm"
-                                        ,"system"
-                                        ,"times"
-                                        ,"tmpfile"
-                                        ,"tmpfile64"
-                                        ,"toascii"
-                                        ,"uname"
-                                        ,"ungetc"
-                                        ,"unlink"
-                                        ,"unsetenv"
-                                        ,"utime"
-                                        ,"utimes"
-                                        ,"valloc"
-                                        ,"vfprintf"
-                                        ,"vfscanf"
-                                        ,"vprintf"
-                                        ,"vscanf"
-                                        ,"vsnprintf"
-                                        ,"vsprintf"
-                                        ,"vsscanf"
-                                        ,"write"]
-                                   else[])
-                                  else [])
-                       ]
-          }
-    ]
+                       ,("MayAlias","MayAlias")]++
+                       (if version>=llvm2_9
+                        then [("PartialAlias","PartialAlias")]
+                        else [])++
+                       [("MustAlias","MustAlias")]
+          }]++
+    (if version>=llvm2_9
+     then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
+                , specNS = [ClassName "llvm" [],ClassName "LibFunc" []]
+                , specName = "Func"
+                , specTemplateArgs = []
+                , specType = EnumSpec "LibFunc"
+                             [(name,"Func_"++name)
+                              | name <- ["fiprintf"
+                                       ,"iprintf"
+                                       ,"memcpy"
+                                       ,"memset"
+                                       ,"memset_pattern16"
+                                       ,"siprintf"]++
+                                       (if version>=llvm3_0
+                                        then ["memmove"]
+                                        else [])++
+                                       (if version>=llvm3_1
+                                        then ["cxa_atexit"
+                                             ,"cxa_guard_abort"
+                                             ,"cxa_guard_acquire"
+                                             ,"cxa_guard_release"
+                                             ,"acos"
+                                             ,"acosf"
+                                             ,"acosl"
+                                             ,"asin"
+                                             ,"asinf"
+                                             ,"asinl"
+                                             ,"atan"
+                                             ,"atan2"
+                                             ,"atan2f"
+                                             ,"atan2l"
+                                             ,"atanf"
+                                             ,"atanl"
+                                             ,"ceil"
+                                             ,"ceilf"
+                                             ,"ceill"
+                                             ,"copysign"
+                                             ,"copysignf"
+                                             ,"copysignl"
+                                             ,"cos"
+                                             ,"cosf"
+                                             ,"cosh"
+                                             ,"coshf"
+                                             ,"coshl"
+                                             ,"cosl"
+                                             ,"exp"
+                                             ,"exp2"
+                                             ,"exp2f"
+                                             ,"exp2l"
+                                             ,"expf"
+                                             ,"expl"
+                                             ,"expm1"
+                                             ,"expm1f"
+                                             ,"expm1l"
+                                             ,"fabs"
+                                             ,"fabsf"
+                                             ,"fabsl"
+                                             ,"floor"
+                                             ,"floorf"
+                                             ,"floorl"
+                                             ,"fmod"
+                                             ,"fmodf"
+                                             ,"fmodl"
+                                             ,"fputs"
+                                             ,"fwrite"
+                                             ,"log"
+                                             ,"log10"
+                                             ,"log10f"
+                                             ,"log10l"
+                                             ,"log1p"
+                                             ,"log1pf"
+                                             ,"log1pl"
+                                             ,"log2"
+                                             ,"log2f"
+                                             ,"log2l"
+                                             ,"logf"
+                                             ,"logl"
+                                             ,"nearbyint"
+                                             ,"nearbyintf"
+                                             ,"nearbyintl"
+                                             ,"pow"
+                                             ,"powf"
+                                             ,"powl"
+                                             ,"rint"
+                                             ,"rintf"
+                                             ,"rintl"
+                                             ,"round"
+                                             ,"roundf"
+                                             ,"roundl"
+                                             ,"sin"
+                                             ,"sinf"
+                                             ,"sinh"
+                                             ,"sinhf"
+                                             ,"sinhl"
+                                             ,"sinl"
+                                             ,"sqrt"
+                                             ,"sqrtf"
+                                             ,"sqrtl"
+                                             ,"tan"
+                                             ,"tanf"
+                                             ,"tanh"
+                                             ,"tanhf"
+                                             ,"tanhl"
+                                             ,"tanl"
+                                             ,"trunc"
+                                             ,"truncf"
+                                             ,"truncl"]++
+                                        (if version>=llvm3_3
+                                         then ["under_IO_getc"
+                                              ,"under_IO_putc"
+                                              ,"ZdaPv"
+                                              ,"ZdlPv"
+                                              ,"Znaj"
+                                              ,"ZnajRKSt9nothrow_t"
+                                              ,"Znam"
+                                              ,"ZnamRKSt9nothrow_t"
+                                              ,"Znwj"
+                                              ,"ZnwjRKSt9nothrow_t"
+                                              ,"Znwm"
+                                              ,"ZnwmRKSt9nothrow_t"
+                                              ,"dunder_isoc99_scanf"
+                                              ,"dunder_isoc99_sscanf"
+                                              ,"memcpy_chk"
+                                              ,"dunder_strdup"
+                                              ,"dunder_strndup"
+                                              ,"dunder_strtok_r"
+                                              ,"abs"
+                                              ,"access"
+                                              ,"acosh"
+                                              ,"acoshf"
+                                              ,"acoshl"
+                                              ,"asinh"
+                                              ,"asinhf"
+                                              ,"asinhl"
+                                              ,"atanh"
+                                              ,"atanhf"
+                                              ,"atanhl"
+                                              ,"atof"
+                                              ,"atoi"
+                                              ,"atol"
+                                              ,"atoll"
+                                              ,"bcmp"
+                                              ,"bcopy"
+                                              ,"bzero"
+                                              ,"calloc"
+                                              ,"cbrt"
+                                              ,"cbrtf"
+                                              ,"cbrtl"
+                                              ,"chmod"
+                                              ,"chown"
+                                              ,"clearerr"
+                                              ,"closedir"
+                                              ,"ctermid"
+                                              ,"exp10"
+                                              ,"exp10f"
+                                              ,"exp10l"
+                                              ,"fclose"
+                                              ,"fdopen"
+                                              ,"feof"
+                                              ,"ferror"
+                                              ,"fflush"
+                                              ,"ffs"
+                                              ,"ffsl"
+                                              ,"ffsll"
+                                              ,"fgetc"
+                                              ,"fgetpos"
+                                              ,"fgets"
+                                              ,"fileno"
+                                              ,"flockfile"
+                                              ,"fopen"
+                                              ,"fopen64"
+                                              ,"fprintf"
+                                              ,"fputc"
+                                              ,"fread"
+                                              ,"free"
+                                              ,"frexp"
+                                              ,"frexpf"
+                                              ,"frexpl"
+                                              ,"fscanf"
+                                              ,"fseek"
+                                              ,"fseeko"
+                                              ,"fseeko64"
+                                              ,"fsetpos"
+                                              ,"fstat"
+                                              ,"fstat64"
+                                              ,"fstatvfs"
+                                              ,"fstatvfs64"
+                                              ,"ftell"
+                                              ,"ftello"
+                                              ,"ftello64"
+                                              ,"ftrylockfile"
+                                              ,"funlockfile"
+                                              ,"getc"
+                                              ,"getc_unlocked"
+                                              ,"getchar"
+                                              ,"getenv"
+                                              ,"getitimer"
+                                              ,"getlogin_r"
+                                              ,"getpwnam"
+                                              ,"gets"
+                                              ,"htonl"
+                                              ,"htons"
+                                              ,"isascii"
+                                              ,"isdigit"
+                                              ,"labs"
+                                              ,"lchown"
+                                              ,"llabs"
+                                              ,"logb"
+                                              ,"logbf"
+                                              ,"logbl"
+                                              ,"lstat"
+                                              ,"lstat64"
+                                              ,"malloc"
+                                              ,"memalign"
+                                              ,"memccpy"
+                                              ,"memchr"
+                                              ,"memcmp"
+                                              ,"memrchr"
+                                              ,"mkdir"
+                                              ,"mktime"
+                                              ,"modf"
+                                              ,"modff"
+                                              ,"modfl"
+                                              ,"ntohl"
+                                              ,"ntohs"
+                                              ,"open"
+                                              ,"open64"
+                                              ,"opendir"
+                                              ,"pclose"
+                                              ,"perror"
+                                              ,"popen"
+                                              ,"posix_memalign"
+                                              ,"pread"
+                                              ,"printf"
+                                              ,"putc"
+                                              ,"putchar"
+                                              ,"puts"
+                                              ,"pwrite"
+                                              ,"qsort"
+                                              ,"read"
+                                              ,"readlink"
+                                              ,"realloc"
+                                              ,"reallocf"
+                                              ,"realpath"
+                                              ,"remove"
+                                              ,"rename"
+                                              ,"rewind"
+                                              ,"rmdir"
+                                              ,"scanf"
+                                              ,"setbuf"
+                                              ,"setitimer"
+                                              ,"setvbuf"
+                                              ,"snprintf"
+                                              ,"sprintf"
+                                              ,"sscanf"
+                                              ,"stat"
+                                              ,"stat64"
+                                              ,"statvfs"
+                                              ,"statvfs64"
+                                              ,"stpcpy"
+                                              ,"stpncpy"
+                                              ,"strcasecmp"
+                                              ,"strcat"
+                                              ,"strchr"
+                                              ,"strcmp"
+                                              ,"strcoll"
+                                              ,"strcpy"
+                                              ,"strcspn"
+                                              ,"strdup"
+                                              ,"strlen"
+                                              ,"strncasecmp"
+                                              ,"strncat"
+                                              ,"strncmp"
+                                              ,"strncpy"
+                                              ,"strndup"
+                                              ,"strnlen"
+                                              ,"strpbrk"
+                                              ,"strrchr"
+                                              ,"strspn"
+                                              ,"strstr"
+                                              ,"strtod"
+                                              ,"strtof"
+                                              ,"strtok"
+                                              ,"strtok_r"
+                                              ,"strtol"
+                                              ,"strtold"
+                                              ,"strtoll"
+                                              ,"strtoul"
+                                              ,"strtoull"
+                                              ,"strxfrm"
+                                              ,"system"
+                                              ,"times"
+                                              ,"tmpfile"
+                                              ,"tmpfile64"
+                                              ,"toascii"
+                                              ,"uname"
+                                              ,"ungetc"
+                                              ,"unlink"
+                                              ,"unsetenv"
+                                              ,"utime"
+                                              ,"utimes"
+                                              ,"valloc"
+                                              ,"vfprintf"
+                                              ,"vfscanf"
+                                              ,"vprintf"
+                                              ,"vscanf"
+                                              ,"vsnprintf"
+                                              ,"vsprintf"
+                                              ,"vsscanf"
+                                              ,"write"]
+                                         else[])
+                                        else [])
+                             ]
+                }
+          ]
+      else [])

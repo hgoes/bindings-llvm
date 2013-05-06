@@ -13,7 +13,9 @@ module LLVM.FFI.Type
         ,isFP128Type
         ,isPPC_FP128Type
         ,isFloatingPointType
+#if HS_LLVM_VERSION>=209
         ,isX86_MMXType
+#endif
         ,isLabelType
         ,isMetadataType
         ,typeDump 
@@ -90,7 +92,9 @@ SUBTYPE3(Type,CompositeType,SequentialType,PointerType)
 TYPE_LEAF(VectorType)
 SUBTYPE3(Type,CompositeType,SequentialType,VectorType)
 
+#if HS_LLVM_VERSION >= 209
 SPECIALIZE_ARRAYREF(Type)
+#endif
 SPECIALIZE_VECTOR(Type)
 SPECIALIZE_SETVECTOR(Type)
 
@@ -145,8 +149,10 @@ isPPC_FP128Type = isPPC_FP128Ty_
 isFloatingPointType :: TypeC t => Ptr t -> Bool
 isFloatingPointType = isFloatingPointTy_
 
+#if HS_LLVM_VERSION>=209
 isX86_MMXType :: TypeC t => Ptr t -> Bool
 isX86_MMXType = isX86_MMXTy_
+#endif
 
 isLabelType :: TypeC t => Ptr t -> Bool
 isLabelType = isLabelTy_

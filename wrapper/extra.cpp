@@ -16,7 +16,9 @@
 #endif
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#if HS_LLVM_VERSION >= 209
 #include <llvm/Target/TargetLibraryInfo.h>
+#endif
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/LoopInfo.h>
 #include <llvm/Analysis/FindUsedTypes.h>
@@ -24,7 +26,9 @@
 extern "C" {
   char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
   char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
+#if HS_LLVM_VERSION >= 209
   char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }
+#endif
 #if HS_LLVM_VERSION >= 302
   char* passId_DataLayout() { return &llvm::DataLayout::ID; }
 #else

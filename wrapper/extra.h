@@ -3,7 +3,9 @@
 
 extern char* passId_LoopInfo();
 extern char* passId_FindUsedTypes();
+#if HS_LLVM_VERSION >= 209
 extern char* passId_TargetLibraryInfo();
+#endif
 #if HS_LLVM_VERSION >= 302
 extern char* passId_DataLayout();
 #else

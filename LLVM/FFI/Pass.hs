@@ -32,6 +32,7 @@ module LLVM.FFI.Pass
        ,newFindUsedTypes
        ,deleteFindUsedTypes
        ,findUsedTypesGetTypes
+#if HS_LLVM_VERSION >= 209
        ,TargetLibraryInfo()
        ,LibFunc(..)
        ,newTargetLibraryInfo
@@ -43,6 +44,7 @@ module LLVM.FFI.Pass
        ,targetLibraryInfoGetName
 #endif
        ,targetLibraryInfoHas
+#endif
 #if HS_LLVM_VERSION >= 302
        ,DataLayout()
        ,newDataLayoutFromString
@@ -95,9 +97,11 @@ instance PassC ImmutablePass
 instance PassC FindUsedTypes
 instance PassId FindUsedTypes where
   passId _ = passId_FindUsedTypes
+#if HS_LLVM_VERSION>=209
 instance PassC TargetLibraryInfo
 instance PassId TargetLibraryInfo where
   passId _ = passId_TargetLibraryInfo
+#endif
 instance PassC LoopInfo
 instance PassId LoopInfo where
   passId _ = passId_LoopInfo
@@ -107,10 +111,14 @@ class ModulePassC t
 instance ModulePassC ModulePass
 instance ModulePassC ImmutablePass
 instance ModulePassC FindUsedTypes
+#if HS_LLVM_VERSION>=209
 instance ModulePassC TargetLibraryInfo
+#endif
 
 class ImmutablePassC t
+#if HS_LLVM_VERSION>=209
 instance ImmutablePassC TargetLibraryInfo
+#endif
 
 class FunctionPassC t
 instance FunctionPassC FunctionPass
@@ -168,6 +176,7 @@ analysisResolverFindImplPassFun :: (PassC t,PassId p) => Ptr AnalysisResolver
 analysisResolverFindImplPassFun res pass p fun
   = analysisResolverFindImplPassFun_ res pass (castPtr $ passId p) fun
 
+#if HS_LLVM_VERSION >= 209
 #if HS_LLVM_VERSION >= 303
 targetLibraryInfoGetLibFunc :: Ptr TargetLibraryInfo -> Ptr StringRef -> IO (Maybe LibFunc)
 targetLibraryInfoGetLibFunc tli str
@@ -188,9 +197,11 @@ targetLibraryInfoGetName ptr f = targetLibraryInfoGetName_ ptr (fromLibFunc f)
 targetLibraryInfoHas :: Ptr TargetLibraryInfo -> LibFunc -> IO Bool
 targetLibraryInfoHas ptr f = targetLibraryInfoHas_ ptr (fromLibFunc f)
 
+foreign import capi _TO_STRING(extra.h passId_TargetLibraryInfo)
+  passId_TargetLibraryInfo :: Ptr CChar
+#endif
+
 foreign import capi _TO_STRING(extra.h passId_LoopInfo)
   passId_LoopInfo :: Ptr CChar
 foreign import capi _TO_STRING(extra.h passId_FindUsedTypes)
   passId_FindUsedTypes :: Ptr CChar
-foreign import capi _TO_STRING(extra.h passId_TargetLibraryInfo)
-  passId_TargetLibraryInfo :: Ptr CChar
