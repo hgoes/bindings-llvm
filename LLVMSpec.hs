@@ -41,15 +41,15 @@ llvm version
           , specName = "StringRef"
           , specTemplateArgs = []
           , specType = ClassSpec
-                       [(Constructor { ftConArgs = [] },GenHS,"newStringRefEmpty")
-                       ,(Constructor { ftConArgs = [(False,constT cstring)] },GenHS,"newStringRef_")
-                       ,(Destructor False,GenHS,"deleteStringRef")
+                       [(Constructor { ftConArgs = [] },"newStringRefEmpty")
+                       ,(Constructor { ftConArgs = [(False,constT cstring)] },"newStringRef_")
+                       ,(Destructor False,"deleteStringRef")
                        ,(memberFun { ftReturnType = constT cstring
                                    , ftName = "data"
-                                   },GenHS,"stringRefData_")
+                                   },"stringRefData_")
                        ,(memberFun { ftReturnType = normalT size_t
                                    , ftName = "size"
-                                   },GenHS,"stringRefSize_")
+                                   },"stringRefSize_")
                        ]
           }
     ]++
@@ -58,11 +58,11 @@ llvm version
           , specName = "OwningPtr"
           , specTemplateArgs = [rtp]
           , specType = ClassSpec
-                       [(Constructor { ftConArgs = [(False,toPtr rtp)] },GenHS,"newOwningPtr"++tp)
-                       ,(Destructor False,GenHS,"deleteOwningPtr"++tp)
+                       [(Constructor { ftConArgs = [(False,toPtr rtp)] },"newOwningPtr"++tp)
+                       ,(Destructor False,"deleteOwningPtr"++tp)
                        ,(memberFun { ftReturnType = toPtr rtp
                                    , ftName = "take"
-                                   },GenHS,"takeOwningPtr"++tp)]
+                                   },"takeOwningPtr"++tp)]
           }
      | tp <- ["MemoryBuffer"]
     , let rtp = Type [] (NamedType llvmNS tp [])
@@ -73,23 +73,23 @@ llvm version
                 , specName = "ArrayRef"
                 , specTemplateArgs = [rtp]
                 , specType = ClassSpec $
-                             [(Constructor { ftConArgs = [] },GenHS,"newArrayRefEmpty"++tp)
+                             [(Constructor { ftConArgs = [] },"newArrayRefEmpty"++tp)
                              ,(Constructor { ftConArgs = [(False,toPtr rtp)
-                                                         ,(False,normalT size_t)] },GenHS,"newArrayRef"++tp)
-                             ,(Destructor False,GenHS,"deleteArrayRef"++tp)
+                                                         ,(False,normalT size_t)] },"newArrayRef"++tp)
+                             ,(Destructor False,"deleteArrayRef"++tp)
                              ,(memberFun { ftReturnType = normalT size_t
                                          , ftName = "size"
-                                         },GenHS,"arrayRefSize"++tp)]++
+                                         },"arrayRefSize"++tp)]++
                              (if version>=llvm3_0
                               then [(memberFun { ftReturnType = normalT bool
                                                , ftName = "equals"
                                                , ftArgs = [(False,normalT $ NamedType llvmNS "ArrayRef" [rtp])]
-                                               },GenHS,"arrayRefEquals"++tp)]
+                                               },"arrayRefEquals"++tp)]
                               else [])++
                              [(memberFun { ftReturnType = toConstRef rtp
                                          , ftName = "operator[]"
                                          , ftArgs = [(False,normalT size_t)]
-                                         },GenHS,"arrayRefIndex"++tp)
+                                         },"arrayRefIndex"++tp)
                              ]
                 }
            | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
@@ -101,17 +101,17 @@ llvm version
                   , specName = "iplist"
                   , specTemplateArgs = [rtp]
                   , specType = ClassSpec
-                               [(Constructor { ftConArgs = [] },GenHS,"new"++tp++"List")
-                               ,(Destructor False,GenHS,"delete"++tp++"List")
+                               [(Constructor { ftConArgs = [] },"new"++tp++"List")
+                               ,(Destructor False,"delete"++tp++"List")
                                ,(memberFun { ftReturnType = normalT size_t
                                            , ftName = "size"
-                                           },GenHS,"list"++tp++"Size")
+                                           },"list"++tp++"Size")
                                ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "ilist_iterator" [rtp]
                                            , ftName = "begin"
-                                           },GenHS,"list"++tp++"Begin")
+                                           },"list"++tp++"Begin")
                                ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "ilist_iterator" [rtp]
                                            , ftName = "end"
-                                           },GenHS,"list"++tp++"End")
+                                           },"list"++tp++"End")
                                ]
                   }
             ,Spec { specHeader = "llvm/ADT/ilist.h"
@@ -121,21 +121,21 @@ llvm version
                   , specType = ClassSpec
                                [(memberFun { ftReturnType = toPtr rtp
                                            , ftName = "operator->"
-                                           },GenHS,"listIterator"++tp++"Deref")
+                                           },"listIterator"++tp++"Deref")
                                ,(memberFun { ftReturnType = normalT $ RefType $ 
                                                             NamedType llvmNS "ilist_iterator" [rtp]
                                            , ftName = "operator++"
-                                           },GenHS,"listIterator"++tp++"Next")
+                                           },"listIterator"++tp++"Next")
                                ,(memberFun { ftReturnType = normalT bool
                                            , ftName = "operator=="
                                            , ftArgs = [(False,constT $ RefType $ 
                                                              NamedType llvmNS "ilist_iterator" [rtp])] 
-                                           },GenHS,"listIterator"++tp++"Eq")
+                                           },"listIterator"++tp++"Eq")
                                ,(memberFun { ftReturnType = normalT bool
                                            , ftName = "operator!="
                                            , ftArgs = [(False,constT $ RefType $ 
                                                              NamedType llvmNS "ilist_iterator" [rtp])] 
-                                           },GenHS,"listIterator"++tp++"NEq")]
+                                           },"listIterator"++tp++"NEq")]
                   }
             ]
             | tp <- ["Function","Instruction","BasicBlock","GlobalVariable","Argument"]
@@ -148,13 +148,13 @@ llvm version
                   , specType = ClassSpec
                                [(memberFun { ftReturnType = normalT bool
                                            , ftName = "empty"
-                                           },GenHS,"setVector"++tp++"Empty")
+                                           },"setVector"++tp++"Empty")
                                ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
                                            , ftName = "begin"
-                                           },GenHS,"setVector"++tp++"Begin")
+                                           },"setVector"++tp++"Begin")
                                ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
                                            , ftName = "end"
-                                           },GenHS,"setVector"++tp++"End")
+                                           },"setVector"++tp++"End")
                                ]
                   }
             ,Spec { specHeader = "vector"
@@ -165,11 +165,11 @@ llvm version
                                [(memberFun { ftReturnType = constT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
                                            , ftName = "begin"
                                            , ftOverloaded = True
-                                           },GenHS,"vector"++tp++"Begin")
+                                           },"vector"++tp++"Begin")
                                ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
                                            , ftName = "end"
                                            , ftOverloaded = True
-                                           },GenHS,"vector"++tp++"End")]
+                                           },"vector"++tp++"End")]
                   }
             ,Spec { specHeader = "vector"
                   , specNS = [ClassName "std" [],ClassName "vector" [rtp]]
@@ -178,10 +178,10 @@ llvm version
                   , specType = ClassSpec
                                [(memberFun { ftReturnType = rtp
                                            , ftName = "operator*"
-                                           },GenHS,"vectorIterator"++tp++"Deref")
+                                           },"vectorIterator"++tp++"Deref")
                                ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" []
                                            , ftName = "operator++"
-                                           },GenHS,"vectorIterator"++tp++"Next")
+                                           },"vectorIterator"++tp++"Next")
                                ]
                   }
             ,Spec { specHeader = "vector"
@@ -203,16 +203,16 @@ llvm version
           , specName = "SmallVector"
           , specTemplateArgs = [rtp,TypeInt 16]
           , specType = ClassSpec
-                       [(Constructor [],GenHS,"newSmallVector"++tp)
-                       ,(Destructor False,GenHS,"deleteSmallVector"++tp)
+                       [(Constructor [],"newSmallVector"++tp)
+                       ,(Destructor False,"deleteSmallVector"++tp)
                        ,(memberFun { ftReturnType = normalT size_t
                                    , ftName = "size"
                                    , ftOverloaded = True
-                                   },GenHS,"smallVectorSize"++tp)
+                                   },"smallVectorSize"++tp)
                        ,(memberFun { ftReturnType = toPtr rtp
                                    , ftName = "data"
                                    , ftOverloaded = True
-                                   },GenHS,"smallVectorData"++tp)]
+                                   },"smallVectorData"++tp)]
           }
      | (tp,rtp) <- [("Loop",normalT $ ptr $ llvmType "Loop")
                   ,("Edge",normalT $ NamedType [ClassName "std" []] "pair" [normalT $ ptr $ llvmType "BasicBlock"
@@ -226,12 +226,12 @@ llvm version
                        [(Getter { ftGetType = rtp1
                                 , ftGetVar = "first"
                                 , ftGetStatic = False
-                                },GenHS,"pairFirst"++tp1++"_"++tp2)
+                                },"pairFirst"++tp1++"_"++tp2)
                        ,(Getter { ftGetType = rtp2
                                 , ftGetVar = "second"
                                 , ftGetStatic = False
-                                },GenHS,"pairSecond"++tp1++"_"++tp2)
-                       ,(SizeOf,GenHS,"sizeofPair"++tp1++"_"++tp2)
+                                },"pairSecond"++tp1++"_"++tp2)
+                       ,(SizeOf,"sizeofPair"++tp1++"_"++tp2)
                        ]
           }
      | (tp1,tp2) <- [("BasicBlock","BasicBlock")]
@@ -244,7 +244,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT double
                                       , ftName = "convertToDouble"
-                                      },GenHS,"apFloatConvertToDouble")]
+                                      },"apFloatConvertToDouble")]
              }
        ,Spec { specHeader = "llvm/ADT/APInt.h"
              , specNS = llvmNS
@@ -254,58 +254,58 @@ llvm version
                           [(Constructor [(False,normalT unsigned)
                                         ,(False,normalT uint64_t)
                                         ,(False,normalT bool)]
-                           ,GenHS,"newAPIntLimited")
+                           ,"newAPIntLimited")
                           ,if version>=llvm3_0
                            then (Constructor [(False,normalT unsigned)
                                              ,(False,normalT $ NamedType llvmNS "ArrayRef"
                                                         [normalT uint64_t])]
-                                ,GenHS,"newAPInt")
+                                ,"newAPInt")
                            else (Constructor [(False,normalT unsigned)
                                              ,(False,normalT unsigned)
                                              ,(False,constT $ ptr $ uint64_t)]
-                                ,GenHS,"newAPInt")
+                                ,"newAPInt")
                           ,(Constructor [(False,normalT unsigned)
                                         ,(False,normalT $ llvmType "StringRef")
                                         ,(False,normalT uint8_t)]
-                           ,GenHS,"newAPIntFromString")
-                          ,(Destructor False,GenHS,"deleteAPInt")
+                           ,"newAPIntFromString")
+                          ,(Destructor False,"deleteAPInt")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getBitWidth"
-                                      },GenHS,"apIntGetBitWidth")
+                                      },"apIntGetBitWidth")
                           ,(memberFun { ftReturnType = normalT uint64_t
                                       , ftName = "getZExtValue"
-                                      },GenHS,"apIntGetZExtValue")
+                                      },"apIntGetZExtValue")
                           ,(memberFun { ftReturnType = normalT int64_t
                                       , ftName = "getSExtValue"
-                                      },GenHS,"apIntGetSExtValue")]
+                                      },"apIntGetSExtValue")]
              }
        ,Spec { specHeader = "llvm/Support/DebugLoc.h"
              , specNS = llvmNS
              , specName = "DebugLoc"
              , specTemplateArgs = []
              , specType = ClassSpec $
-                          [(Constructor { ftConArgs = [] },GenHS,"newDebugLoc")
+                          [(Constructor { ftConArgs = [] },"newDebugLoc")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isUnknown"
-                                      },GenHS,"debugLocIsUnknown")
+                                      },"debugLocIsUnknown")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getLine"
-                                      },GenHS,"debugLocGetLine")
+                                      },"debugLocGetLine")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getCol"
-                                      },GenHS,"debugLocGetCol")
+                                      },"debugLocGetCol")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "MDNode" []
                                       , ftName = "getScope"
                                       , ftArgs = [(False,constT $ ref $ NamedType llvmNS "LLVMContext" [])]
-                                      },GenHS,"debugLocGetScope")
+                                      },"debugLocGetScope")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "MDNode" []
                                       , ftName = "getInlinedAt"
                                       , ftArgs = [(False,constT $ ref $ NamedType llvmNS "LLVMContext" [])]
-                                      },GenHS,"debugLocGetInlinedAt")]++
+                                      },"debugLocGetInlinedAt")]++
                           (if version>=llvm3_0
                            then [(memberFun { ftName = "dump" 
                                             , ftArgs = [(False,constT $ ref $ NamedType llvmNS "LLVMContext" [])]
-                                            },GenHS,"debugLocDump")]
+                                            },"debugLocDump")]
                            else [])
              }
        ]++
@@ -317,17 +317,17 @@ llvm version
                           [(memberFun { ftReturnType = normalT void
                                       , ftName = "dump"
                                       , ftOverloaded = True
-                                      },GenHS,"typeDump_")
+                                      },"typeDump_")
                           ,(memberFun { ftReturnType = normalT $ ref $ llvmType "LLVMContext"
                                       , ftName = "getContext"
                                       , ftOverloaded = True
-                                      },GenHS,"typeGetContext_")
+                                      },"typeGetContext_")
                           ]++
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "is"++tp++"Ty"
                                       , ftOverloaded = True
                                       , ftPure = True
-                                      },GenHS,"is"++tp++"Ty_")
+                                      },"is"++tp++"Ty_")
                            | tp <- ["Void"]++(if version>=llvm3_1
                                              then ["Half"]
                                              else [])++
@@ -346,13 +346,13 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getBitWidth"
-                                      },GenHS,"getBitWidth_")
+                                      },"getBitWidth_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "IntegerType" [] 
                                       , ftName = "get"
                                       , ftArgs = [(False,normalT $ RefType $ NamedType llvmNS "LLVMContext" [])
                                                  ,(False,normalT $ NamedType [] "unsigned" [])]
                                       , ftStatic = True
-                                      },GenHS,"getIntegerType_")]
+                                      },"getIntegerType_")]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = llvmNS
@@ -363,12 +363,12 @@ llvm version
                                       , ftName = "getTypeAtIndex"
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftOverloaded = True
-                                      },GenHS,"compositeTypeGetTypeAtIndex_")
+                                      },"compositeTypeGetTypeAtIndex_")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "indexValid"
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftOverloaded = True
-                                      },GenHS,"compositeTypeIndexValid_")]
+                                      },"compositeTypeIndexValid_")]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = llvmNS
@@ -378,7 +378,7 @@ llvm version
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Type" []
                                       , ftName = "getElementType"
                                       , ftOverloaded = True
-                                      },GenHS,"sequentialTypeGetElementType_")]
+                                      },"sequentialTypeGetElementType_")]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = llvmNS
@@ -387,7 +387,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT uint64_t
                                       , ftName = "getNumElements"
-                                      },GenHS,"arrayTypeGetNumElements_")]
+                                      },"arrayTypeGetNumElements_")]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = llvmNS
@@ -396,13 +396,13 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAddressSpace"
-                                      },GenHS,"pointerTypeGetAddressSpace_")
+                                      },"pointerTypeGetAddressSpace_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "PointerType" []
                                       , ftName = "get"
                                       , ftArgs = [(True,normalT $ ptr $ NamedType llvmNS "Type" [])
                                                  ,(False,normalT unsigned)]
                                       , ftStatic = True
-                                      },GenHS,"pointerTypeGet_")]
+                                      },"pointerTypeGet_")]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = llvmNS
@@ -411,13 +411,13 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumElements"
-                                      },GenHS,"vectorTypeGetNumElements_")
+                                      },"vectorTypeGetNumElements_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
                                       , ftName = "get"
                                       , ftArgs = [(True,normalT $ ptr $ NamedType llvmNS "Type" [])
                                                  ,(False,normalT unsigned)]
                                       , ftStatic = True
-                                      },GenHS,"vectorTypeGet_")
+                                      },"vectorTypeGet_")
                           ]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
@@ -427,22 +427,22 @@ llvm version
              , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isPacked"
-                                      },GenHS,"structTypeIsPacked")]++
+                                      },"structTypeIsPacked")]++
                           (if version>=llvm3_0
                            then [(memberFun { ftReturnType = normalT bool
                                             , ftName = "hasName"
-                                            },GenHS,"structTypeHasName")
+                                            },"structTypeHasName")
                                 ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "StringRef" []
                                             , ftName = "getName"
-                                            },GenHS,"structTypeGetName")]
+                                            },"structTypeGetName")]
                            else [])++
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumElements"
-                                      },GenHS,"structTypeGetNumElements_")
+                                      },"structTypeGetNumElements_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Type" []
                                       , ftName = "getElementType"
                                       , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"structTypeGetElementType_")
+                                      },"structTypeGetElementType_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
                                       , ftName = "get"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
@@ -451,7 +451,7 @@ llvm version
                                                          else constT $ ref $ NamedType [ClassName "std" []] "vector" [constT $ ptr $ llvmType "Type"])
                                                  ,(False,normalT bool)]
                                       , ftStatic = True
-                                      },GenHS,"newStructType")
+                                      },"newStructType")
                           ]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
@@ -461,17 +461,17 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isVarArg"
-                                      },GenHS,"functionTypeIsVarArg")
+                                      },"functionTypeIsVarArg")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumParams"
-                                      },GenHS,"functionTypeGetNumParams_")
+                                      },"functionTypeGetNumParams_")
                           ,(memberFun { ftReturnType = normalT (ptr $ NamedType llvmNS "Type" [])
                                       , ftName = "getParamType"
                                       , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"functionTypeGetParamType_")
+                                      },"functionTypeGetParamType_")
                           ,(memberFun { ftReturnType = normalT (ptr $ NamedType llvmNS "Type" [])
                                       , ftName = "getReturnType"
-                                      },GenHS,"functionTypeGetReturnType")
+                                      },"functionTypeGetReturnType")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionType"
                                       , ftName = "get"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
@@ -481,7 +481,7 @@ llvm version
                                                  ,(False,normalT bool)
                                                  ]
                                       , ftStatic = True
-                                      },GenHS,"newFunctionType_")
+                                      },"newFunctionType_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Value.h"
@@ -489,22 +489,22 @@ llvm version
              , specName = "Value"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Destructor True,GenHS,"deleteValue_")
+                          [(Destructor True,"deleteValue_")
                           ,(memberFun { ftName = "dump"
                                       , ftOverloaded = True
-                                      },GenHS,"valueDump_")
+                                      },"valueDump_")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "hasName"
                                       , ftOverloaded = True
-                                      },GenHS,"hasName_")
+                                      },"hasName_")
                           ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "StringRef" []
                                       , ftName = "getName"
                                       , ftOverloaded = True
-                                      },GenHS,"getName_")
+                                      },"getName_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Type" []
                                       , ftName = "getType"
                                       , ftOverloaded = True
-                                      },GenHS,"valueGetType_")
+                                      },"valueGetType_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Argument.h"
@@ -514,10 +514,10 @@ llvm version
              , specType = ClassSpec 
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
                                       , ftName = "getParent"
-                                      },GenHS,"argumentGetParent")
+                                      },"argumentGetParent")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getArgNo"
-                                      },GenHS,"argumentGetArgNo_")
+                                      },"argumentGetArgNo_")
                           ]
              }
        ,Spec { specHeader = irInclude version "BasicBlock.h"
@@ -527,14 +527,14 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Function" []
                                       , ftName = "getParent"
-                                      },GenHS,"basicBlockGetParent")
+                                      },"basicBlockGetParent")
                           ,(memberFun { ftReturnType = normalT $ RefType $ NamedType llvmNS "iplist" 
                                                        [normalT $ NamedType llvmNS "Instruction" []]
                                       , ftName = "getInstList"
-                                      },GenHS,"getInstList")
+                                      },"getInstList")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "TerminatorInst" []
                                       , ftName = "getTerminator"
-                                      },GenHS,"getTerminator")
+                                      },"getTerminator")
                           ]
              }
        ,Spec { specHeader = irInclude version "InlineAsm.h"
@@ -571,21 +571,21 @@ llvm version
                                             , ftName = "getAggregateElement"
                                             , ftArgs = [(False,normalT unsigned)]
                                             , ftOverloaded = True
-                                            },GenHS,"constantGetAggregateElement_")]
+                                            },"constantGetAggregateElement_")]
                            else [])++
                           (if version >= llvm3_3
                            then [(memberFun { ftReturnType = normalT bool
                                             , ftName = "isNullValue"
-                                            },GenHS,"isNullValue")
+                                            },"isNullValue")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "canTrap"
-                                            },GenHS,"canTrap")
+                                            },"canTrap")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isThreadDependent"
-                                            },GenHS,"isThreadDependent")
+                                            },"isThreadDependent")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isConstantUsed"
-                                            },GenHS,"isConstantUsed")
+                                            },"isConstantUsed")
                                 ]
                            else [])
              }
@@ -602,7 +602,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "ArrayType" []
                                       , ftName = "getType"
-                                      },GenHS,"constantArrayGetType")]
+                                      },"constantArrayGetType")]
              }
        ]++
     (if version>=llvm3_1
@@ -614,16 +614,16 @@ llvm version
                              [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "SequentialType" []
                                          , ftName = "getType"
                                          , ftOverloaded = True
-                                         },GenHS,"constantDataSequentialGetType")
+                                         },"constantDataSequentialGetType")
                              ,(memberFun { ftReturnType = normalT unsigned
                                          , ftName = "getNumElements"
                                          , ftOverloaded = True
-                                         },GenHS,"constantDataSequentialGetNumElements_")
+                                         },"constantDataSequentialGetNumElements_")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
                                          , ftName = "getElementAsConstant"
                                          , ftOverloaded = True
                                          , ftArgs = [(False,normalT unsigned)]
-                                         },GenHS,"constantDataSequentialGetElementAsConstant_")]
+                                         },"constantDataSequentialGetElementAsConstant_")]
                 }
           ,Spec { specHeader = irInclude version "Constants.h"
                 , specNS = llvmNS
@@ -632,7 +632,7 @@ llvm version
                 , specType = ClassSpec
                              [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "ArrayType" []
                                          , ftName = "getType"
-                                         },GenHS,"constantDataArrayGetType")]
+                                         },"constantDataArrayGetType")]
                 }
           ,Spec { specHeader = irInclude version "Constants.h"
                 , specNS = llvmNS
@@ -641,7 +641,7 @@ llvm version
                 , specType = ClassSpec
                              [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
                                          , ftName = "getType"
-                                         },GenHS,"constantDataVectorGetType")]
+                                         },"constantDataVectorGetType")]
                 }]
      else [])++
        [Spec { specHeader = irInclude version "Constants.h"
@@ -651,7 +651,7 @@ llvm version
              , specType = ClassSpec 
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getOpcode"
-                                      },GenHS,"constantExprGetOpcode_")]
+                                      },"constantExprGetOpcode_")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
@@ -660,7 +660,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = constT $ ref $ llvmType "APFloat"
                                       , ftName = "getValueAPF"
-                                      },GenHS,"constantFPGetValueAPF")]
+                                      },"constantFPGetValueAPF")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
@@ -669,10 +669,10 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "IntegerType" []
                                       , ftName = "getType"
-                                      },GenHS,"constantIntGetType")
+                                      },"constantIntGetType")
                           ,(memberFun { ftReturnType = constT $ ref $ llvmType "APInt"
                                       , ftName = "getValue"
-                                      },GenHS,"constantIntGetValue")]
+                                      },"constantIntGetValue")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
@@ -681,7 +681,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "PointerType" []
                                       , ftName = "getType"
-                                      },GenHS,"constantPointerNullGetType")]
+                                      },"constantPointerNullGetType")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
@@ -690,7 +690,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "StructType" []
                                       , ftName = "getType"
-                                      },GenHS,"constantStructGetType")]
+                                      },"constantStructGetType")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
@@ -699,7 +699,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
                                       , ftName = "getType"
-                                      },GenHS,"constantVectorGetType")]
+                                      },"constantVectorGetType")]
              }
        ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = llvmNS
@@ -709,11 +709,11 @@ llvm version
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "PointerType" []
                                       , ftName = "getType"
                                       , ftOverloaded = True
-                                      },GenHS,"globalValueGetType")
+                                      },"globalValueGetType")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isDeclaration"
                                       , ftOverloaded = True
-                                      },GenHS,"globalValueIsDeclaration_")]
+                                      },"globalValueIsDeclaration_")]
              }
        ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = llvmNS
@@ -728,13 +728,13 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isConstant"
-                                      },GenHS,"globalVariableIsConstant")
+                                      },"globalVariableIsConstant")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isThreadLocal"
-                                      },GenHS,"globalVariableIsThreadLocal")
+                                      },"globalVariableIsThreadLocal")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
                                       , ftName = "getInitializer"
-                                      },GenHS,"globalVariableGetInitializer")
+                                      },"globalVariableGetInitializer")
                           ]
              }
        ,Spec { specHeader = irInclude version "Function.h"
@@ -744,21 +744,21 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isVarArg"
-                                      },GenHS,"functionIsVarArg")
+                                      },"functionIsVarArg")
                           ,(memberFun { ftReturnType = normalT $ RefType $ NamedType llvmNS "iplist" 
                                                        [normalT $ NamedType llvmNS "BasicBlock" []]
                                       , ftName = "getBasicBlockList"
-                                      },GenHS,"getBasicBlockList")
+                                      },"getBasicBlockList")
                           ,(memberFun { ftReturnType = normalT $ RefType $ NamedType llvmNS "BasicBlock" []
                                       , ftName = "getEntryBlock"
-                                      },GenHS,"getEntryBlock")
+                                      },"getEntryBlock")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionType"
                                       , ftName = "getFunctionType"
-                                      },GenHS,"functionGetFunctionType")
+                                      },"functionGetFunctionType")
                           ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "iplist"
                                                        [normalT $ llvmType "Argument"]
                                       , ftName = "getArgumentList"
-                                      },GenHS,"functionGetArgumentList")
+                                      },"functionGetArgumentList")
                           ]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
@@ -773,10 +773,10 @@ llvm version
                 , specName = "error_code"
                 , specTemplateArgs = []
                 , specType = ClassSpec
-                             [(Destructor False,GenHS,"deleteErrorCode")
+                             [(Destructor False,"deleteErrorCode")
                              ,(memberFun { ftReturnType = normalT (NamedType [] "int" [])
                                          , ftName = "value"
-                                         },GenHS,"errorCodeValue_")]
+                                         },"errorCodeValue_")]
                 }]
      else [])++
        [Spec { specHeader = "llvm/Support/MemoryBuffer.h"
@@ -784,10 +784,10 @@ llvm version
              , specName = "MemoryBuffer"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Destructor False,GenHS,"deleteMemoryBuffer")
+                          [(Destructor False,"deleteMemoryBuffer")
                           ,(memberFun { ftReturnType = normalT size_t 
                                       , ftName = "getBufferSize"
-                                      },GenHS,"getBufferSize_")
+                                      },"getBufferSize_")
                           ,if version>=llvm2_9
                            then (memberFun { ftReturnType = normalT (NamedType llvmNS "error_code" []) 
                                            , ftName = "getFile"
@@ -799,12 +799,12 @@ llvm version
                                                        then [(False,normalT (NamedType [] "bool" []))]
                                                        else [])
                                            , ftStatic = True
-                                           },GenHS,"getFileMemoryBuffer")
+                                           },"getFileMemoryBuffer")
                            else (memberFun { ftReturnType = normalT $ ptr $ llvmType "MemoryBuffer"
                                            , ftName = "getFile"
                                            , ftArgs = [(False,normalT (NamedType llvmNS "StringRef" []))]
                                            , ftStatic = True
-                                           },GenHS,"getFileMemoryBuffer")
+                                           },"getFileMemoryBuffer")
                           ]
              }
        ,Spec { specHeader = "llvm/Support/SourceMgr.h"
@@ -812,25 +812,25 @@ llvm version
              , specName = "SMDiagnostic"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Constructor [],GenHS,"newSMDiagnostic")
-                          ,(Destructor False,GenHS,"deleteSMDiagnostic")
+                          [(Constructor [],"newSMDiagnostic")
+                          ,(Destructor False,"deleteSMDiagnostic")
                           ,(memberFun { ftReturnType = normalT (NamedType llvmNS "StringRef" [])
                                       , ftName = "getFilename"
-                                      },GenHS,"getFilename")
+                                      },"getFilename")
                           ,(memberFun { ftReturnType = normalT (NamedType [] "int" [])
                                       , ftName = "getLineNo"
-                                      },GenHS,"getLineNo_")
+                                      },"getLineNo_")
                           ,(memberFun { ftReturnType = normalT (NamedType [] "int" [])
                                       , ftName = "getColumnNo"
-                                      },GenHS,"getColumnNo_")
+                                      },"getColumnNo_")
                           ]
              }
        ,Spec { specHeader = irInclude version "LLVMContext.h"
              , specNS = llvmNS
              , specName = "LLVMContext"
              , specTemplateArgs = []
-             , specType = ClassSpec [(Constructor [],GenHS,"newLLVMContext")
-                                    ,(Destructor False,GenHS,"deleteLLVMContext")]
+             , specType = ClassSpec [(Constructor [],"newLLVMContext")
+                                    ,(Destructor False,"deleteLLVMContext")]
              }
        ,Spec { specHeader = irInclude version "LLVMContext.h"
              , specNS = llvmNS
@@ -848,23 +848,23 @@ llvm version
              , specType = ClassSpec
                           [(Constructor [(False,normalT $ NamedType llvmNS "StringRef" [])
                                         ,(False,normalT $ RefType $ NamedType llvmNS "LLVMContext" [])
-                                        ],GenHS,"newModule")
-                          ,(Destructor False,GenHS,"deleteModule")
+                                        ],"newModule")
+                          ,(Destructor False,"deleteModule")
                           ,(memberFun { ftReturnType = normalT void
                                       , ftName = "dump"
-                                      },GenHS,"moduleDump")
+                                      },"moduleDump")
                           ,(memberFun { ftReturnType = normalT $ RefType $ NamedType llvmNS "iplist"
                                                        [normalT $ NamedType llvmNS "Function" []]
                                       , ftName = "getFunctionList"
-                                      },GenHS,"getFunctionList")
+                                      },"getFunctionList")
                           ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "iplist"
                                                        [normalT $ NamedType llvmNS "GlobalVariable" []]
                                       , ftName = "getGlobalList"
-                                      },GenHS,"getGlobalList")
+                                      },"getGlobalList")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
                                       , ftName = "getTypeByName"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
-                                      },GenHS,"getTypeByName")
+                                      },"getTypeByName")
                           ]
              }
        ,Spec { specHeader = "llvm/Support/IRReader.h"
@@ -878,11 +878,11 @@ llvm version
                                                  ,(False,normalT (RefType $ NamedType llvmNS "SMDiagnostic" []))
                                                  ,(False,normalT (RefType $ NamedType llvmNS "LLVMContext" []))]
                                       , ftStatic = True
-                                      },GenHS,"parseIR")
+                                      },"parseIR")
                           {-,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionPass"
                                       , ftName = "createCFGSimplificationPass"
                                       , ftStatic = True
-                                      },GenHS,"createCFGSimplificationPass")-}
+                                      },"createCFGSimplificationPass")-}
                           ]++
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isa"
@@ -891,7 +891,7 @@ llvm version
                                       , ftStatic = True
                                       , ftOverloaded = True
                                       , ftPure = True
-                                      },GenHS,"isA"++to)
+                                      },"isA"++to)
                            | (to,from) <- [(to',"Value")
                                               | to' <- ["Value"
                                                       ,"Argument"
@@ -1019,10 +1019,10 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "BasicBlock" []
                                       , ftName = "getParent"
-                                      },GenHS,"instructionGetParent")
+                                      },"instructionGetParent")
                           ,(memberFun { ftReturnType = constT $ ref $ NamedType llvmNS "DebugLoc" []
                                       , ftName = "getDebugLoc"
-                                      },GenHS,"instructionGetDebugLoc")]
+                                      },"instructionGetDebugLoc")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
@@ -1032,25 +1032,25 @@ llvm version
                 , specType = ClassSpec 
                              [(memberFun { ftReturnType = normalT bool
                                          , ftName = "isVolatile"
-                                         },GenHS,"atomicCmpXchgInstIsVolatile")
+                                         },"atomicCmpXchgInstIsVolatile")
                              ,(memberFun { ftReturnType = normalT int
                                          , ftName = "getOrdering"
-                                         },GenHS,"atomicCmpXchgInstGetOrdering_")
+                                         },"atomicCmpXchgInstGetOrdering_")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                          , ftName = "getPointerOperand"
-                                         },GenHS,"atomicCmpXchgInstGetPointerOperand")
+                                         },"atomicCmpXchgInstGetPointerOperand")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                          , ftName = "getCompareOperand"
-                                         },GenHS,"atomicCmpXchgInstGetCompareOperand")
+                                         },"atomicCmpXchgInstGetCompareOperand")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                          , ftName = "getNewValOperand"
-                                         },GenHS,"atomicCmpXchgInstGetNewValOperand")
+                                         },"atomicCmpXchgInstGetNewValOperand")
                              ,(Constructor [(True,normalT $ ptr $ llvmType "Value")
                                            ,(True,normalT $ ptr $ llvmType "Value")
                                            ,(True,normalT $ ptr $ llvmType "Value")
                                            ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
                                            ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                                           ],GenHS,"newAtomicCmpXchgInst_")]
+                                           ],"newAtomicCmpXchgInst_")]
                 }
           ,Spec { specHeader = irInclude version "Instructions.h"
                 , specNS = llvmNS
@@ -1059,25 +1059,25 @@ llvm version
                 , specType = ClassSpec 
                              [(memberFun { ftReturnType = normalT int
                                          , ftName = "getOperation"
-                                         },GenHS,"atomicRMWInstGetOperation_")
+                                         },"atomicRMWInstGetOperation_")
                              ,(memberFun { ftReturnType = normalT bool
                                          , ftName = "isVolatile"
-                                         },GenHS,"atomicRMWInstIsVolatile")
+                                         },"atomicRMWInstIsVolatile")
                              ,(memberFun { ftReturnType = normalT int
                                          , ftName = "getOrdering"
-                                         },GenHS,"atomicRMWInstGetOrdering_")
+                                         },"atomicRMWInstGetOrdering_")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                          , ftName = "getPointerOperand"
-                                         },GenHS,"atomicRMWInstGetPointerOperand")
+                                         },"atomicRMWInstGetPointerOperand")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                          , ftName = "getValOperand"
-                                         },GenHS,"atomicRMWInstGetValOperand")
+                                         },"atomicRMWInstGetValOperand")
                              ,(Constructor [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "AtomicRMWInst" []] "BinOp")
                                            ,(True,normalT $ ptr $ llvmType "Value")
                                            ,(True,normalT $ ptr $ llvmType "Value")
                                            ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
                                            ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                                           ],GenHS,"newAtomicRMWInst_")]
+                                           ],"newAtomicRMWInst_")]
                 }]
      else [])++
        [Spec { specHeader = irInclude version "Instructions.h"
@@ -1087,7 +1087,7 @@ llvm version
              , specType = ClassSpec 
                           [(memberFun { ftReturnType = normalT int
                                       , ftName = "getOpcode"
-                                      },GenHS,"binOpGetOpCode_")
+                                      },"binOpGetOpCode_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BinaryOperator"
                                       , ftName = "Create"
                                       , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "Instruction" []] "BinaryOps")
@@ -1095,7 +1095,7 @@ llvm version
                                                  ,(True,normalT $ ptr $ llvmType "Value")
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newBinaryOperator_")
+                                      },"newBinaryOperator_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -1105,20 +1105,20 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isTailCall"
-                                      },GenHS,"callInstIsTailCall")
+                                      },"callInstIsTailCall")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumArgOperands"
-                                      },GenHS,"callInstGetNumArgOperands_")
+                                      },"callInstGetNumArgOperands_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getArgOperand"
                                       , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"callInstGetArgOperand_")
+                                      },"callInstGetArgOperand_")
                           ,(memberFun { ftReturnType = normalT int
                                       , ftName = "getCallingConv"
-                                      },GenHS,"callInstGetCallingConv_")
+                                      },"callInstGetCallingConv_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getCalledValue"
-                                      },GenHS,"callInstGetCalledValue")
+                                      },"callInstGetCalledValue")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "CallInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
@@ -1127,7 +1127,7 @@ llvm version
                                                   else (False,normalT $ ptr $ llvmType "Value")
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newCallInst_")
+                                      },"newCallInst_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -1138,7 +1138,7 @@ llvm version
                           [(memberFun { ftReturnType = normalT int
                                       , ftName = "getPredicate" 
                                       , ftOverloaded = True
-                                      },GenHS,"cmpInstGetPredicate_")]
+                                      },"cmpInstGetPredicate_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1151,7 +1151,7 @@ llvm version
                             ,(True,normalT $ ptr $ llvmType "Value")
                             ,(True,normalT $ ptr $ llvmType "Value")
                             ,(False,constT $ ref $ llvmType "Twine")
-                            ],GenHS,"newFCmpInst_")]
+                            ],"newFCmpInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1164,7 +1164,7 @@ llvm version
                             ,(True,normalT $ ptr $ llvmType "Value")
                             ,(True,normalT $ ptr $ llvmType "Value")
                             ,(False,constT $ ref $ llvmType "Twine")
-                            ],GenHS,"newICmpInst_")]
+                            ],"newICmpInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1173,17 +1173,17 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getVectorOperand"
-                                      },GenHS,"extractElementInstGetVectorOperand")
+                                      },"extractElementInstGetVectorOperand")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getIndexOperand"
-                                      },GenHS,"extractElementInstGetIndexOperand")
+                                      },"extractElementInstGetIndexOperand")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExtractElementInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
                                                  ,(True,normalT $ ptr $ llvmType "Value")
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newExtractElementInst_")]
+                                      },"newExtractElementInst_")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
@@ -1193,12 +1193,12 @@ llvm version
                 , specType = ClassSpec 
                              [(memberFun { ftReturnType = normalT int
                                          , ftName = "getOrdering"
-                                         },GenHS,"fenceInstGetOrdering_")
+                                         },"fenceInstGetOrdering_")
                              ,(Constructor
                                [(False,normalT $ ref $ llvmType "LLVMContext")
                                ,(False,normalT $ EnumType llvmNS "AtomicOrdering")
                                ,(False,normalT $ EnumType llvmNS "SynchronizationScope")
-                               ],GenHS,"newFenceInst_")]
+                               ],"newFenceInst_")]
                 }]
      else [])++
        [Spec { specHeader = irInclude version "Instructions.h"
@@ -1208,22 +1208,22 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "PointerType" []
                                       , ftName = "getType"
-                                      },GenHS,"getElementPtrInstGetType")
+                                      },"getElementPtrInstGetType")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isInBounds"
-                                      },GenHS,"getElementPtrInstIsInBounds")
+                                      },"getElementPtrInstIsInBounds")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getPointerOperand"
-                                      },GenHS,"getElementPtrInstGetPointerOperand")
+                                      },"getElementPtrInstGetPointerOperand")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Use"
                                       , ftName = "idx_begin"
-                                      },GenHS,"getElementPtrInstIdxBegin")
+                                      },"getElementPtrInstIdxBegin")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Use"
                                       , ftName = "idx_end"
-                                      },GenHS,"getElementPtrInstIdxEnd")
+                                      },"getElementPtrInstIdxEnd")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumIndices"
-                                      },GenHS,"getElementPtrInstGetNumIndices_")
+                                      },"getElementPtrInstGetNumIndices_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "GetElementPtrInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
@@ -1232,7 +1232,7 @@ llvm version
                                                   else (False,normalT $ ptr $ llvmType "Value")
                                                  ,(False,normalT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newGetElementPtrInst_")
+                                      },"newGetElementPtrInst_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -1242,7 +1242,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
                                       , ftName = "getType"
-                                      },GenHS,"insertElementInstGetType")
+                                      },"insertElementInstGetType")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "InsertElementInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
@@ -1250,7 +1250,7 @@ llvm version
                                                  ,(True,normalT $ ptr $ llvmType "Value")
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newInsertElementInst_")]
+                                      },"newInsertElementInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1266,7 +1266,7 @@ llvm version
                                                   else (False,normalT unsigned)
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newInsertValueInst_")]
+                                      },"newInsertValueInst_")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
@@ -1276,25 +1276,25 @@ llvm version
                 , specType = ClassSpec
                              [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                          , ftName = "getPersonalityFn"
-                                         },GenHS,"landingPadInstGetPersonaliteFn")
+                                         },"landingPadInstGetPersonaliteFn")
                              ,(memberFun { ftReturnType = normalT bool
                                          , ftName = "isCleanup"
-                                         },GenHS,"landingPadInstIsCleanup")
+                                         },"landingPadInstIsCleanup")
                              ,(memberFun { ftReturnType = normalT unsigned
                                          , ftName = "getNumClauses"
-                                         },GenHS,"landingPadInstGetNumClauses_")
+                                         },"landingPadInstGetNumClauses_")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                          , ftName = "getClause"
                                          , ftArgs = [(False,normalT unsigned)]
-                                         },GenHS,"landingPadInstGetClause_")
+                                         },"landingPadInstGetClause_")
                              ,(memberFun { ftReturnType = normalT bool
                                          , ftName = "isCatch"
                                          , ftArgs = [(False,normalT unsigned)]
-                                         },GenHS,"landingPadInstIsCatch_")
+                                         },"landingPadInstIsCatch_")
                              ,(memberFun { ftReturnType = normalT bool
                                          , ftName = "isFilter"
                                          , ftArgs = [(False,normalT unsigned)]
-                                         },GenHS,"landingPadInstIsFilter_")
+                                         },"landingPadInstIsFilter_")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
                                          , ftName = "Create"
                                          , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
@@ -1302,13 +1302,13 @@ llvm version
                                                     ,(False,normalT unsigned)
                                                     ,(False,constT $ ref $ llvmType "Twine")]
                                          , ftStatic = True
-                                         },GenHS,"newLandingPadInst_")
+                                         },"newLandingPadInst_")
                              ,(memberFun { ftName = "setCleanup"
                                          , ftArgs = [(False,normalT bool)]
-                                         },GenHS,"landingPadInstSetCleanup")
+                                         },"landingPadInstSetCleanup")
                              ,(memberFun { ftName = "addClause"
                                          , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
-                                         },GenHS,"landingPadInstAddClause_")
+                                         },"landingPadInstAddClause_")
                              ]
                 }]
      else [])++
@@ -1319,15 +1319,15 @@ llvm version
              , specType = ClassSpec 
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumIncomingValues"
-                                      },GenHS,"phiNodeGetNumIncomingValues_")
+                                      },"phiNodeGetNumIncomingValues_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getIncomingValue"
                                       , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"phiNodeGetIncomingValue_")
+                                      },"phiNodeGetIncomingValue_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "BasicBlock" []
                                       , ftName = "getIncomingBlock"
                                       , ftArgs = [(False,normalT unsigned)]
-                                      },GenHS,"phiNodeGetIncomingBlock_")
+                                      },"phiNodeGetIncomingBlock_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "PHINode"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]++
@@ -1336,11 +1336,11 @@ llvm version
                                                   else [])++
                                                  [(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newPhiNode_")
+                                      },"newPhiNode_")
                           ,(memberFun { ftName = "addIncoming"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
                                                  ,(False,normalT $ ptr $ llvmType "BasicBlock")]
-                                      },GenHS,"phiNodeAddIncoming_")]
+                                      },"phiNodeAddIncoming_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1349,13 +1349,13 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCondition"
-                                      },GenHS,"selectInstGetCondition")
+                                      },"selectInstGetCondition")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getTrueValue"
-                                      },GenHS,"selectInstGetTrueValue")
+                                      },"selectInstGetTrueValue")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getFalseValue"
-                                      },GenHS,"selectInstGetFalseValue")
+                                      },"selectInstGetFalseValue")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "SelectInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
@@ -1363,7 +1363,7 @@ llvm version
                                                  ,(True,normalT $ ptr $ llvmType "Value")
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
-                                      },GenHS,"newSelectInst_")
+                                      },"newSelectInst_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -1373,7 +1373,7 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "VectorType" []
                                       , ftName = "getType"
-                                      },GenHS,"shuffleVectorInstGetType")]
+                                      },"shuffleVectorInstGetType")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1382,21 +1382,21 @@ llvm version
              , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isVolatile"
-                                      },GenHS,"storeInstIsVolatile")
+                                      },"storeInstIsVolatile")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
-                                      },GenHS,"storeInstGetAlignment_")]++
+                                      },"storeInstGetAlignment_")]++
                (if version>=llvm3_0
                 then [(memberFun { ftReturnType = normalT int
                                  , ftName = "getOrdering"
-                                 },GenHS,"storeInstGetOrdering_")]
+                                 },"storeInstGetOrdering_")]
                 else [])++
                [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                            , ftName = "getValueOperand"
-                           },GenHS,"storeInstGetValueOperand")
+                           },"storeInstGetValueOperand")
                ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                            , ftName = "getPointerOperand"
-                           },GenHS,"storeInstGetPointerOperand")
+                           },"storeInstGetPointerOperand")
                ]
              }
        ,Spec { specHeader = irInclude version "InstrTypes.h"
@@ -1407,12 +1407,12 @@ llvm version
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumSuccessors"
                                       , ftOverloaded = True
-                                      },GenHS,"terminatorInstGetNumSuccessors_")
+                                      },"terminatorInstGetNumSuccessors_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                       , ftName = "getSuccessor"
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftOverloaded = True
-                                      },GenHS,"terminatorInstGetSuccessor_")]
+                                      },"terminatorInstGetSuccessor_")]
              }
        ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = llvmNS
@@ -1421,10 +1421,10 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isConditional"
-                                      },GenHS,"branchInstIsConditional")
+                                      },"branchInstIsConditional")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCondition"
-                                      },GenHS,"branchInstGetCondition")]
+                                      },"branchInstGetCondition")]
              }
        ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = llvmNS
@@ -1439,27 +1439,27 @@ llvm version
              , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumArgOperands"
-                                      },GenHS,"invokeInstGetNumArgOperands_")
+                                      },"invokeInstGetNumArgOperands_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftName = "getArgOperand"
-                                      },GenHS,"invokeInstGetArgOperand_")
+                                      },"invokeInstGetArgOperand_")
                           ,(memberFun { ftReturnType = normalT int
                                       , ftName = "getCallingConv"
-                                      },GenHS,"invokeInstGetCallingConv_")
+                                      },"invokeInstGetCallingConv_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCalledValue"
-                                      },GenHS,"invokeInstGetCalledValue")
+                                      },"invokeInstGetCalledValue")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                       , ftName = "getNormalDest"
-                                      },GenHS,"invokeInstGetNormalDest")
+                                      },"invokeInstGetNormalDest")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                       , ftName = "getUnwindDest"
-                                      },GenHS,"invokeInstGetUnwindDest")]++
+                                      },"invokeInstGetUnwindDest")]++
                           (if version>=llvm3_0
                            then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
                                             , ftName = "getLandingPadInst"
-                                            },GenHS,"invokeInstGetLandingPadInst")]
+                                            },"invokeInstGetLandingPadInst")]
                            else [])
              }]++
     (if version>=llvm3_0
@@ -1477,7 +1477,7 @@ llvm version
              , specType = ClassSpec 
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getReturnValue"
-                                      },GenHS,"returnInstGetReturnValue")]
+                                      },"returnInstGetReturnValue")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1486,17 +1486,17 @@ llvm version
              , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCondition"
-                                      },GenHS,"switchInstGetCondition")]++
+                                      },"switchInstGetCondition")]++
                           (if version>=llvm3_1
                            then [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
                                             , ftName = "case_begin"
-                                            },GenHS,"switchInstCaseBegin")
+                                            },"switchInstCaseBegin")
                                 ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
                                             , ftName = "case_end"
-                                            },GenHS,"switchInstCaseEnd")
+                                            },"switchInstCaseEnd")
                                 ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
                                             , ftName = "case_default"
-                                            },GenHS,"switchInstCaseDefault")]
+                                            },"switchInstCaseDefault")]
                            else [])
              }]++
     (if version>=llvm3_1
@@ -1507,20 +1507,20 @@ llvm version
                 , specType = ClassSpec
                              [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
                                          , ftName = "operator++"
-                                         },GenHS,"caseItNext")
+                                         },"caseItNext")
                              ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" []
                                          , ftName = "operator--"
-                                         },GenHS,"caseItPrev")
+                                         },"caseItPrev")
                              ,(memberFun { ftReturnType = normalT bool
                                          , ftName = "operator=="
                                          , ftArgs = [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" [])]
-                                         },GenHS,"caseItEq")
+                                         },"caseItEq")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
                                          , ftName = "getCaseValue"
-                                         },GenHS,"caseItGetCaseValue")
+                                         },"caseItGetCaseValue")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                          , ftName = "getCaseSuccessor"
-                                         },GenHS,"caseItGetCaseSuccessor")]
+                                         },"caseItGetCaseSuccessor")]
                 }]
      else [])++
        [Spec { specHeader = irInclude version "Instructions.h"
@@ -1542,16 +1542,16 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "PointerType" []
                                       , ftName = "getType"
-                                      },GenHS,"allocaInstGetType")
+                                      },"allocaInstGetType")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isArrayAllocation"
-                                      },GenHS,"allocaInstIsArrayAllocation")
+                                      },"allocaInstIsArrayAllocation")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getArraySize"
-                                      },GenHS,"allocaInstGetArraySize")
+                                      },"allocaInstGetArraySize")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
-                                      },GenHS,"allocaInstGetAlignment_")]
+                                      },"allocaInstGetAlignment_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1638,18 +1638,18 @@ llvm version
              , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isVolatile"
-                                      },GenHS,"loadInstIsVolatile")
+                                      },"loadInstIsVolatile")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
-                                      },GenHS,"loadInstGetAlignment_")]++
+                                      },"loadInstGetAlignment_")]++
                (if version>=llvm3_0
                 then [(memberFun { ftReturnType = normalT int
                                  , ftName = "getOrdering"
-                                 },GenHS,"loadInstGetOrdering_")]
+                                 },"loadInstGetOrdering_")]
                 else [])++
                [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                            , ftName = "getPointerOperand"
-                           },GenHS,"loadInstGetPointerOperand")
+                           },"loadInstGetPointerOperand")
                ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
@@ -1666,12 +1666,12 @@ llvm version
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumOperands" 
                                       , ftOverloaded = True
-                                      },GenHS,"getNumOperands_")
+                                      },"getNumOperands_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "Value" []
                                       , ftName = "getOperand" 
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftOverloaded = True
-                                      },GenHS,"getOperand_")]
+                                      },"getOperand_")]
              }
        ,Spec { specHeader = irInclude version "Operator.h"
              , specNS = llvmNS
@@ -1686,13 +1686,13 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "get"
-                                      },GenHS,"useGet")
+                                      },"useGet")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Use"
                                       , ftName = "getNext"
-                                      },GenHS,"useGetNext")
+                                      },"useGetNext")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "User"
                                       , ftName = "getUser"
-                                      },GenHS,"useGetUser")]
+                                      },"useGetUser")]
                
              }
        ,Spec { specHeader = "llvm/PassManager.h"
@@ -1700,16 +1700,16 @@ llvm version
              , specName = "PassManager"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Constructor [],GenHS,"newPassManager")
-                          ,(Destructor False,GenHS,"deletePassManager")
+                          [(Constructor [],"newPassManager")
+                          ,(Destructor False,"deletePassManager")
                           ,(memberFun { ftReturnType = normalT void
                                       , ftName = "add"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Pass")]
-                                      },GenHS,"passManagerAdd_")
+                                      },"passManagerAdd_")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "run"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "Module")]
-                                      },GenHS,"passManagerRun")
+                                      },"passManagerRun")
                           ]
              }
        ,Spec { specHeader = "llvm/PassManager.h"
@@ -1717,16 +1717,16 @@ llvm version
              , specName = "FunctionPassManager"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Constructor [(False,normalT $ ptr $ llvmType "Module")],GenHS,"newFunctionPassManager")
-                          ,(Destructor False,GenHS,"deleteFunctionPassManager")
+                          [(Constructor [(False,normalT $ ptr $ llvmType "Module")],"newFunctionPassManager")
+                          ,(Destructor False,"deleteFunctionPassManager")
                           ,(memberFun { ftReturnType = normalT void
                                       , ftName = "add"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Pass")]
-                                      },GenHS,"functionPassManagerAdd_")
+                                      },"functionPassManagerAdd_")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "run"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "Function")]
-                                      },GenHS,"functionPassManagerRun")
+                                      },"functionPassManagerRun")
                           ]
              }
        ,Spec { specHeader = "llvm/Pass.h"
@@ -1734,32 +1734,32 @@ llvm version
              , specName = "Pass"
              , specTemplateArgs = []
              , specType = ClassSpec 
-                          [(Destructor True,GenHS,"deletePass_")
+                          [(Destructor True,"deletePass_")
                           ,(memberFun { ftReturnType = constT $ ptr $ llvmType "PassInfo"
                                       , ftName = "lookupPassInfo"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
                                       , ftStatic = True
-                                      },GenHS,"passLookupPassInfo")
+                                      },"passLookupPassInfo")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "AnalysisResolver"
                                       , ftName = "getResolver"
                                       , ftOverloaded = True
-                                      },GenHS,"passGetResolver_")
+                                      },"passGetResolver_")
                           ,(memberFun { ftReturnType = normalT $ ptr void
                                       , ftName = "getAdjustedAnalysisPointer"
                                       , ftArgs = [(False,constT $ ptr void)]
                                       , ftOverloaded = True
-                                      },GenHS,"passGetAdjustedAnalysisPointer_")
+                                      },"passGetAdjustedAnalysisPointer_")
                           ,(memberFun { ftReturnType = normalT $ EnumType llvmNS "PassKind"
                                       , ftName = "getPassKind"
                                       , ftOverloaded = True
-                                      },GenHS,"passGetKind_")
+                                      },"passGetKind_")
                           ,(memberFun { ftReturnType = constT $ ptr char
                                       , ftName = "getPassName"
                                       , ftOverloaded = True
-                                      },GenHS,"passGetName_")
+                                      },"passGetName_")
                           ,(memberFun { ftName = "dump"
                                       , ftOverloaded = True
-                                      },GenHS,"passDump_")
+                                      },"passDump_")
                           ]
              }
        ,Spec { specHeader = "llvm/Pass.h"
@@ -1771,7 +1771,7 @@ llvm version
                                       , ftName = "runOnFunction"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "Function")]
                                       , ftOverloaded = True
-                                      },GenHS,"functionPassRun_")]
+                                      },"functionPassRun_")]
              }
        ,Spec { specHeader = "llvm/Pass.h"
              , specNS = llvmNS
@@ -1782,7 +1782,7 @@ llvm version
                                       , ftName = "runOnModule"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "Module")]
                                       , ftOverloaded = True
-                                      },GenHS,"modulePassRunOnModule_")
+                                      },"modulePassRunOnModule_")
                           ]
              }
        ,Spec { specHeader = "llvm/Pass.h"
@@ -1796,11 +1796,11 @@ llvm version
              , specName = "FindUsedTypes"
              , specTemplateArgs = []
              , specType = ClassSpec 
-                          [(Constructor [],GenHS,"newFindUsedTypes")
-                          ,(Destructor False,GenHS,"deleteFindUsedTypes")
+                          [(Constructor [],"newFindUsedTypes")
+                          ,(Destructor False,"deleteFindUsedTypes")
                           ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "llvm" []] "SetVector" [normalT $ ptr $ llvmType "Type"]
                                       , ftName = "getTypes"
-                                      },GenHS,"findUsedTypesGetTypes")]
+                                      },"findUsedTypesGetTypes")]
              }]++
     (if version>=llvm2_9
      then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
@@ -1808,25 +1808,25 @@ llvm version
                 , specName = "TargetLibraryInfo"
                 , specTemplateArgs = []
                 , specType = ClassSpec $
-                             [(Constructor [],GenHS,"newTargetLibraryInfo")
-                             ,(Destructor False,GenHS,"deleteTargetLibraryInfo")]++
+                             [(Constructor [],"newTargetLibraryInfo")
+                             ,(Destructor False,"deleteTargetLibraryInfo")]++
                              (if version>=llvm3_3
                               then [(memberFun { ftReturnType = normalT bool
                                                , ftName = "getLibFunc"
                                                , ftArgs = [(False,normalT $ llvmType "StringRef")
                                                           ,(False,normalT $ ref $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                               },GenHS,"targetLibraryInfoGetLibFunc_")]
+                                               },"targetLibraryInfoGetLibFunc_")]
                               else [])++
                              (if version>=llvm3_1
                               then [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
                                                , ftName = "getName"
                                                , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                               },GenHS,"targetLibraryInfoGetName_")]
+                                               },"targetLibraryInfoGetName_")]
                               else [])++
                              [(memberFun { ftReturnType = normalT bool
                                          , ftName = "has"
                                          , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
-                                         },GenHS,"targetLibraryInfoHas_")
+                                         },"targetLibraryInfoHas_")
                              ]
                 }]
      else [])++
@@ -1836,44 +1836,44 @@ llvm version
                    , specName = "DataLayout"
                    , specTemplateArgs = []
                    , specType = ClassSpec
-                                [(Constructor [(False,normalT $ llvmType "StringRef")],GenHS,"newDataLayoutFromString")
-                                ,(Constructor [(False,constT $ ptr $ llvmType "Module")],GenHS,"newDataLayoutFromModule")
+                                [(Constructor [(False,normalT $ llvmType "StringRef")],"newDataLayoutFromString")
+                                ,(Constructor [(False,constT $ ptr $ llvmType "Module")],"newDataLayoutFromModule")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isLittleEndian"
-                                            },GenHS,"dataLayoutIsLittleEndian")
+                                            },"dataLayoutIsLittleEndian")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isBigEndian"
-                                            },GenHS,"dataLayoutIsBigEndian")]
+                                            },"dataLayoutIsBigEndian")]
                    }]
         else [Spec { specHeader = "llvm/Target/TargetData.h"
                    , specNS = llvmNS
                    , specName = "TargetData"
                    , specTemplateArgs = []
                    , specType = ClassSpec
-                                [(Constructor [(False,normalT $ llvmType "StringRef")],GenHS,"newTargetDataFromString")
-                                ,(Constructor [(False,constT $ ptr $ llvmType "Module")],GenHS,"newTargetDataFromModule")
+                                [(Constructor [(False,normalT $ llvmType "StringRef")],"newTargetDataFromString")
+                                ,(Constructor [(False,constT $ ptr $ llvmType "Module")],"newTargetDataFromModule")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isLittleEndian"
-                                            },GenHS,"targetDataIsLittleEndian")
+                                            },"targetDataIsLittleEndian")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isBigEndian"
-                                            },GenHS,"targetDataIsBigEndian")]
+                                            },"targetDataIsBigEndian")]
                    }])++
        [Spec { specHeader = "llvm/PassSupport.h"
              , specNS = llvmNS
              , specName = "PassInfo"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Destructor False,GenHS,"deletePassInfo")
+                          [(Destructor False,"deletePassInfo")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Pass"
                                       , ftName = "createPass"
-                                      },GenHS,"passInfoCreatePass")
+                                      },"passInfoCreatePass")
                           ,(memberFun { ftReturnType = constT $ ptr $ char
                                       , ftName = "getPassName"
-                                      },GenHS,"passInfoGetPassName_")
+                                      },"passInfoGetPassName_")
                           ,(memberFun { ftReturnType = constT $ ptr $ char
                                       , ftName = "getPassArgument"
-                                      },GenHS,"passInfoGetPassArgument_")
+                                      },"passInfoGetPassArgument_")
                           ]
              }
        ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
@@ -1881,12 +1881,12 @@ llvm version
              , specName = "LoopInfo"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Constructor [],GenHS,"newLoopInfo")
+                          [(Constructor [],"newLoopInfo")
                           ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "LoopInfoBase" 
                                                        [normalT $ llvmType "BasicBlock"
                                                        ,normalT $ llvmType "Loop"]
                                       , ftName = "getBase"
-                                      },GenHS,"loopInfoGetBase")
+                                      },"loopInfoGetBase")
                           ]
              }
        ]++
@@ -1896,34 +1896,34 @@ llvm version
                 , specName = "PassManagerBuilder"
                 , specTemplateArgs = []
                 , specType = ClassSpec $
-                             [(Constructor [],GenHS,"newPassManagerBuilder")
-                             ,(Destructor False,GenHS,"deletePassManagerBuilder")
+                             [(Constructor [],"newPassManagerBuilder")
+                             ,(Destructor False,"deletePassManagerBuilder")
                              ,(memberFun { ftName = "populateFunctionPassManager"
                                          , ftArgs = [(False,normalT $ ref $ llvmType "FunctionPassManager")
                                                     ]
-                                         },GenHS,"populateFunctionPassManager")
+                                         },"populateFunctionPassManager")
                              ,(Setter { ftSetVar = "OptLevel"
                                       , ftSetType = normalT unsigned
-                                      },GenHS,"setPassManagerBuilderOptLevel")
+                                      },"setPassManagerBuilderOptLevel")
                              ,(Setter { ftSetVar = "SizeLevel"
                                       , ftSetType = normalT unsigned
-                                      },GenHS,"setPassManagerBuilderSizeLevel")
+                                      },"setPassManagerBuilderSizeLevel")
                              ,(Setter { ftSetVar = "Inliner"
                                       , ftSetType = normalT $ ptr $ llvmType "Pass"
-                                      },GenHS,"setPassManagerBuilderInliner")
+                                      },"setPassManagerBuilderInliner")
                              ,(Setter { ftSetVar = "DisableSimplifyLibCalls"
                                       , ftSetType = normalT bool
-                                      },GenHS,"setPassManagerBuilderDisableSimplifyLibCalls")
+                                      },"setPassManagerBuilderDisableSimplifyLibCalls")
                              ,(Setter { ftSetVar = "DisableUnitAtATime"
                                       , ftSetType = normalT bool
-                                      },GenHS,"setPassManagerBuilderDisableUnitAtATime")
+                                      },"setPassManagerBuilderDisableUnitAtATime")
                              ,(Setter { ftSetVar = "DisableUnrollLoops"
                                       , ftSetType = normalT bool
-                                      },GenHS,"setPassManagerBuilderDisableUnrollLoops")]++
+                                      },"setPassManagerBuilderDisableUnrollLoops")]++
                              (if version>=llvm3_1
                               then [(Setter { ftSetVar = "Vectorize"
                                             , ftSetType = normalT bool
-                                            },GenHS,"setPassManagerBuilderVectorize")]
+                                            },"setPassManagerBuilderVectorize")]
                               else [])
                 }]
      else [])++
@@ -2014,7 +2014,7 @@ llvm version
              , specName = "raw_ostream"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Destructor True,GenHS,"deleteOStream_")
+                          [(Destructor True,"deleteOStream_")
                           ]
              }
        ,Spec { specHeader = "llvm/Support/raw_ostream.h"
@@ -2022,33 +2022,33 @@ llvm version
              , specName = "raw_fd_ostream"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Constructor [(False,normalT int),(False,normalT bool),(False,normalT bool)],GenHS,"newFDOStream_")
-                          ,(Destructor False,GenHS,"deleteFDOStream")]
+                          [(Constructor [(False,normalT int),(False,normalT bool),(False,normalT bool)],"newFDOStream_")
+                          ,(Destructor False,"deleteFDOStream")]
              }
        ,Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
              , specNS = llvmNS
              , specName = "AliasAnalysis"
              , specTemplateArgs = []
              , specType = ClassSpec $
-                          [(Constructor [],GenHS,"newAliasAnalysis")
-                          ,(Destructor True,GenHS,"deleteAliasAnalysis_")]++
+                          [(Constructor [],"newAliasAnalysis")
+                          ,(Destructor True,"deleteAliasAnalysis_")]++
                           (if version>=llvm3_3
                            then [(memberFun { ftReturnType = constT $ ptr $ llvmType "TargetLibraryInfo"
                                             , ftName = "getTargetLibraryInfo"
                                             , ftOverloaded = True
-                                            },GenHS,"aliasAnalysisGetTargetLibraryInfo_")]
+                                            },"aliasAnalysisGetTargetLibraryInfo_")]
                            else [])++
                           [(memberFun { ftReturnType = normalT uint64_t
                                       , ftName = "getTypeStoreSize"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
                                       , ftOverloaded = True
-                                      },GenHS,"aliasAnalysisGetTypeStoreSize_")]++
+                                      },"aliasAnalysisGetTypeStoreSize_")]++
                           (if version>=llvm2_9
                            then [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" []
                                             , ftName = "getLocation"
                                             , ftArgs = [(False,constT $ ptr $ llvmType (inst++"Inst"))]
                                             , ftOverloaded = True
-                                            },GenHS,"aliasAnalysisGetLocation"++inst++"_")
+                                            },"aliasAnalysisGetLocation"++inst++"_")
                                  | inst <- ["Load","Store","VAArg"]++(if version>=llvm3_0
                                                                      then ["AtomicCmpXchg","AtomicRMW"]
                                                                      else [])]
@@ -2063,7 +2063,7 @@ llvm version
                                                       ,(False,constT $ ptr $ llvmType "Value")
                                                       ,(False,normalT unsigned)]
                                       , ftOverloaded = True
-                                      },GenHS,"aliasAnalysisAlias_")
+                                      },"aliasAnalysisAlias_")
                           ]
              }]++
     (if version>=llvm2_9
@@ -2075,7 +2075,7 @@ llvm version
                              [(Constructor [(True,constT $ ptr $ llvmType "Value")
                                            ,(False,normalT uint64_t)
                                            ,(False,constT $ ptr $ llvmType "MDNode")
-                                           ],GenHS,"newLocation_")]
+                                           ],"newLocation_")]
                 }]
      else [])++
        [Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
@@ -2124,8 +2124,8 @@ llvm version
              , specName = "Twine"
              , specTemplateArgs = []
              , specType = ClassSpec
-                          [(Constructor [],GenHS,"newTwineEmpty")
-                          ,(Constructor [(False,constT $ ptr char)],GenHS,"newTwineString_")
+                          [(Constructor [],"newTwineEmpty")
+                          ,(Constructor [(False,constT $ ptr char)],"newTwineString_")
                           ]
              }
        ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
@@ -2136,9 +2136,9 @@ llvm version
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isLoopInvariant"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
-                                      },GenHS,"loopIsLoopInvariant_")
+                                      },"loopIsLoopInvariant_")
                           ,(memberFun { ftName = "dump"
-                                      },GenHS,"loopDump")]
+                                      },"loopDump")]
              }
        ]++
     concat
@@ -2150,40 +2150,40 @@ llvm version
                         [(memberFun { ftReturnType = normalT unsigned
                                     , ftName = "getLoopDepth"
                                     , ftOverloaded = True
-                                    },GenHS,"loopGetDepth_")
+                                    },"loopGetDepth_")
                         ,(memberFun { ftReturnType = toPtr blk
                                     , ftName = "getHeader"
                                     , ftOverloaded = True
-                                    },GenHS,"loopGetHeader_")
+                                    },"loopGetHeader_")
                         ,(memberFun { ftReturnType = toPtr loop
                                     , ftName = "getParentLoop"
                                     , ftOverloaded = True
-                                    },GenHS,"loopGetParent_")
+                                    },"loopGetParent_")
                         ,(memberFun { ftReturnType = normalT bool
                                     , ftName = "contains"
                                     , ftArgs = [(False,toConstPtr loop)]
                                     , ftOverloaded = True
-                                    },GenHS,"loopContainsLoop_")
+                                    },"loopContainsLoop_")
                         ,(memberFun { ftReturnType = normalT bool
                                     , ftName = "contains"
                                     , ftArgs = [(False,toConstPtr blk)]
                                     , ftOverloaded = True
-                                    },GenHS,"loopContainsBlock_")
+                                    },"loopContainsBlock_")
                         ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr loop]
                                     , ftName = "getSubLoops"
                                     , ftOverloaded = True
-                                    },GenHS,"loopGetSubLoops_")
+                                    },"loopGetSubLoops_")
                         ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" []] "vector" [toPtr blk]
                                     , ftName = "getBlocks"
                                     , ftOverloaded = True
-                                    },GenHS,"loopGetBlocks_")
+                                    },"loopGetBlocks_")
                         ,(memberFun { ftName = "getExitEdges"
                                     , ftArgs = [(False,normalT $ ref $ NamedType llvmNS "SmallVector"
                                                           [normalT $ NamedType [ClassName "std" []] "pair" [constT $ ptr $ llvmType "BasicBlock"
                                                                                                            ,constT $ ptr $ llvmType "BasicBlock"]
                                                           ,TypeInt 16])]
                                     , ftOverloaded = True
-                                    },GenHS,"loopGetExitEdges_")]
+                                    },"loopGetExitEdges_")]
              }
      ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
            , specNS = llvmNS
@@ -2194,16 +2194,16 @@ llvm version
                                                                          ,ClassName "vector" [toPtr loop]
                                                                          ] "const_iterator" []
                                     , ftName = "begin"
-                                    },GenHS,"loopInfoBaseBegin_")
+                                    },"loopInfoBaseBegin_")
                         ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" []
                                                                          ,ClassName "vector" [toPtr loop]
                                                                          ] "const_iterator" []
                                     , ftName = "end"
-                                    },GenHS,"loopInfoBaseEnd_")
+                                    },"loopInfoBaseEnd_")
                         ,(memberFun { ftReturnType = toPtr loop
                                     , ftName = "getLoopFor"
                                     , ftArgs = [(False,toConstPtr blk)]
-                                    },GenHS,"loopInfoBaseGetLoopFor_")]
+                                    },"loopInfoBaseGetLoopFor_")]
            }]
      | (blk,loop) <- [(normalT $ llvmType "BasicBlock",normalT $ llvmType "Loop")]
     ]++
@@ -2212,23 +2212,23 @@ llvm version
           , specName = "AnalysisUsage"
           , specTemplateArgs = []
           , specType = ClassSpec
-                       [(Constructor [],GenHS,"newAnalysisUsage")
+                       [(Constructor [],"newAnalysisUsage")
                        ,(memberFun { ftName = "addRequiredID"
                                    , ftArgs = [(False,normalT $ ref char)]
                                    , ftIgnoreReturn = True
-                                   },GenHS,"analysisUsageAddRequired_")
+                                   },"analysisUsageAddRequired_")
                        ,(memberFun { ftName = "addRequiredTransitiveID"
                                    , ftArgs = [(False,normalT $ ref char)]
                                    , ftIgnoreReturn = True
-                                   },GenHS,"analysisUsageAddRequiredTransitive_")
+                                   },"analysisUsageAddRequiredTransitive_")
                        ,(memberFun { ftName = "addPreservedID"
                                    , ftArgs = [(False,normalT $ ref char)]
                                    , ftIgnoreReturn = True
-                                   },GenHS,"analysisUsageAddPreserved_")
+                                   },"analysisUsageAddPreserved_")
                        ,(memberFun { ftName = "setPreservesAll"
-                                   },GenHS,"analysisUsagePreservesAll")
+                                   },"analysisUsagePreservesAll")
                        ,(memberFun { ftName = "setPreservesCFG"
-                                   },GenHS,"analysisUsagePreservesCFG")]
+                                   },"analysisUsagePreservesCFG")]
           }
     ,Spec { specHeader = "llvm/PassAnalysisSupport.h"
           , specNS = llvmNS
@@ -2238,58 +2238,58 @@ llvm version
                        [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Pass"
                                    , ftName = "findImplPass"
                                    , ftArgs = [(False,constT $ ptr void)]
-                                   },GenHS,"analysisResolverFindImplPass_")
+                                   },"analysisResolverFindImplPass_")
                        ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Pass"
                                    , ftName = "findImplPass"
                                    , ftArgs = [(True,normalT $ ptr $ llvmType "Pass")
                                               ,(False,constT $ ptr void)
                                               ,(False,normalT $ ref $ llvmType "Function")]
-                                   },GenHS,"analysisResolverFindImplPassFun_")]
+                                   },"analysisResolverFindImplPassFun_")]
           }
     ,Spec { specHeader = "llvm/ExecutionEngine/GenericValue.h"
           , specNS = llvmNS
           , specName = "GenericValue"
           , specTemplateArgs = []
           , specType = ClassSpec $
-                       [(Constructor [],GenHS,"newGenericValue")
+                       [(Constructor [],"newGenericValue")
                        ,(Getter { ftGetVar = "DoubleVal"
                                 , ftGetType = normalT double
                                 , ftGetStatic = False
-                                },GenHS,"genericValueGetDouble")
+                                },"genericValueGetDouble")
                        ,(Setter { ftSetVar = "DoubleVal"
                                 , ftSetType = normalT double
-                                },GenHS,"genericValueSetDouble")
+                                },"genericValueSetDouble")
                        ,(Getter { ftGetVar = "FloatVal"
                                 , ftGetType = normalT float
                                 , ftGetStatic = False
-                                },GenHS,"genericValueGetFloat")
+                                },"genericValueGetFloat")
                        ,(Setter { ftSetVar = "FloatVal"
                                 , ftSetType = normalT float
-                                },GenHS,"genericValueSetFloat")
+                                },"genericValueSetFloat")
                        ,(Getter { ftGetVar = "PointerVal"
                                 , ftGetType = normalT $ ptr void
                                 , ftGetStatic = False
-                                },GenHS,"genericValueGetPointer")
+                                },"genericValueGetPointer")
                        ,(Setter { ftSetVar = "PointerVal"
                                 , ftSetType = normalT $ ptr void
-                                },GenHS,"genericValueSetPointer")
+                                },"genericValueSetPointer")
                        ,(Getter { ftGetVar = "IntVal"
                                 , ftGetType = normalT $ llvmType "APInt"
                                 , ftGetStatic = False
-                                },GenHS,"genericValueGetInt")
+                                },"genericValueGetInt")
                        ,(Setter { ftSetVar = "IntVal"
                                 , ftSetType = normalT $ llvmType "APInt"
-                                },GenHS,"genericValueSetInt")]++
+                                },"genericValueSetInt")]++
                        (if version>=llvm3_3
                         then [(Getter { ftGetVar = "AggregateVal"
                                       , ftGetType = normalT $ NamedType [ClassName "std" []] "vector"
                                                     [normalT $ llvmType "GenericValue"]
                                       , ftGetStatic = False
-                                      },GenHS,"genericValueGetAggregate")
+                                      },"genericValueGetAggregate")
                              ,(Setter { ftSetVar = "AggregateVal"
                                       , ftSetType = normalT $ NamedType [ClassName "std" []] "vector"
                                                     [normalT $ llvmType "GenericValue"]
-                                      },GenHS,"genericValueSetAggregate")]
+                                      },"genericValueSetAggregate")]
                         else [])
           }
     ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
@@ -2297,130 +2297,130 @@ llvm version
           , specName = "ExecutionEngine"
           , specTemplateArgs = []
           , specType = ClassSpec $
-                       [(Destructor True,GenHS,"deleteExecutionEngine_")
+                       [(Destructor True,"deleteExecutionEngine_")
                        ,(memberFun { ftName = "addModule"
                                    , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]
                                    , ftOverloaded = True
-                                   },GenHS,"executionEngineAddModule_")
+                                   },"executionEngineAddModule_")
                        ,if version >= llvm3_2
                         then (memberFun { ftReturnType = normalT $ ptr $ llvmType "DataLayout"
                                         , ftName = "getDataLayout"
                                         , ftOverloaded = True
-                                        },GenHS,"executionEngineGetDataLayout_")
+                                        },"executionEngineGetDataLayout_")
                         else (memberFun { ftReturnType = normalT $ ptr $ llvmType "TargetData"
                                         , ftName = "getTargetData"
                                         , ftOverloaded = True
-                                        },GenHS,"executionEngineGetTargetData_")
+                                        },"executionEngineGetTargetData_")
                        ,(memberFun { ftReturnType = normalT bool
                                    , ftName = "removeModule"
                                    , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]
                                    , ftOverloaded = True
-                                   },GenHS,"executionEngineRemoveModule_")
+                                   },"executionEngineRemoveModule_")
                        ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
                                    , ftName = "FindFunctionNamed"
                                    , ftArgs = [(False,constT $ ptr char)]
                                    , ftOverloaded = True
-                                   },GenHS,"executionEngineFindFunctionNamed_")
+                                   },"executionEngineFindFunctionNamed_")
                        ,(memberFun { ftReturnType = normalT $ llvmType "GenericValue"
                                    , ftName = "runFunction"
                                    , ftArgs = [(False,normalT $ ptr $ llvmType "Function")
                                               ,(False,constT $ ref $ NamedType [ClassName "std" []] "vector"
                                                          [normalT $ llvmType "GenericValue"])]
                                    , ftOverloaded = True
-                                   },GenHS,"executionEngineRunFunction_")]++
+                                   },"executionEngineRunFunction_")]++
             (if version >= llvm3_1
              then [(memberFun { ftReturnType = normalT $ ptr void
                               , ftName = "getPointerToNamedFunction"
                               , ftArgs = [(False,constT $ ptr char)
                                          ,(False,normalT bool)]
                               , ftOverloaded = True
-                              },GenHS,"executionEngineGetPointerToNamedFunction_")
+                              },"executionEngineGetPointerToNamedFunction_")
                   ,(memberFun { ftName = "mapSectionAddress"
                         , ftArgs = [(False,if version >= llvm3_2
                                            then constT $ ptr void
                                            else normalT $ ptr void)
                                    ,(False,normalT uint64_t)]
                                    , ftOverloaded = True
-                        },GenHS,"executionEngineMapSectionAddress_")]
+                        },"executionEngineMapSectionAddress_")]
              else [])++
             [(memberFun { ftName = "runStaticConstructorsDestructors"
                         , ftArgs = [(False,normalT bool)]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineRunStaticConstructorsDestructors_")
+                        },"executionEngineRunStaticConstructorsDestructors_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "getPointerToFunction"
                         , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineGetPointerToFunction_")
+                        },"executionEngineGetPointerToFunction_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "getPointerToFunctionOrStub"
                         , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineGetPointerToFunctionOrStub_")
+                        },"executionEngineGetPointerToFunctionOrStub_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "getPointerToGlobal"
                         , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineGetPointerToGlobal_")
+                        },"executionEngineGetPointerToGlobal_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "getPointerToGlobalIfAvailable"
                         , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineGetPointerToGlobalIfAvailable_")
+                        },"executionEngineGetPointerToGlobalIfAvailable_")
             ,(memberFun { ftName = "addGlobalMapping"
                         , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")
                                    ,(False,normalT $ ptr void)]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineAddGlobalMapping_")
+                        },"executionEngineAddGlobalMapping_")
             ,(memberFun { ftName = "clearAllGlobalMappings"
                         , ftOverloaded = True
-                        },GenHS,"executionEngineClearAllGlobalMappings_")
+                        },"executionEngineClearAllGlobalMappings_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "updateGlobalMapping"
                         , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")
                                    ,(False,normalT $ ptr void)]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineUpdateGlobalMapping_")
+                        },"executionEngineUpdateGlobalMapping_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "getPointerToBasicBlock"
                         , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineGetPointerToBasicBlock_")
+                        },"executionEngineGetPointerToBasicBlock_")
             ,(memberFun { ftName = "runJITOnFunction"
                         , ftArgs = [(False,normalT $ ptr $ llvmType "Function")
                                    ,(False,normalT $ ptr $ llvmType "MachineCodeInfo")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineRunJITOnFunction_")
+                        },"executionEngineRunJITOnFunction_")
             ,(memberFun { ftReturnType = constT $ ptr $ llvmType "GlobalValue"
                         , ftName = "getGlobalValueAtAddress"
                         , ftArgs = [(False,normalT $ ptr void)]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineGetGlobalValueAtAddress_")
+                        },"executionEngineGetGlobalValueAtAddress_")
             ,(memberFun { ftName = "StoreValueToMemory"
                         , ftArgs = [(False,constT $ ref $ llvmType "GenericValue")
                                    ,(False,normalT $ ptr $ llvmType "GenericValue")
                                    ,(True,normalT $ ptr $ llvmType "Type")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineStoreValueToMemory_")
+                        },"executionEngineStoreValueToMemory_")
             ,(memberFun { ftName = "InitializeMemory"
                         , ftArgs = [(True,constT $ ptr $ llvmType "Constant")
                                    ,(False,normalT $ ptr void)]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineInitializeMemory_")
+                        },"executionEngineInitializeMemory_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "recompileAndRelinkFunction"
                         , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineRecompileAndRelinkFunction_")
+                        },"executionEngineRecompileAndRelinkFunction_")
             ,(memberFun { ftName = "freeMachineCodeForFunction"
                         , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineFreeMachineCodeForFunction_")
+                        },"executionEngineFreeMachineCodeForFunction_")
             ,(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "getOrEmitGlobalVariable"
                         , ftArgs = [(False,constT $ ptr $ llvmType "GlobalVariable")]
                         , ftOverloaded = True
-                        },GenHS,"executionEngineGetOrEmitGlobalVariable_")
+                        },"executionEngineGetOrEmitGlobalVariable_")
             ]
           }
     ,Spec { specHeader = if version>=llvm3_0
@@ -2471,36 +2471,36 @@ llvm version
           , specName = "EngineBuilder"
           , specTemplateArgs = []
           , specType = ClassSpec $
-                       [(Constructor [(False,normalT $ ptr $ llvmType "Module")],GenHS,"newEngineBuilder")
-                       ,(Destructor False,GenHS,"deleteEngineBuilder")
+                       [(Constructor [(False,normalT $ ptr $ llvmType "Module")],"newEngineBuilder")
+                       ,(Destructor False,"deleteEngineBuilder")
                        ,(memberFun { ftIgnoreReturn = True
                                    , ftName = "setEngineKind"
                                    , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                          ,ClassName "EngineKind" []
                                                                          ] "Kind")]
-                                   },GenHS,"engineBuilderSetKind")
+                                   },"engineBuilderSetKind")
                        ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
                                    , ftName = "create"
-                                   },GenHS,"engineBuilderCreate")
+                                   },"engineBuilderCreate")
                        ,(memberFun { ftIgnoreReturn = True
                                    , ftName = "setOptLevel"
                                    , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                          ,ClassName "CodeGenOpt" []
                                                                          ] "Level")]
-                                   },GenHS,"engineBuilderSetOptLevel")
+                                   },"engineBuilderSetOptLevel")
                        ,(memberFun { ftIgnoreReturn = True
                                    , ftName = "setCodeModel"
                                    , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                          ,ClassName "CodeModel" []
                                                                          ] "Model")]
-                                   },GenHS,"engineBuilderSetCodeModel")]++
+                                   },"engineBuilderSetCodeModel")]++
             (if version>=llvm3_0
              then [(memberFun { ftIgnoreReturn = True
                               , ftName = "setRelocationModel"
                               , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                     ,ClassName "Reloc" []
                                                                     ] "Model")]
-                              },GenHS,"engineBuilderSetRelocationModel")]
+                              },"engineBuilderSetRelocationModel")]
              else [])
           }
     ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
@@ -2516,19 +2516,19 @@ llvm version
           , specName = "MachineCodeInfo"
           , specTemplateArgs = []
           , specType = ClassSpec
-                       [(Constructor [],GenHS,"newMachineCodeInfo")
+                       [(Constructor [],"newMachineCodeInfo")
                        ,(memberFun { ftName = "setSize"
                                    , ftArgs = [(False,normalT size_t)]
-                                   },GenHS,"machineCodeInfoSetSize")
+                                   },"machineCodeInfoSetSize")
                        ,(memberFun { ftName = "setAddress"
                                    , ftArgs = [(False,normalT $ ptr void)]
-                                   },GenHS,"machineCodeInfoSetAddress")
+                                   },"machineCodeInfoSetAddress")
                        ,(memberFun { ftReturnType = normalT size_t
                                    , ftName = "size"
-                                   },GenHS,"machineCodeInfoGetSize")
+                                   },"machineCodeInfoGetSize")
                        ,(memberFun { ftReturnType = normalT $ ptr void
                                    , ftName = "address"
-                                   },GenHS,"machineCodeInfoGetAddress")]
+                                   },"machineCodeInfoGetAddress")]
           }
     ,Spec { specHeader = "llvm/Pass.h"
           , specNS = llvmNS
@@ -2651,16 +2651,16 @@ llvm version
           , specType = ClassSpec $
                        [(memberFun { ftReturnType = constT $ ptr $ llvmType "Target"
                                    , ftName = "getNext"
-                                   },GenHS,"targetNext")
+                                   },"targetNext")
                        ,(memberFun { ftReturnType = constT $ ptr char
                                    , ftName = "getName"
-                                   },GenHS,"targetName")
+                                   },"targetName")
                        ,(memberFun { ftReturnType = constT $ ptr char
                                    , ftName = "getShortDescription"
-                                   },GenHS,"targetShortDescription")]++
+                                   },"targetShortDescription")]++
                        [(memberFun { ftReturnType = normalT bool
                                    , ftName = "has"++name
-                                   },GenHS,"targetHas"++name)
+                                   },"targetHas"++name)
                         | name <- ["JIT","TargetMachine","AsmPrinter"]++
                                  (if version>=llvm2_9
                                   then ["AsmStreamer"]
@@ -2675,11 +2675,11 @@ llvm version
           , specName = "TargetMachine"
           , specTemplateArgs = []
           , specType = ClassSpec
-                       [(Destructor True,GenHS,"deleteTargetMachine_")
+                       [(Destructor True,"deleteTargetMachine_")
                        ,(memberFun { ftReturnType = constT $ ref $ llvmType "Target"
                                    , ftName = "getTarget"
                                    , ftOverloaded = True
-                                   },GenHS,"targetMachineTarget_")]
+                                   },"targetMachineTarget_")]
           }]++
     (if version>=llvm2_9
      then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"

@@ -17,7 +17,7 @@ data Spec
          }
 
 data SpecType
-  = ClassSpec { cspecFuns :: [(FunSpec,GenSpec,String)] }
+  = ClassSpec { cspecFuns :: [(FunSpec,String)] }
   | GlobalFunSpec { gfunReturnType :: Type
                   , gfunArgs :: [(Bool,Type)]
                   , gfunHSName :: String
@@ -25,9 +25,6 @@ data SpecType
   | EnumSpec { enumHSName :: String
              , enumElems :: [(String,String)]
              }
-
-data GenSpec = GenOnlyC
-             | GenHS
 
 specFullName :: Spec -> String
 specFullName cs = renderNS (specNS cs) ++
@@ -288,8 +285,8 @@ generateWrapper inc_sym spec
       = generateWrapperFunction' rtp hsname (mkArgs (fmap snd args))
         (\args' -> ([],specFullName cls++"("++argList args'++")")) False
     
-    generateWrapperFunction :: Spec -> (FunSpec,GenSpec,String) -> ([String],[String])
-    generateWrapperFunction cls (fun,_,as)
+    generateWrapperFunction :: Spec -> (FunSpec,String) -> ([String],[String])
+    generateWrapperFunction cls (fun,as)
       = let args = case fun of
               Constructor args -> mkArgs $ fmap snd args
               Destructor _ -> [(self_ptr,"self")]
@@ -393,7 +390,7 @@ generateFFI mname header specs
                  | cs <- specs
                  , (tps,rtp,c_name) <- case specType cs of
                    ClassSpec { cspecFuns = funs } 
-                     -> fmap (\(fun,_,cname)
+                     -> fmap (\(fun,cname)
                               -> case fun of
                                 MemberFun { ftArgs = r
                                           , ftOverloaded = isO 
