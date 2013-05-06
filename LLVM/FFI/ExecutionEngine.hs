@@ -27,6 +27,10 @@ module LLVM.FFI.ExecutionEngine
        ,executionEngineRunJITOnFunction
        ,executionEngineGetGlobalValueAtAddress
        ,executionEngineStoreValueToMemory
+       ,executionEngineInitializeMemory
+       ,executionEngineRecompileAndRelinkFunction
+       ,executionEngineFreeMachineCodeForFunction
+       ,executionEngineGetOrEmitGlobalVariable
        ) where
 
 import LLVM.FFI.Interface
@@ -109,3 +113,15 @@ executionEngineGetGlobalValueAtAddress = executionEngineGetGlobalValueAtAddress_
 
 executionEngineStoreValueToMemory :: (ExecutionEngineC t,TypeC tp) => Ptr t -> Ptr GenericValue -> Ptr GenericValue -> Ptr tp -> IO ()
 executionEngineStoreValueToMemory = executionEngineStoreValueToMemory_
+
+executionEngineInitializeMemory :: (ExecutionEngineC t,ConstantC c) => Ptr t -> Ptr c -> Ptr () -> IO ()
+executionEngineInitializeMemory = executionEngineInitializeMemory_
+
+executionEngineRecompileAndRelinkFunction :: (ExecutionEngineC t) => Ptr t -> Ptr Function -> IO (Ptr ())
+executionEngineRecompileAndRelinkFunction = executionEngineRecompileAndRelinkFunction_
+
+executionEngineFreeMachineCodeForFunction :: (ExecutionEngineC t) => Ptr t -> Ptr Function -> IO ()
+executionEngineFreeMachineCodeForFunction = executionEngineFreeMachineCodeForFunction_
+
+executionEngineGetOrEmitGlobalVariable :: (ExecutionEngineC t) => Ptr t -> Ptr GlobalVariable -> IO (Ptr ())
+executionEngineGetOrEmitGlobalVariable = executionEngineGetOrEmitGlobalVariable_

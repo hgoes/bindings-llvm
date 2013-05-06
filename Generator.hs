@@ -34,6 +34,10 @@ specFullName cs = renderNS (specNS cs) ++
                   specName cs ++
                   renderTempl (specTemplateArgs cs)
 
+specFullNameHS :: Spec -> String
+specFullNameHS cs = (concat [ cname++"_" | ClassName cname _ <- specNS cs ])++
+                    (specName cs)
+
 specFullType :: Spec -> Type
 specFullType cs = Type [] (NamedType (specNS cs) (specName cs) (specTemplateArgs cs))
 
@@ -349,9 +353,9 @@ generateWrapper inc_sym spec
         in generateWrapperFunction' rt as args body ignore
     generateEnum :: Spec -> [(String,String)] -> ([String],[String])
     generateEnum cls elems
-      = (["extern int enum_"++specName cls++"_"++el++"();"
+      = (["extern int enum_"++specFullNameHS cls++"_"++el++"();"
          | (el,_) <- elems ],
-         ["int enum_"++specName cls++"_"++el++"() { return "++renderNS (specNS cls)++el++"; }"
+         ["int enum_"++specFullNameHS cls++"_"++el++"() { return "++renderNS (specNS cls)++el++"; }"
          | (el,_) <- elems ])
 
 generateFFI :: [String] -> String -> [Spec] -> String
@@ -378,10 +382,10 @@ generateFFI mname header specs
              ["","from"++hsname++" :: "++hsname++" -> CInt"]++
              ["from"++hsname++" "++el_hs++" = enum_"++cname++"_"++el
              | (el,el_hs) <- els ]
-           | Spec { specName = cname
-                  , specType = EnumSpec { enumHSName = hsname
-                                        , enumElems = els }
-                  } <- specs
+           | cs@Spec { specType = EnumSpec { enumHSName = hsname
+                                           , enumElems = els }
+                     } <- specs
+           , let cname = specFullNameHS cs
            ]
     fns = concat [ [""
                    ,"foreign import capi \""++header++" "++c_name++"\""
@@ -449,7 +453,7 @@ generateFFI mname header specs
                                         toHaskellType True Nothing rtp,
                                         hsname)]
                    EnumSpec { enumElems = els
-                            } -> [([],toHaskellType True Nothing $ normalT int,"enum_"++specName cs++"_"++el)
+                            } -> [([],toHaskellType True Nothing $ normalT int,"enum_"++specFullNameHS cs++"_"++el)
                                  | (el,_) <- els ]
                  , let sig = (concat [ prettyPrint tp ++ " -> " 
                                      | tp <- tps

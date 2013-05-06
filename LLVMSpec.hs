@@ -2402,13 +2402,75 @@ llvm version
                                    ,(True,normalT $ ptr $ llvmType "Type")]
                         , ftOverloaded = True
                         },GenHS,"executionEngineStoreValueToMemory_")
+            ,(memberFun { ftName = "InitializeMemory"
+                        , ftArgs = [(True,constT $ ptr $ llvmType "Constant")
+                                   ,(False,normalT $ ptr void)]
+                        , ftOverloaded = True
+                        },GenHS,"executionEngineInitializeMemory_")
+            ,(memberFun { ftReturnType = normalT $ ptr void
+                        , ftName = "recompileAndRelinkFunction"
+                        , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
+                        , ftOverloaded = True
+                        },GenHS,"executionEngineRecompileAndRelinkFunction_")
+            ,(memberFun { ftName = "freeMachineCodeForFunction"
+                        , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
+                        , ftOverloaded = True
+                        },GenHS,"executionEngineFreeMachineCodeForFunction_")
+            ,(memberFun { ftReturnType = normalT $ ptr void
+                        , ftName = "getOrEmitGlobalVariable"
+                        , ftArgs = [(False,constT $ ptr $ llvmType "GlobalVariable")]
+                        , ftOverloaded = True
+                        },GenHS,"executionEngineGetOrEmitGlobalVariable_")
             ]
+          }
+    ,Spec { specHeader = if version>=llvm3_0
+                         then "llvm/Support/CodeGen.h"
+                         else "llvm/Target/TargetMachine.h"
+          , specNS = [ClassName "llvm" []
+                     ,ClassName "CodeGenOpt" []]
+          , specName = "Level"
+          , specTemplateArgs = []
+          , specType = EnumSpec "CodeGenOptLevel"
+                       [("None","CodeGenOptNone")
+                       ,("Less","CodeGenOptLess")
+                       ,("Default","CodeGenOptDefault")
+                       ,("Aggressive","CodeGenOptAggressive")]
+          }
+    ,Spec { specHeader = if version>=llvm3_0
+                         then "llvm/Support/CodeGen.h"
+                         else "llvm/Target/TargetMachine.h"
+          , specNS = [ClassName "llvm" []
+                     ,ClassName "CodeModel" []]
+          , specName = "Model"
+          , specTemplateArgs = []
+          , specType = EnumSpec "CodeModel" $
+                       [("Default","CodeModelDefault")
+                       ,("Small","CodeModelSmall")
+                       ,("Kernel","CodeModelKernel")
+                       ,("Medium","CodeModelMedium")
+                       ,("Large","CodeModelLarge")]++
+                       (if version>=llvm3_0
+                        then [("JITDefault","CodeModelJITDefault")]
+                        else [])
+          }
+    ,Spec { specHeader = if version>=llvm3_0
+                         then "llvm/Support/CodeGen.h"
+                         else "llvm/Target/TargetMachine.h"
+          , specNS = [ClassName "llvm" []
+                     ,ClassName "Reloc" []]
+          , specName = "Model"
+          , specTemplateArgs = []
+          , specType = EnumSpec "RelocModel" $
+                       [("Default","RelocModelDefault")
+                       ,("Static","RelocModelStatic")
+                       ,("PIC_","RelocModelPIC")
+                       ,("DynamicNoPIC","RelocModelDynamicNoPIC")]
           }
     ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
           , specNS = llvmNS
           , specName = "EngineBuilder"
           , specTemplateArgs = []
-          , specType = ClassSpec
+          , specType = ClassSpec $
                        [(Constructor [(False,normalT $ ptr $ llvmType "Module")],GenHS,"newEngineBuilder")
                        ,(Destructor False,GenHS,"deleteEngineBuilder")
                        ,(memberFun { ftIgnoreReturn = True
@@ -2420,7 +2482,26 @@ llvm version
                        ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
                                    , ftName = "create"
                                    },GenHS,"engineBuilderCreate")
-                       ]
+                       ,(memberFun { ftIgnoreReturn = True
+                                   , ftName = "setOptLevel"
+                                   , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
+                                                                         ,ClassName "CodeGenOpt" []
+                                                                         ] "Level")]
+                                   },GenHS,"engineBuilderSetOptLevel")
+                       ,(memberFun { ftIgnoreReturn = True
+                                   , ftName = "setCodeModel"
+                                   , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
+                                                                         ,ClassName "CodeModel" []
+                                                                         ] "Model")]
+                                   },GenHS,"engineBuilderSetCodeModel")]++
+            (if version>=llvm3_0
+             then [(memberFun { ftIgnoreReturn = True
+                              , ftName = "setRelocationModel"
+                              , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
+                                                                    ,ClassName "Reloc" []
+                                                                    ] "Model")]
+                              },GenHS,"engineBuilderSetRelocationModel")]
+             else [])
           }
     ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
           , specNS = [ClassName "llvm" [],ClassName "EngineKind" []]
