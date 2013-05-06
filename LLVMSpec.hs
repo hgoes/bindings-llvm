@@ -2588,6 +2588,17 @@ llvm version
                                   then ["MCAsmBackend","MCAsmParser","MCDisassembler","MCInstPrinter"
                                        ,"MCCodeEmitter","MCObjectStreamer"]
                                   else []) ]
+          }
+    ,Spec { specHeader = "llvm/Target/TargetMachine.h"
+          , specNS = llvmNS
+          , specName = "TargetMachine"
+          , specTemplateArgs = []
+          , specType = ClassSpec
+                       [(Destructor True,GenHS,"deleteTargetMachine_")
+                       ,(memberFun { ftReturnType = constT $ ref $ llvmType "Target"
+                                   , ftName = "getTarget"
+                                   , ftOverloaded = True
+                                   },GenHS,"targetMachineTarget_")]
           }]++
     (if version>=llvm2_9
      then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
