@@ -16,12 +16,11 @@ module LLVM.FFI.Instruction
          toOtherOpCode,
          CallingConv(..),
          toCallingConv,
+#if HS_LLVM_VERSION>=300
          AtomicOrdering(..),
-         toAtomicOrdering,
          RMWBinOp(..),
-         toRMWBinOp,
          SynchronizationScope(..),
-         toSynchronizationScope,
+#endif
          instructionGetParent,
          instructionGetDebugLoc,
 #if HS_LLVM_VERSION>=300
@@ -127,7 +126,9 @@ module LLVM.FFI.Instruction
          StoreInst(),
          storeInstIsVolatile,
          storeInstGetAlignment,
+#if HS_LLVM_VERSION>=300
          storeInstGetOrdering,
+#endif
          storeInstGetValueOperand,
          storeInstGetPointerOperand,
          -- ** Terminator Instructions
@@ -214,7 +215,9 @@ module LLVM.FFI.Instruction
          LoadInst(),
          loadInstIsVolatile,
          loadInstGetAlignment,
+#if HS_LLVM_VERSION>=300
          loadInstGetOrdering,
+#endif
          loadInstGetPointerOperand,
          -- *** VarArg Instruction
          VAArgInst()
@@ -240,7 +243,11 @@ newSelectInst = newSelectInst_
 phiNodeAddIncoming :: ValueC val => Ptr PHINode -> Ptr val -> Ptr BasicBlock -> IO ()
 phiNodeAddIncoming = phiNodeAddIncoming_
 
+#if HS_LLVM_VERSION>=300
 newPhiNode :: TypeC tp => Ptr tp -> CUInt -> Ptr Twine -> IO (Ptr PHINode)
+#else
+newPhiNode :: TypeC tp => Ptr tp -> Ptr Twine -> IO (Ptr PHINode)
+#endif
 newPhiNode = newPhiNode_
 
 #if HS_LLVM_VERSION>=300
@@ -251,13 +258,21 @@ newLandingPadInst :: (TypeC tp,ValueC fn) => Ptr tp -> Ptr fn -> CUInt -> Ptr Tw
 newLandingPadInst = newLandingPadInst_
 #endif
 
+#if HS_LLVM_VERSION>=300
 newInsertValueInst :: (ValueC agg,ValueC val) => Ptr agg -> Ptr val -> Ptr (ArrayRef CUInt) -> Ptr Twine -> IO (Ptr InsertValueInst)
+#else
+newInsertValueInst :: (ValueC agg,ValueC val) => Ptr agg -> Ptr val -> CUInt -> Ptr Twine -> IO (Ptr InsertValueInst)
+#endif
 newInsertValueInst = newInsertValueInst_
 
 newInsertElementInst :: (ValueC vec,ValueC newEl,ValueC idx) => Ptr vec -> Ptr newEl -> Ptr idx -> Ptr Twine -> IO (Ptr InsertElementInst)
 newInsertElementInst = newInsertElementInst_
 
+#if HS_LLVM_VERSION>=300
 newGetElementPtrInst :: ValueC ptr => Ptr ptr -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr GetElementPtrInst)
+#else
+newGetElementPtrInst :: ValueC ptr => Ptr ptr -> Ptr Value -> Ptr Twine -> IO (Ptr GetElementPtrInst)
+#endif
 newGetElementPtrInst = newGetElementPtrInst_
 
 #if HS_LLVM_VERSION>=300
@@ -274,7 +289,11 @@ newICmpInst op = newICmpInst_ (fromICmpOp op)
 newFCmpInst :: (ValueC v1,ValueC v2) => FCmpOp -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr FCmpInst)
 newFCmpInst op = newFCmpInst_ (fromFCmpOp op)
 
+#if HS_LLVM_VERSION >= 300
 newCallInst :: ValueC fun => Ptr fun -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr CallInst)
+#else
+newCallInst :: ValueC fun => Ptr fun -> Ptr Value -> Ptr Twine -> IO (Ptr CallInst)
+#endif
 newCallInst = newCallInst_
 
 newBinaryOperator :: (ValueC v1,ValueC v2) => BinOpType -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr BinaryOperator)
@@ -304,13 +323,13 @@ isMallocLikeFn :: ValueC t => Ptr t -> IO Bool
 #endif
 isMallocLikeFn = isMallocLikeFn_
 
+#if HS_LLVM_VERSION >= 300
 loadInstGetOrdering :: Ptr LoadInst -> IO AtomicOrdering
 loadInstGetOrdering = fmap toAtomicOrdering . loadInstGetOrdering_
 
 storeInstGetOrdering :: Ptr StoreInst -> IO AtomicOrdering
 storeInstGetOrdering = fmap toAtomicOrdering . storeInstGetOrdering_
 
-#if HS_LLVM_VERSION >= 300
 atomicRMWInstGetOperation :: Ptr AtomicRMWInst -> IO RMWBinOp
 atomicRMWInstGetOperation = fmap toRMWBinOp . atomicRMWInstGetOperation_
 

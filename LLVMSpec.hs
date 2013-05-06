@@ -248,10 +248,15 @@ llvm version
                                         ,(False,normalT uint64_t)
                                         ,(False,normalT bool)]
                            ,GenHS,"newAPIntLimited")
-                          ,(Constructor [(False,normalT unsigned)
-                                        ,(False,normalT $ NamedType llvmNS "ArrayRef"
-                                               [normalT uint64_t])]
-                           ,GenHS,"newAPInt")
+                          ,if version>=llvm3_0
+                           then (Constructor [(False,normalT unsigned)
+                                             ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                                        [normalT uint64_t])]
+                                ,GenHS,"newAPInt")
+                           else (Constructor [(False,normalT unsigned)
+                                             ,(False,normalT unsigned)
+                                             ,(False,constT $ ptr $ uint64_t)]
+                                ,GenHS,"newAPInt")
                           ,(Constructor [(False,normalT unsigned)
                                         ,(False,normalT $ llvmType "StringRef")
                                         ,(False,normalT uint8_t)]
@@ -1097,7 +1102,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "CallInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Value"])
+                                                 ,if version>=llvm3_0
+                                                  then (False,normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Value"])
+                                                  else (False,normalT $ ptr $ llvmType "Value")
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
                                       },GenHS,"newCallInst_")
@@ -1200,7 +1207,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "GetElementPtrInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Value"])
+                                                 ,if version>=llvm3_0
+                                                  then (False,normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Value"])
+                                                  else (False,normalT $ ptr $ llvmType "Value")
                                                  ,(False,normalT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
                                       },GenHS,"newGetElementPtrInst_")
@@ -1232,7 +1241,9 @@ llvm version
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
                                                  ,(True,normalT $ ptr $ llvmType "Value")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef" [normalT unsigned])
+                                                 ,if version>=llvm3_0
+                                                  then (False,normalT $ NamedType llvmNS "ArrayRef" [normalT unsigned])
+                                                  else (False,normalT unsigned)
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
                                       },GenHS,"newInsertValueInst_")]
@@ -1299,9 +1310,11 @@ llvm version
                                       },GenHS,"phiNodeGetIncomingBlock_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "PHINode"
                                       , ftName = "Create"
-                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
-                                                 ,(False,normalT unsigned)
-                                                 ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]++
+                                                 (if version>=llvm3_0
+                                                  then [(False,normalT unsigned)]
+                                                  else [])++
+                                                 [(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
                                       },GenHS,"newPhiNode_")
                           ,(memberFun { ftName = "addIncoming"
@@ -1346,23 +1359,25 @@ llvm version
              , specNS = llvmNS
              , specName = "StoreInst"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isVolatile"
                                       },GenHS,"storeInstIsVolatile")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
-                                      },GenHS,"storeInstGetAlignment_")
-                          ,(memberFun { ftReturnType = normalT int
-                                      , ftName = "getOrdering"
-                                      },GenHS,"storeInstGetOrdering_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getValueOperand"
-                                      },GenHS,"storeInstGetValueOperand")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getPointerOperand"
-                                      },GenHS,"storeInstGetPointerOperand")
-                          ]
+                                      },GenHS,"storeInstGetAlignment_")]++
+               (if version>=llvm3_0
+                then [(memberFun { ftReturnType = normalT int
+                                 , ftName = "getOrdering"
+                                 },GenHS,"storeInstGetOrdering_")]
+                else [])++
+               [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                           , ftName = "getValueOperand"
+                           },GenHS,"storeInstGetValueOperand")
+               ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                           , ftName = "getPointerOperand"
+                           },GenHS,"storeInstGetPointerOperand")
+               ]
              }
        ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = llvmNS
@@ -1600,20 +1615,22 @@ llvm version
              , specNS = llvmNS
              , specName = "LoadInst"
              , specTemplateArgs = []
-             , specType = ClassSpec
+             , specType = ClassSpec $
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isVolatile"
                                       },GenHS,"loadInstIsVolatile")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
-                                      },GenHS,"loadInstGetAlignment_")
-                          ,(memberFun { ftReturnType = normalT int
-                                      , ftName = "getOrdering"
-                                      },GenHS,"loadInstGetOrdering_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                      , ftName = "getPointerOperand"
-                                      },GenHS,"loadInstGetPointerOperand")
-                          ]
+                                      },GenHS,"loadInstGetAlignment_")]++
+               (if version>=llvm3_0
+                then [(memberFun { ftReturnType = normalT int
+                                 , ftName = "getOrdering"
+                                 },GenHS,"loadInstGetOrdering_")]
+                else [])++
+               [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                           , ftName = "getPointerOperand"
+                           },GenHS,"loadInstGetPointerOperand")
+               ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1941,7 +1958,9 @@ llvm version
                                                               then [normalT bool]
                                                               else [])
                            ,("Pass","createPruneEHPass",[])
-                           ,("ModulePass","createInternalizePass",[normalT $ NamedType llvmNS "ArrayRef" [constT $ ptr $ char]])
+                           ,("ModulePass","createInternalizePass",[if version>=llvm3_0
+                                                                   then normalT $ NamedType llvmNS "ArrayRef" [constT $ ptr $ char]
+                                                                   else constT $ NamedType [ClassName "std" []] "vector" [constT $ ptr char]])
                            ,("ModulePass","createDeadArgEliminationPass",[])
                            ,("ModulePass","createDeadArgHackingPass",[])
                            ,("Pass","createArgumentPromotionPass",[normalT unsigned])
@@ -2454,16 +2473,49 @@ llvm version
                                        ,"SPIR_KERNEL"
                                        ,"Intel_OCL_BI"]
                                   else [])]
-          }
-    ,Spec { specHeader = irInclude version "Instructions.h"
-          , specNS = llvmNS
-          , specName = "SynchronizationScope"
-          , specTemplateArgs = []
-          , specType = EnumSpec "SynchronizationScope"
-                       [("SingleThread","SingleThread")
-                       ,("CrossThread","CrossThread")]
-          }
-    ,Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
+          }]++
+    (if version>=llvm3_0
+     then [Spec { specHeader = irInclude version "Instructions.h"
+                , specNS = llvmNS
+                , specName = "SynchronizationScope"
+                , specTemplateArgs = []
+                , specType = EnumSpec "SynchronizationScope"
+                             [("SingleThread","SingleThread")
+                             ,("CrossThread","CrossThread")]
+                }
+          ,Spec { specHeader = irInclude version "Instructions.h"
+                , specNS = llvmNS
+                , specName = "AtomicOrdering"
+                , specTemplateArgs = []
+                , specType = EnumSpec "AtomicOrdering"
+                             [(name,name) | name <- ["NotAtomic"
+                                                   ,"Unordered"
+                                                   ,"Monotonic"
+                                                   ,"Acquire"
+                                                   ,"Release"
+                                                   ,"AcquireRelease"
+                                                   ,"SequentiallyConsistent"]]
+                }
+          ,Spec { specHeader = irInclude version "Instructions.h"
+                , specNS = [ClassName "llvm" [],ClassName "AtomicRMWInst" []]
+                , specName = "BinOp"
+                , specTemplateArgs = []
+                , specType = EnumSpec "RMWBinOp"
+                             [(name,"RMW"++name)
+                                  | name <- ["Xchg"
+                                           ,"Add"
+                                           ,"Sub"
+                                           ,"And"
+                                           ,"Nand"
+                                           ,"Or"
+                                           ,"Xor"
+                                           ,"Max"
+                                           ,"Min"
+                                           ,"UMax"
+                                           ,"UMin"]]
+                }]
+     else [])++
+    [Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
           , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
           , specName = "AliasResult"
           , specTemplateArgs = []
@@ -2472,37 +2524,6 @@ llvm version
                        ,("MayAlias","MayAlias")
                        ,("PartialAlias","PartialAlias")
                        ,("MustAlias","MustAlias")]
-          }
-    ,Spec { specHeader = irInclude version "Instructions.h"
-          , specNS = llvmNS
-          , specName = "AtomicOrdering"
-          , specTemplateArgs = []
-          , specType = EnumSpec "AtomicOrdering"
-                       [(name,name) | name <- ["NotAtomic"
-                                             ,"Unordered"
-                                             ,"Monotonic"
-                                             ,"Acquire"
-                                             ,"Release"
-                                             ,"AcquireRelease"
-                                             ,"SequentiallyConsistent"]]
-          }
-    ,Spec { specHeader = irInclude version "Instructions.h"
-          , specNS = [ClassName "llvm" [],ClassName "AtomicRMWInst" []]
-          , specName = "BinOp"
-          , specTemplateArgs = []
-          , specType = EnumSpec "RMWBinOp"
-                       [(name,"RMW"++name)
-                        | name <- ["Xchg"
-                                 ,"Add"
-                                 ,"Sub"
-                                 ,"And"
-                                 ,"Nand"
-                                 ,"Or"
-                                 ,"Xor"
-                                 ,"Max"
-                                 ,"Min"
-                                 ,"UMax"
-                                 ,"UMin"]]
           }
     ,Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
           , specNS = [ClassName "llvm" [],ClassName "LibFunc" []]
@@ -2513,10 +2534,12 @@ llvm version
                         | name <- ["fiprintf"
                                  ,"iprintf"
                                  ,"memcpy"
-                                 ,"memmove"
                                  ,"memset"
                                  ,"memset_pattern16"
                                  ,"siprintf"]++
+                                 (if version>=llvm3_0
+                                  then ["memmove"]
+                                  else [])++
                                  (if version>=llvm3_1
                                   then ["cxa_atexit"
                                        ,"cxa_guard_abort"
