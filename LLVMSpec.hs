@@ -2560,6 +2560,34 @@ llvm version
                         then [("PartialAlias","PartialAlias")]
                         else [])++
                        [("MustAlias","MustAlias")]
+          }
+    ,Spec { specHeader = if version>=llvm3_0
+                         then "llvm/Support/TargetRegistry.h"
+                         else "llvm/Target/TargetRegistry.h"
+          , specNS = llvmNS
+          , specName = "Target"
+          , specTemplateArgs = []
+          , specType = ClassSpec $
+                       [(memberFun { ftReturnType = constT $ ptr $ llvmType "Target"
+                                   , ftName = "getNext"
+                                   },GenHS,"targetNext")
+                       ,(memberFun { ftReturnType = constT $ ptr char
+                                   , ftName = "getName"
+                                   },GenHS,"targetName")
+                       ,(memberFun { ftReturnType = constT $ ptr char
+                                   , ftName = "getShortDescription"
+                                   },GenHS,"targetShortDescription")]++
+                       [(memberFun { ftReturnType = normalT bool
+                                   , ftName = "has"++name
+                                   },GenHS,"targetHas"++name)
+                        | name <- ["JIT","TargetMachine","AsmPrinter"]++
+                                 (if version>=llvm2_9
+                                  then ["AsmStreamer"]
+                                  else [])++
+                                 (if version>=llvm3_0
+                                  then ["MCAsmBackend","MCAsmParser","MCDisassembler","MCInstPrinter"
+                                       ,"MCCodeEmitter","MCObjectStreamer"]
+                                  else []) ]
           }]++
     (if version>=llvm2_9
      then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"

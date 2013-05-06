@@ -77,5 +77,6 @@ library
     LLVM.FFI.ExecutionEngine
     LLVM.FFI.MachineCodeInfo
     LLVM.FFI.EngineBuilder
+    LLVM.FFI.Target
   other-modules:
     LLVM.FFI.Interface
