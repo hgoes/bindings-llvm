@@ -4,11 +4,17 @@ module LLVM.FFI.ExecutionEngine
        ,deleteExecutionEngine
        ,executionEngineAddModule
        ,executionEngineRemoveModule
+#if HS_LLVM_VERSION >= 302
        ,executionEngineGetDataLayout
+#else
+       ,executionEngineGetTargetData
+#endif
        ,executionEngineFindFunctionNamed
        ,executionEngineRunFunction
+#if HS_LLVM_VERSION >= 301
        ,executionEngineGetPointerToNamedFunction
        ,executionEngineMapSectionAddress
+#endif
        ,executionEngineRunStaticConstructorsDestructors
        ,executionEngineAddGlobalMapping
        ,executionEngineClearAllGlobalMappings
@@ -43,8 +49,13 @@ executionEngineAddModule = executionEngineAddModule_
 executionEngineRemoveModule :: ExecutionEngineC t => Ptr t -> Ptr Module -> IO Bool
 executionEngineRemoveModule = executionEngineRemoveModule_
 
+#if HS_LLVM_VERSION >= 302
 executionEngineGetDataLayout :: ExecutionEngineC t => Ptr t -> IO (Ptr DataLayout)
 executionEngineGetDataLayout = executionEngineGetDataLayout_
+#else
+executionEngineGetTargetData :: ExecutionEngineC t => Ptr t -> IO (Ptr TargetData)
+executionEngineGetTargetData = executionEngineGetTargetData_
+#endif
 
 executionEngineFindFunctionNamed :: ExecutionEngineC t => Ptr t -> String -> IO (Ptr Function)
 executionEngineFindFunctionNamed ptr name
@@ -53,6 +64,7 @@ executionEngineFindFunctionNamed ptr name
 executionEngineRunFunction :: ExecutionEngineC t => Ptr t -> Ptr Function -> Ptr (Vector GenericValue) -> IO (Ptr GenericValue)
 executionEngineRunFunction = executionEngineRunFunction_
 
+#if HS_LLVM_VERSION >= 301
 executionEngineGetPointerToNamedFunction :: ExecutionEngineC t => Ptr t -> String -> Bool -> IO (Ptr ())
 executionEngineGetPointerToNamedFunction engine str abort
   = withCString str
@@ -60,6 +72,7 @@ executionEngineGetPointerToNamedFunction engine str abort
 
 executionEngineMapSectionAddress :: ExecutionEngineC t => Ptr t -> Ptr () -> Word64 -> IO ()
 executionEngineMapSectionAddress = executionEngineMapSectionAddress_
+#endif
 
 executionEngineRunStaticConstructorsDestructors :: ExecutionEngineC t => Ptr t -> Bool -> IO ()
 executionEngineRunStaticConstructorsDestructors = executionEngineRunStaticConstructorsDestructors_
