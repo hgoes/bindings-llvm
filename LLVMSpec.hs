@@ -856,15 +856,18 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ RefType $ NamedType llvmNS "iplist"
                                                        [normalT $ NamedType llvmNS "Function" []]
                                       , ftName = "getFunctionList"
-                                      },"getFunctionList")
+                                      },"moduleGetFunctionList")
                           ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "iplist"
                                                        [normalT $ NamedType llvmNS "GlobalVariable" []]
                                       , ftName = "getGlobalList"
-                                      },"getGlobalList")
+                                      },"moduleGetGlobalList")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
                                       , ftName = "getTypeByName"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
-                                      },"getTypeByName")
+                                      },"moduleGetTypeByName")
+                          ,(memberFun { ftReturnType = normalT $ ref $ llvmType "LLVMContext"
+                                      , ftName = "getContext"
+                                      },"moduleGetContext")
                           ]
              }
        ,Spec { specHeader = "llvm/Support/IRReader.h"

@@ -1,11 +1,18 @@
 module LLVM.FFI.Module 
        (Module()
+        -- * Public Member Functions
+        -- ** Constructors
        ,newModule
        ,deleteModule
-       ,getGlobalList
-       ,getFunctionList
-       ,getTypeByName
+        -- ** Module Level Accessors
+       ,moduleGetContext
+        -- ** Utility functions for printing and dumping Module objects
        ,moduleDump
+        -- * Generic Value Accessors
+       ,moduleGetTypeByName
+        -- * Globals list, functions list, and symbol table
+       ,moduleGetGlobalList
+       ,moduleGetFunctionList
        ,parseIR
        ,writeBitCodeToFile
        ) where
