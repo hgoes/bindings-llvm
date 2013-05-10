@@ -4,7 +4,6 @@ module LLVM.FFI.Loop
        ,loopExitEdgeList
        ,Loop()
        ,loopIsLoopInvariant
-       ,loopDump
        ,LoopInfoBaseC(..)
        ,LoopInfoBase()
        ) where
