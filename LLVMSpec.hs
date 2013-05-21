@@ -2184,7 +2184,11 @@ llvm version
                                                                                                            ,constT $ ptr $ llvmType "BasicBlock"]
                                                           ,TypeInt 16])]
                                     , ftOverloaded = True
-                                    },"loopGetExitEdges_")]
+                                    },"loopGetExitEdges_")
+                        ,(memberFun { ftReturnType = normalT unsigned
+                                    , ftName = "getNumBackEdges"
+                                    , ftOverloaded = True
+                                    },"loopGetNumBackEdges_")]
              }
      ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
            , specNS = llvmNS
