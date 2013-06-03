@@ -74,6 +74,7 @@ module LLVM.FFI.Pass
        ) where
 
 import LLVM.FFI.Interface
+import LLVM.FFI.CPP
 import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal.Alloc
@@ -238,3 +239,10 @@ instance DomTreeNodeBaseC BasicBlock where
   domTreeNodeBaseCompare = domTreeNodeBaseCompareBasicBlock
   domTreeNodeBaseGetDFSNumIn = domTreeNodeBaseGetDFSNumInBasicBlock
   domTreeNodeBaseGetDFSNumOut = domTreeNodeBaseGetDFSNumOutBasicBlock
+
+instance VectorC (Ptr (DomTreeNodeBase BasicBlock)) where
+  vectorBegin = vectorDominatorTreeBegin
+  vectorEnd = vectorDominatorTreeEnd
+  vectorIteratorDeref = vectorIteratorDominatorTreeDeref
+  vectorIteratorNext = vectorIteratorDominatorTreeNext
+  vectorIteratorEq = vectorIteratorDominatorTreeEq

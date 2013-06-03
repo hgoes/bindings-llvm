@@ -195,8 +195,10 @@ llvm version
                                              }
                   }
             ]
-            | tp <- ["Type","Loop","BasicBlock"]
-           , let rtp = Type [] (ptr $ llvmType tp)
+            | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
+                         ,("Loop",normalT $ ptr $ llvmType "Loop")
+                         ,("BasicBlock",normalT $ ptr $ llvmType "BasicBlock")
+                         ,("DominatorTree",normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"])]
            ]++
     [Spec { specHeader = "llvm/ADT/SmallVector.h"
           , specNS = llvmNS
