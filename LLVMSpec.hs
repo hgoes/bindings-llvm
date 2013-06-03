@@ -3017,8 +3017,12 @@ llvm version
                                   },"dominatorTreeCompare")
                       ,(memberFun { ftReturnType = normalT bool
                                   , ftName = "dominates"
-                                  , ftArgs = [(False,constT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"])
-                                             ,(False,constT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"])]
+                                  , ftArgs = [(False,(if version>=llvm2_9
+                                                      then constT
+                                                      else normalT) $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"])
+                                             ,(False,(if version>=llvm2_9
+                                                      then constT
+                                                      else normalT) $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"])]
                                   },"dominatorTreeDominates")
                       ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                   , ftName = "findNearestCommonDominator"
