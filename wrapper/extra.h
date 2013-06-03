@@ -11,6 +11,7 @@ extern char* passId_DataLayout();
 #else
 extern char* passId_TargetData();
 #endif
+extern char* passId_DominatorTree();
 
 extern int writeBitCodeToFile(void* m,const char* path);
 

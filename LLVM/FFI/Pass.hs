@@ -62,6 +62,15 @@ module LLVM.FFI.Pass
        ,newLoopInfo
        ,loopInfoGetBase
        ,createCFGSimplificationPass
+       ,DominatorTree()
+       ,DomTreeNodeBase()
+       ,DomTreeNodeBaseC(..)
+       ,newDominatorTree
+       ,dominatorTreeGetRootNode
+       ,dominatorTreeCompare
+       ,dominatorTreeDominates
+       ,dominatorTreeFindNearestCommonDominator
+       ,dominatorTreeGetNode
        ) where
 
 import LLVM.FFI.Interface
@@ -205,3 +214,27 @@ foreign import capi _TO_STRING(extra.h passId_LoopInfo)
   passId_LoopInfo :: Ptr CChar
 foreign import capi _TO_STRING(extra.h passId_FindUsedTypes)
   passId_FindUsedTypes :: Ptr CChar
+
+foreign import capi _TO_STRING(extra.h passId_DominatorTree)
+  passId_DominatorTree :: Ptr CChar
+
+instance PassC DominatorTree
+instance FunctionPassC DominatorTree
+instance PassId DominatorTree where
+  passId _ = passId_DominatorTree
+
+class DomTreeNodeBaseC tp where
+  domTreeNodeBaseGetBlock :: Ptr (DomTreeNodeBase tp) -> IO (Ptr tp)
+  domTreeNodeBaseGetIDom :: Ptr (DomTreeNodeBase tp) -> IO (Ptr (DomTreeNodeBase tp))
+  domTreeNodeBaseGetChildren :: Ptr (DomTreeNodeBase tp) -> IO (Ptr (Vector (Ptr (DomTreeNodeBase tp))))
+  domTreeNodeBaseCompare :: Ptr (DomTreeNodeBase tp) -> Ptr (DomTreeNodeBase tp) -> IO Bool
+  domTreeNodeBaseGetDFSNumIn :: Ptr (DomTreeNodeBase tp) -> IO CUInt
+  domTreeNodeBaseGetDFSNumOut :: Ptr (DomTreeNodeBase tp) -> IO CUInt
+
+instance DomTreeNodeBaseC BasicBlock where
+  domTreeNodeBaseGetBlock = domTreeNodeBaseGetBlockBasicBlock
+  domTreeNodeBaseGetIDom = domTreeNodeBaseGetIDomBasicBlock
+  domTreeNodeBaseGetChildren = domTreeNodeBaseGetChildrenBasicBlock
+  domTreeNodeBaseCompare = domTreeNodeBaseCompareBasicBlock
+  domTreeNodeBaseGetDFSNumIn = domTreeNodeBaseGetDFSNumInBasicBlock
+  domTreeNodeBaseGetDFSNumOut = domTreeNodeBaseGetDFSNumOutBasicBlock

@@ -2997,4 +2997,58 @@ llvm version
                              ]
                 }
           ]
-      else [])
+      else [])++
+   [Spec { specHeader = "llvm/Analysis/Dominators.h"
+         , specNS = llvmNS
+         , specName = "DominatorTree"
+         , specTemplateArgs = []
+         , specType = ClassSpec
+                      [(Constructor [],"newDominatorTree")
+                      ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"]
+                                  , ftName = "getRootNode"
+                                  },"dominatorTreeGetRootNode")
+                      ,(memberFun { ftReturnType = normalT bool
+                                  , ftName = "compare"
+                                  , ftArgs = [(False,normalT $ ref $ llvmType "DominatorTree")]
+                                  },"dominatorTreeCompare")
+                      ,(memberFun { ftReturnType = normalT bool
+                                  , ftName = "dominates"
+                                  , ftArgs = [(False,constT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"])
+                                             ,(False,constT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"])]
+                                  },"dominatorTreeDominates")
+                      ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                  , ftName = "findNearestCommonDominator"
+                                  , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")
+                                             ,(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                  },"dominatorTreeFindNearestCommonDominator")
+                      ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"]
+                                  , ftName = "getNode"
+                                  , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                  },"dominatorTreeGetNode")]
+         }]++
+   [Spec { specHeader = "llvm/Analysis/Dominators.h"
+         , specNS = llvmNS
+         , specName = "DomTreeNodeBase"
+         , specTemplateArgs = [normalT $ llvmType tp]
+         , specType = ClassSpec
+                      [(memberFun { ftReturnType = normalT $ ptr $ llvmType tp
+                                  , ftName = "getBlock"
+                                  },"domTreeNodeBaseGetBlock"++tp)
+                      ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType tp]
+                                  , ftName = "getIDom"
+                                  },"domTreeNodeBaseGetIDom"++tp)
+                      ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "std" []] "vector" [normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType tp]]
+                                  , ftName = "getChildren"
+                                  },"domTreeNodeBaseGetChildren"++tp)
+                      ,(memberFun { ftReturnType = normalT bool
+                                  , ftName = "compare"
+                                  , ftArgs = [(False,normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType tp])]
+                                  },"domTreeNodeBaseCompare"++tp)
+                      ,(memberFun { ftReturnType = normalT unsigned
+                                  , ftName = "getDFSNumIn"
+                                  },"domTreeNodeBaseGetDFSNumIn"++tp)
+                      ,(memberFun { ftReturnType = normalT unsigned
+                                  , ftName = "getDFSNumOut"
+                                  },"domTreeNodeBaseGetDFSNumOut"++tp)]
+         }
+    | tp <- ["BasicBlock"]]

@@ -34,6 +34,7 @@ extern "C" {
 #else
   char* passId_TargetData() { return &llvm::TargetData::ID; }
 #endif
+  char* passId_DominatorTree() { return &llvm::DominatorTree::ID; }
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;
