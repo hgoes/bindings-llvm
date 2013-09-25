@@ -872,7 +872,9 @@ llvm version
                                       },"moduleGetContext")
                           ]
              }
-       ,Spec { specHeader = "llvm/Support/IRReader.h"
+       ,Spec { specHeader = if version>=llvm3_3
+                            then "llvm/IRReader/IRReader.h"
+                            else "llvm/Support/IRReader.h"
              , specNS = []
              , specName = "llvm"
              , specTemplateArgs = []
@@ -1926,9 +1928,19 @@ llvm version
                                       , ftSetType = normalT bool
                                       },"setPassManagerBuilderDisableUnrollLoops")]++
                              (if version>=llvm3_1
-                              then [(Setter { ftSetVar = "Vectorize"
+                              then (if version>=llvm3_3
+                                    then [(Setter { ftSetVar = "BBVectorize"
+                                                  , ftSetType = normalT bool
+                                                  },"setPassManagerBuilderBBVectorize")
+                                         ,(Setter { ftSetVar = "SLPVectorize"
+                                                  , ftSetType = normalT bool
+                                                  },"setPassManagerBuilderSLPVectorize")]
+                                    else [(Setter { ftSetVar = "Vectorize"
+                                                  , ftSetType = normalT bool
+                                                  },"setPassManagerBuilderVectorize")])++
+                                   [(Setter { ftSetVar = "LoopVectorize"
                                             , ftSetType = normalT bool
-                                            },"setPassManagerBuilderVectorize")]
+                                            },"setPassManagerBuilderLoopVectorize")]
                               else [])
                 }]
      else [])++

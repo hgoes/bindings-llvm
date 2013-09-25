@@ -404,61 +404,105 @@ data OpType
 
 data TermOpType =
 #define HANDLE_TERM_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
   UnknownTermOp
   deriving (Show,Eq,Ord)
 
 data BinOpType =
 #define HANDLE_BINARY_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
   UnknownBinOp
   deriving (Show,Eq,Ord)
 
 data MemoryOpType =
 #define HANDLE_MEMORY_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
   UnknownMemoryOp
   deriving (Show,Eq,Ord)
 
 data CastOpType =
 #define HANDLE_CAST_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
   UnknownCastOp
   deriving (Show,Eq,Ord)
 
 data OtherOpType =
 #define HANDLE_OTHER_INST(N,OPC,CLASS) PRESERVE(  ) OPC |
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
   UnknownOtherOp
   deriving (Show,Eq,Ord)
 
 toTermOpCode :: Integral a => a -> Maybe TermOpType
 #define HANDLE_TERM_INST(N,OPC,CLASS) toTermOpCode N = Just OPC
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
 toTermOpCode _ = Nothing
 
 toBinOpCode :: Integral a => a -> Maybe BinOpType
 #define HANDLE_BINARY_INST(N,OPC,CLASS) toBinOpCode N = Just OPC
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
 toBinOpCode _ = Nothing
 
 fromBinOpCode :: BinOpType -> CInt
 #define HANDLE_BINARY_INST(N,OPC,CLASS) fromBinOpCode OPC = N
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
 
 toMemoryOpCode :: Integral a => a -> Maybe MemoryOpType
 #define HANDLE_MEMORY_INST(N,OPC,CLASS) toMemoryOpCode N = Just OPC
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
 toMemoryOpCode _ = Nothing
 
 toCastOpCode :: Integral a => a -> Maybe CastOpType
 #define HANDLE_CAST_INST(N,OPC,CLASS) toCastOpCode N = Just OPC
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
 toCastOpCode _ = Nothing
 
 toOtherOpCode :: Integral a => a -> Maybe OtherOpType
 #define HANDLE_OTHER_INST(N,OPC,CLASS) toOtherOpCode N = Just OPC
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
 toOtherOpCode _ = Nothing
 
 toOpCode :: Integral a => a -> Maybe OpType
@@ -467,7 +511,11 @@ toOpCode :: Integral a => a -> Maybe OpType
 #define HANDLE_MEMORY_INST(N,OPC,CLASS) toOpCode N = Just (MemoryOp OPC)
 #define HANDLE_CAST_INST(N,OPC,CLASS) toOpCode N = Just (CastOp OPC)
 #define HANDLE_OTHER_INST(N,OPC,CLASS) toOpCode N = Just (OtherOp OPC)
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
 #include <llvm/Instruction.def>
+#endif
 toOpCode _ = Nothing
 
 binOpGetOpCode :: Ptr BinaryOperator -> IO BinOpType
