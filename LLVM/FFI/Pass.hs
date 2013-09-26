@@ -51,13 +51,55 @@ module LLVM.FFI.Pass
        ,newDataLayoutFromModule
        ,dataLayoutIsLittleEndian
        ,dataLayoutIsBigEndian
+       ,dataLayoutIsLegalInteger
+       ,dataLayoutExceedsNaturalStackAlignment
+       ,dataLayoutFitsInLegalInteger
+       ,dataLayoutPointerABIAlignment
+       ,dataLayoutPointerPrefAlignment
+       ,dataLayoutPointerSize
+       ,dataLayoutTypeSizeInBits
+       ,dataLayoutTypeStoreSize
+       ,dataLayoutTypeAllocSize
+       ,dataLayoutABITypeAlignment
+       ,dataLayoutABIIntegerTypeAlignment
+       ,dataLayoutCallFrameTypeAlignment
+       ,dataLayoutPrefTypeAlignment
+       ,dataLayoutIntPtrType
+       ,dataLayoutIntPtrTypeForType
+       ,dataLayoutStructLayout
+       ,dataLayoutPreferedAlignment
 #else
        ,TargetData()
        ,newTargetDataFromString
        ,newTargetDataFromModule
        ,targetDataIsLittleEndian
        ,targetDataIsBigEndian
+       ,targetDataIsLegalInteger
+#if HS_LLVM_VERSION >= 300
+       ,targetDataExceedsNaturalStackAlignment
+       ,targetDataFitsInLegalInteger
 #endif
+       ,targetDataPointerABIAlignment
+       ,targetDataPointerPrefAlignment
+       ,targetDataPointerSize
+       ,targetDataTypeSizeInBits
+       ,targetDataTypeStoreSize
+       ,targetDataTypeAllocSize
+       ,targetDataABITypeAlignment
+       ,targetDataABIIntegerTypeAlignment
+       ,targetDataCallFrameTypeAlignment
+       ,targetDataPrefTypeAlignment
+       ,targetDataIntPtrType
+       ,targetDataStructLayout
+       ,targetDataPreferedAlignment
+#endif
+       ,StructLayout()
+       ,structLayoutSizeInBytes
+       ,structLayoutSizeInBits
+       ,structLayoutAlignment
+       ,structLayoutElementContainingOffset
+       ,structLayoutElementOffset
+       ,structLayoutElementOffsetInBits
        ,LoopInfo()
        ,newLoopInfo
        ,loopInfoGetBase
@@ -75,11 +117,13 @@ module LLVM.FFI.Pass
 
 import LLVM.FFI.Interface
 import LLVM.FFI.CPP
+import LLVM.FFI.Type
 import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
 import Data.Proxy
+import Data.Word
 
 #include "Helper.h"
 
@@ -246,3 +290,44 @@ instance VectorC (Ptr (DomTreeNodeBase BasicBlock)) where
   vectorIteratorDeref = vectorIteratorDominatorTreeDeref
   vectorIteratorNext = vectorIteratorDominatorTreeNext
   vectorIteratorEq = vectorIteratorDominatorTreeEq
+
+#if HS_LLVM_VERSION >= 302
+dataLayoutTypeSizeInBits :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO Word64
+dataLayoutTypeSizeInBits = dataLayoutTypeSizeInBits_
+
+dataLayoutTypeStoreSize :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO Word64
+dataLayoutTypeStoreSize = dataLayoutTypeStoreSize_
+
+dataLayoutTypeAllocSize :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO Word64
+dataLayoutTypeAllocSize = dataLayoutTypeAllocSize_
+
+dataLayoutABITypeAlignment :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO CUInt
+dataLayoutABITypeAlignment = dataLayoutABITypeAlignment_
+
+dataLayoutCallFrameTypeAlignment :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO CUInt
+dataLayoutCallFrameTypeAlignment = dataLayoutCallFrameTypeAlignment_
+
+dataLayoutPrefTypeAlignment :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO CUInt
+dataLayoutPrefTypeAlignment = dataLayoutPrefTypeAlignment_
+
+dataLayoutIntPtrTypeForType :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO (Ptr Type)
+dataLayoutIntPtrTypeForType = dataLayoutIntPtrTypeForType_
+#else
+targetDataTypeSizeInBits :: TypeC tp => Ptr TargetData -> Ptr tp -> IO Word64
+targetDataTypeSizeInBits = targetDataTypeSizeInBits_
+
+targetDataTypeStoreSize :: TypeC tp => Ptr TargetData -> Ptr tp -> IO Word64
+targetDataTypeStoreSize = targetDataTypeStoreSize_
+
+targetDataTypeAllocSize :: TypeC tp => Ptr TargetData -> Ptr tp -> IO Word64
+targetDataTypeAllocSize = targetDataTypeAllocSize_
+
+targetDataABITypeAlignment :: TypeC tp => Ptr TargetData -> Ptr tp -> IO CUInt
+targetDataABITypeAlignment = targetDataABITypeAlignment_
+
+targetDataCallFrameTypeAlignment :: TypeC tp => Ptr TargetData -> Ptr tp -> IO CUInt
+targetDataCallFrameTypeAlignment = targetDataCallFrameTypeAlignment_
+
+targetDataPrefTypeAlignment :: TypeC tp => Ptr TargetData -> Ptr tp -> IO CUInt
+targetDataPrefTypeAlignment = targetDataPrefTypeAlignment_
+#endif

@@ -1850,13 +1850,82 @@ llvm version
                                             },"dataLayoutIsLittleEndian")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isBigEndian"
-                                            },"dataLayoutIsBigEndian")]
+                                            },"dataLayoutIsBigEndian")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isLegalInteger"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"dataLayoutIsLegalInteger")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "exceedsNaturalStackAlignment"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"dataLayoutExceedsNaturalStackAlignment")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "fitsInLegalInteger"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"dataLayoutFitsInLegalInteger")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPointerABIAlignment"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"dataLayoutPointerABIAlignment")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPointerPrefAlignment"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"dataLayoutPointerPrefAlignment")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPointerSize"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"dataLayoutPointerSize")
+                                ,(memberFun { ftReturnType = normalT uint64_t
+                                            , ftName = "getTypeSizeInBits"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"dataLayoutTypeSizeInBits_")
+                                ,(memberFun { ftReturnType = normalT uint64_t
+                                            , ftName = "getTypeStoreSize"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"dataLayoutTypeStoreSize_")
+                                ,(memberFun { ftReturnType = normalT uint64_t
+                                            , ftName = "getTypeAllocSize"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"dataLayoutTypeAllocSize_")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getABITypeAlignment"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"dataLayoutABITypeAlignment_")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getABIIntegerTypeAlignment"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"dataLayoutABIIntegerTypeAlignment")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getCallFrameTypeAlignment"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"dataLayoutCallFrameTypeAlignment_")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPrefTypeAlignment"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"dataLayoutPrefTypeAlignment_")
+                                ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "IntegerType"
+                                            , ftName = "getIntPtrType"
+                                            , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                       ,(False,normalT unsigned)]
+                                            },"dataLayoutIntPtrType")
+                                ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Type"
+                                            , ftName = "getIntPtrType"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"dataLayoutIntPtrTypeForType_")
+                                ,(memberFun { ftReturnType = constT $ ptr $ llvmType "StructLayout"
+                                            , ftName = "getStructLayout"
+                                            , ftArgs = [(False,normalT $ ptr $ llvmType "StructType")]
+                                            },"dataLayoutStructLayout")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPreferredAlignment"
+                                            , ftArgs = [(False,normalT $ ptr $ llvmType "GlobalVariable")]
+                                            },"dataLayoutPreferedAlignment")]
                    }]
         else [Spec { specHeader = "llvm/Target/TargetData.h"
                    , specNS = llvmNS
                    , specName = "TargetData"
                    , specTemplateArgs = []
-                   , specType = ClassSpec
+                   , specType = ClassSpec $
                                 [(Constructor [(False,normalT $ llvmType "StringRef")],"newTargetDataFromString")
                                 ,(Constructor [(False,constT $ ptr $ llvmType "Module")],"newTargetDataFromModule")
                                 ,(memberFun { ftReturnType = normalT bool
@@ -1864,9 +1933,101 @@ llvm version
                                             },"targetDataIsLittleEndian")
                                 ,(memberFun { ftReturnType = normalT bool
                                             , ftName = "isBigEndian"
-                                            },"targetDataIsBigEndian")]
+                                            },"targetDataIsBigEndian")
+                                ,(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isLegalInteger"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"targetDataIsLegalInteger")]++
+                                (if version>=llvm3_0
+                                 then [(memberFun { ftReturnType = normalT bool
+                                                  , ftName = "exceedsNaturalStackAlignment"
+                                                  , ftArgs = [(False,normalT unsigned)]
+                                                  },"targetDataExceedsNaturalStackAlignment")
+                                      ,(memberFun { ftReturnType = normalT bool
+                                                  , ftName = "fitsInLegalInteger"
+                                                  , ftArgs = [(False,normalT unsigned)]
+                                                  },"targetDataFitsInLegalInteger")]
+                                 else [])++
+                                [(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPointerABIAlignment"
+                                            },"targetDataPointerABIAlignment")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPointerPrefAlignment"
+                                            },"targetDataPointerPrefAlignment")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPointerSize"
+                                            },"targetDataPointerSize")
+                                ,(memberFun { ftReturnType = normalT uint64_t
+                                            , ftName = "getTypeSizeInBits"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"targetDataTypeSizeInBits_")
+                                ,(memberFun { ftReturnType = normalT uint64_t
+                                            , ftName = "getTypeStoreSize"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"targetDataTypeStoreSize_")
+                                ,(memberFun { ftReturnType = normalT uint64_t
+                                            , ftName = "getTypeAllocSize"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"targetDataTypeAllocSize_")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getABITypeAlignment"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"targetDataABITypeAlignment_")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getABIIntegerTypeAlignment"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"targetDataABIIntegerTypeAlignment")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getCallFrameTypeAlignment"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"targetDataCallFrameTypeAlignment_")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPrefTypeAlignment"
+                                            , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                            },"targetDataPrefTypeAlignment_")
+                                ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "IntegerType"
+                                            , ftName = "getIntPtrType"
+                                            , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")]
+                                            },"targetDataIntPtrType")
+                                ,(memberFun { ftReturnType = constT $ ptr $ llvmType "StructLayout"
+                                            , ftName = "getStructLayout"
+                                            , ftArgs = [(False,normalT $ ptr $ llvmType "StructType")]
+                                            },"targetDataStructLayout")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getPreferredAlignment"
+                                            , ftArgs = [(False,normalT $ ptr $ llvmType "GlobalVariable")]
+                                            },"targetDataPreferedAlignment")]
                    }])++
-       [Spec { specHeader = "llvm/PassSupport.h"
+       [Spec { specHeader = if version >= llvm3_2
+                            then irInclude version "DataLayout.h"
+                            else "llvm/Target/TargetData.h"
+             , specNS = llvmNS
+             , specName = "StructLayout"
+             , specTemplateArgs = []
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = normalT uint64_t
+                                      , ftName = "getSizeInBytes"
+                                      },"structLayoutSizeInBytes")
+                          ,(memberFun { ftReturnType = normalT uint64_t
+                                      , ftName = "getSizeInBits"
+                                      },"structLayoutSizeInBits")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getAlignment"
+                                      },"structLayoutAlignment")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getElementContainingOffset"
+                                      , ftArgs = [(False,normalT uint64_t)]
+                                      },"structLayoutElementContainingOffset")
+                          ,(memberFun { ftReturnType = normalT uint64_t
+                                      , ftName = "getElementOffset"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },"structLayoutElementOffset")
+                          ,(memberFun { ftReturnType = normalT uint64_t
+                                      , ftName = "getElementOffsetInBits"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },"structLayoutElementOffsetInBits")]
+             }
+       ,Spec { specHeader = "llvm/PassSupport.h"
              , specNS = llvmNS
              , specName = "PassInfo"
              , specTemplateArgs = []
