@@ -6,6 +6,8 @@ module LLVM.FFI.Value
         argumentGetArgNo,
         InlineAsm(),
         MDNode(),
+        mdNodeGetNumOperands,
+        mdNodeGetOperand,
         MDString(),
         PseudoSourceValue(),
         FixedStackPseudoSourceValue(),
@@ -23,6 +25,8 @@ import LLVM.FFI.Type
 import LLVM.FFI.OOP
 import LLVM.FFI.StringRef
 import LLVM.FFI.IPList
+import LLVM.FFI.CPP
+import LLVM.FFI.SmallVector
 
 import Foreign
 import Foreign.C
@@ -80,3 +84,14 @@ getNameString ptr = do
   res <- stringRefData str
   deleteStringRef str
   return res
+
+instance PairC CUInt (Ptr MDNode) where
+  pairSize _ = sizeofPairUnsigned_MDNode
+  pairFirst = pairFirstUnsigned_MDNode
+  pairSecond = pairSecondUnsigned_MDNode
+
+instance SmallVectorC (Pair CUInt (Ptr MDNode)) where
+  newSmallVector = newSmallVectorMDNodePair
+  deleteSmallVector = deleteSmallVectorMDNodePair
+  smallVectorSize = smallVectorSizeMDNodePair
+  smallVectorData = smallVectorDataMDNodePair

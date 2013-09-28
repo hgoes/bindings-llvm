@@ -22,6 +22,9 @@ module LLVM.FFI.Instruction
          SynchronizationScope(..),
 #endif
          instructionGetParent,
+         instructionGetMetadataById,
+         instructionGetMetadataByName,
+         instructionGetAllMetadata,
          instructionGetDebugLoc,
 #if HS_LLVM_VERSION>=300
          -- ** Atomic Compare & Exchange Instruction
@@ -236,6 +239,21 @@ import Foreign.C
 #include "Helper.h"
 
 SPECIALIZE_IPLIST(Instruction,capi)
+
+instructionGetParent :: InstructionC i => Ptr i -> IO (Ptr BasicBlock)
+instructionGetParent = instructionGetParent_
+
+instructionGetDebugLoc :: InstructionC i => Ptr i -> IO (Ptr DebugLoc)
+instructionGetDebugLoc = instructionGetDebugLoc_
+
+instructionGetMetadataById :: InstructionC i => Ptr i -> CUInt -> IO (Ptr MDNode)
+instructionGetMetadataById = instructionGetMetadataById_
+
+instructionGetMetadataByName :: InstructionC i => Ptr i -> Ptr StringRef -> IO (Ptr MDNode)
+instructionGetMetadataByName = instructionGetMetadataByName_
+
+instructionGetAllMetadata :: InstructionC i => Ptr i -> Ptr (SmallVector (Pair CUInt (Ptr MDNode))) -> IO ()
+instructionGetAllMetadata = instructionGetAllMetadata_
 
 newSelectInst :: (ValueC c,ValueC s1,ValueC s2) => Ptr c -> Ptr s1 -> Ptr s2 -> Ptr Twine -> IO (Ptr SelectInst)
 newSelectInst = newSelectInst_

@@ -218,7 +218,9 @@ llvm version
           }
      | (tp,rtp) <- [("Loop",normalT $ ptr $ llvmType "Loop")
                   ,("Edge",normalT $ NamedType [ClassName "std" []] "pair" [normalT $ ptr $ llvmType "BasicBlock"
-                                                                           ,normalT $ ptr $ llvmType "BasicBlock"])]
+                                                                           ,normalT $ ptr $ llvmType "BasicBlock"])
+                  ,("MDNodePair",normalT $ NamedType [ClassName "std" []] "pair" [normalT unsigned
+                                                                                 ,normalT $ ptr $ llvmType "MDNode"])]
     ]++
     [Spec { specHeader = "utility"
           , specNS = [ClassName "std" []]
@@ -236,9 +238,8 @@ llvm version
                        ,(SizeOf,"sizeofPair"++tp1++"_"++tp2)
                        ]
           }
-     | (tp1,tp2) <- [("BasicBlock","BasicBlock")]
-    , let rtp1 = normalT $ ptr $ llvmType tp1
-          rtp2 = normalT $ ptr $ llvmType tp2 ]++
+     | (tp1,rtp1,tp2,rtp2) <- [("BasicBlock",normalT $ ptr $ llvmType "BasicBlock","BasicBlock",normalT $ ptr $ llvmType "BasicBlock")
+                             ,("Unsigned",normalT unsigned,"MDNode",normalT $ ptr $ llvmType "MDNode")] ]++
        [Spec { specHeader = "llvm/ADT/APFloat.h"
              , specNS = llvmNS
              , specName = "APFloat"
@@ -549,7 +550,14 @@ llvm version
              , specNS = llvmNS
              , specName = "MDNode"
              , specTemplateArgs = []
-             , specType = ClassSpec []
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getOperand"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },"mdNodeGetOperand")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumOperands"
+                                      },"mdNodeGetNumOperands")]
              }
        ,Spec { specHeader = irInclude version "Metadata.h"
              , specNS = llvmNS
@@ -1026,10 +1034,29 @@ llvm version
              , specType = ClassSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "BasicBlock" []
                                       , ftName = "getParent"
-                                      },"instructionGetParent")
+                                      , ftOverloaded = True
+                                      },"instructionGetParent_")
                           ,(memberFun { ftReturnType = constT $ ref $ NamedType llvmNS "DebugLoc" []
                                       , ftName = "getDebugLoc"
-                                      },"instructionGetDebugLoc")]
+                                      , ftOverloaded = True
+                                      },"instructionGetDebugLoc_")
+                          ,(memberFun { ftReturnType = constT $ ptr $ llvmType "MDNode"
+                                      , ftName = "getMetadata"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      , ftOverloaded = True
+                                      },"instructionGetMetadataById_")
+                          ,(memberFun { ftReturnType = constT $ ptr $ llvmType "MDNode"
+                                      , ftName = "getMetadata"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                      , ftOverloaded = True
+                                      },"instructionGetMetadataByName_")
+                          ,(memberFun { ftName = "getAllMetadata"
+                                      , ftArgs = [(False,normalT $ ref $ NamedType llvmNS "SmallVector"
+                                                            [normalT $ NamedType [ClassName "std" []] "pair" [normalT unsigned
+                                                                                                             ,normalT $ ptr $ llvmType "MDNode"]
+                                                            ,TypeInt 16])]
+                                      , ftOverloaded = True
+                                      },"instructionGetAllMetadata_")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
