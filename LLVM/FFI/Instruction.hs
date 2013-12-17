@@ -249,7 +249,11 @@ instructionGetDebugLoc = instructionGetDebugLoc_
 instructionGetMetadataById :: InstructionC i => Ptr i -> CUInt -> IO (Ptr MDNode)
 instructionGetMetadataById = instructionGetMetadataById_
 
+#if HS_LLVM_VERSION>=301
 instructionGetMetadataByName :: InstructionC i => Ptr i -> Ptr StringRef -> IO (Ptr MDNode)
+#else
+instructionGetMetadataByName :: InstructionC i => Ptr i -> CString -> IO (Ptr MDNode)
+#endif
 instructionGetMetadataByName = instructionGetMetadataByName_
 
 instructionGetAllMetadata :: InstructionC i => Ptr i -> Ptr (SmallVector (Pair CUInt (Ptr MDNode))) -> IO ()

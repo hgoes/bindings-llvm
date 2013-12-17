@@ -1047,7 +1047,9 @@ llvm version
                                       },"instructionGetMetadataById_")
                           ,(memberFun { ftReturnType = constT $ ptr $ llvmType "MDNode"
                                       , ftName = "getMetadata"
-                                      , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                      , ftArgs = [(False,if version >= llvm3_1
+                                                         then normalT $ llvmType "StringRef"
+                                                         else constT $ ptr char)]
                                       , ftOverloaded = True
                                       },"instructionGetMetadataByName_")
                           ,(memberFun { ftName = "getAllMetadata"
