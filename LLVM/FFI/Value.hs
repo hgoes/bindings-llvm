@@ -17,7 +17,11 @@ module LLVM.FFI.Value
         valueGetType,
         hasName,
         getName,
-        getNameString)
+        getNameString,
+        valueUseBegin,
+        valueUseEnd,
+        Value_use_iterator(),
+        ValueUseIteratorC(..))
         where
 
 import LLVM.FFI.Interface
@@ -85,6 +89,12 @@ getNameString ptr = do
   deleteStringRef str
   return res
 
+valueUseBegin :: ValueC t => Ptr t -> IO (Ptr (Value_use_iterator User))
+valueUseBegin = valueUseBegin_
+
+valueUseEnd :: ValueC t => Ptr t -> IO (Ptr (Value_use_iterator User))
+valueUseEnd = valueUseEnd_
+
 instance PairC CUInt (Ptr MDNode) where
   pairSize _ = sizeofPairUnsigned_MDNode
   pairFirst = pairFirstUnsigned_MDNode
@@ -95,3 +105,21 @@ instance SmallVectorC (Pair CUInt (Ptr MDNode)) where
   deleteSmallVector = deleteSmallVectorMDNodePair
   smallVectorSize = smallVectorSizeMDNodePair
   smallVectorData = smallVectorDataMDNodePair
+
+class ValueUseIteratorC t where
+  valueUseIteratorDeref :: Ptr (Value_use_iterator t) -> IO (Ptr t)
+  valueUseIteratorEq :: Ptr (Value_use_iterator t) -> Ptr (Value_use_iterator t) -> IO Bool
+  valueUseIteratorNEq :: Ptr (Value_use_iterator t) -> Ptr (Value_use_iterator t) -> IO Bool
+  valueUseIteratorAtEnd :: Ptr (Value_use_iterator t) -> IO Bool
+  valueUseIteratorNext :: Ptr (Value_use_iterator t) -> IO (Ptr (Value_use_iterator t))
+  valueUseIteratorGetUse :: Ptr (Value_use_iterator t) -> IO (Ptr Use)
+  valueUseIteratorGetOperandNo :: Ptr (Value_use_iterator t) -> IO CUInt
+
+instance ValueUseIteratorC User where
+  valueUseIteratorDeref = valueUseIteratorUserDeref
+  valueUseIteratorEq = valueUseIteratorUserEq
+  valueUseIteratorNEq = valueUseIteratorUserNEq
+  valueUseIteratorAtEnd = valueUseIteratorUserAtEnd
+  valueUseIteratorNext = valueUseIteratorUserNext
+  valueUseIteratorGetUse = valueUseIteratorUserGetUse
+  valueUseIteratorGetOperandNo = valueUseIteratorUserGetOperandNo

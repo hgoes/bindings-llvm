@@ -508,6 +508,18 @@ llvm version
                                       , ftName = "getType"
                                       , ftOverloaded = True
                                       },"valueGetType_")
+                          ,(memberFun { ftReturnType = normalT $ NamedType llvmNS
+                                                       "value_use_iterator"
+                                                       [normalT $ llvmType "User"]
+                                      , ftName = "use_begin"
+                                      , ftOverloaded = True
+                                      },"valueUseBegin_")
+                          ,(memberFun { ftReturnType = normalT $ NamedType llvmNS
+                                                       "value_use_iterator"
+                                                       [normalT $ llvmType "User"]
+                                      , ftName = "use_end"
+                                      , ftOverloaded = True
+                                      },"valueUseEnd_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Argument.h"
@@ -1707,7 +1719,18 @@ llvm version
                                       , ftName = "getOperand" 
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftOverloaded = True
-                                      },"getOperand_")]
+                                      },"getOperand_")
+                          ,(memberFun { ftReturnType = normalT $ ref $ llvmType "Use"
+                                      , ftName = "getOperandUse"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      , ftOverloaded = True
+                                      },"getOperandUse_")
+                          ,(memberFun { ftReturnType = normalT void
+                                      , ftName = "replaceUsesOfWith"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")]
+                                      , ftOverloaded = True
+                                      },"replaceUsesOfWith_")]
              }
        ,Spec { specHeader = irInclude version "Operator.h"
              , specNS = llvmNS
@@ -1728,10 +1751,47 @@ llvm version
                                       },"useGetNext")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "User"
                                       , ftName = "getUser"
-                                      },"useGetUser")]
+                                      },"useGetUser")
+                          ,(memberFun { ftName = "set"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                      },"useSet_")]
                
+             }]++
+       [Spec { specHeader = irInclude version "Use.h"
+             , specNS = llvmNS
+             , specName = "value_use_iterator"
+             , specTemplateArgs = [rtp]
+             , specType = ClassSpec
+                          [(memberFun { ftReturnType = toPtr rtp
+                                      , ftName = "operator->"
+                                      },"valueUseIterator"++tp++"Deref")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "operator=="
+                                      , ftArgs = [(False,constT $ ref $
+                                                         NamedType llvmNS "value_use_iterator" [rtp])]
+                                      },"valueUseIterator"++tp++"Eq")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "operator!="
+                                      , ftArgs = [(False,constT $ ref $
+                                                         NamedType llvmNS "value_use_iterator" [rtp])]
+                                      },"valueUseIterator"++tp++"NEq")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "atEnd"
+                                      },"valueUseIterator"++tp++"AtEnd")
+                          ,(memberFun { ftReturnType = normalT $ ref $
+                                                       NamedType llvmNS "value_use_iterator" [rtp]
+                                      , ftName = "operator++"
+                                      },"valueUseIterator"++tp++"Next")
+                          ,(memberFun { ftReturnType = normalT $ ref $ llvmType "Use"
+                                      , ftName = "getUse"
+                                      },"valueUseIterator"++tp++"GetUse")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getOperandNo"
+                                      },"valueUseIterator"++tp++"GetOperandNo")]
              }
-       ,Spec { specHeader = "llvm/PassManager.h"
+       | tp <- ["User"]
+       , let rtp = Type [] (NamedType llvmNS tp [])]++
+       [Spec { specHeader = "llvm/PassManager.h"
              , specNS = llvmNS
              , specName = "PassManager"
              , specTemplateArgs = []
