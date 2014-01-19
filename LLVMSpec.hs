@@ -1186,7 +1186,23 @@ llvm version
                           [(memberFun { ftReturnType = normalT int
                                       , ftName = "getPredicate" 
                                       , ftOverloaded = True
-                                      },"cmpInstGetPredicate_")]
+                                      },"cmpInstGetPredicate_")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getInversePredicate"
+                                      , ftArgs = [(False,normalT $
+                                                         EnumType [ClassName "llvm" []
+                                                                  ,ClassName "CmpInst" []]
+                                                         "Predicate")]
+                                      , ftStatic = True
+                                      , ftPure = True },"cmpInstGetInversePredicate_")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getSwappedPredicate"
+                                      , ftArgs = [(False,normalT $
+                                                         EnumType [ClassName "llvm" []
+                                                                  ,ClassName "CmpInst" []]
+                                                         "Predicate")]
+                                      , ftStatic = True
+                                      , ftPure = True },"cmpInstGetSwappedPredicate_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS

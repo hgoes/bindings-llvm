@@ -67,11 +67,15 @@ module LLVM.FFI.Instruction
          FCmpOp(..),
          newFCmpInst,
          getFCmpOp,
+         inverseFCmpOp,
+         swappedFCmpOp,
          -- *** Integer Compare Instruction
          ICmpInst(),
          ICmpOp(..),
          newICmpInst,
          getICmpOp,
+         inverseICmpOp,
+         swappedICmpOp,
          -- ** Extract Element Instruction
          ExtractElementInst(),
          newExtractElementInst,
@@ -557,6 +561,18 @@ getFCmpOp ptr = fmap toFCmpOp (cmpInstGetPredicate_ ptr)
 
 getICmpOp :: Ptr ICmpInst -> IO ICmpOp
 getICmpOp ptr = fmap toICmpOp (cmpInstGetPredicate_ ptr)
+
+inverseICmpOp :: ICmpOp -> ICmpOp
+inverseICmpOp op = toICmpOp (cmpInstGetInversePredicate_ $ fromICmpOp op)
+
+inverseFCmpOp :: FCmpOp -> FCmpOp
+inverseFCmpOp op = toFCmpOp (cmpInstGetInversePredicate_ $ fromFCmpOp op)
+
+swappedICmpOp :: ICmpOp -> ICmpOp
+swappedICmpOp op = toICmpOp (cmpInstGetSwappedPredicate_ $ fromICmpOp op)
+
+swappedFCmpOp :: FCmpOp -> FCmpOp
+swappedFCmpOp op = toFCmpOp (cmpInstGetSwappedPredicate_ $ fromFCmpOp op)
 
 TYPE(Instruction)
 SUBTYPE2(Value,User,Instruction)
