@@ -23,6 +23,7 @@ library
     FlexibleInstances
     TypeFamilies
   exposed-modules:
+    LLVM.FFI
     LLVM.FFI.StringRef
     LLVM.FFI.ErrorCode
     LLVM.FFI.OOP
