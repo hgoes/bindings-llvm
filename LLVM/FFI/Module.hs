@@ -9,6 +9,7 @@ module LLVM.FFI.Module
         -- ** Utility functions for printing and dumping Module objects
        ,moduleDump
         -- * Generic Value Accessors
+       ,moduleGetNamedValue
        ,moduleGetTypeByName
         -- * Globals list, functions list, and symbol table
        ,moduleGetGlobalList

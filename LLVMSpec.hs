@@ -890,6 +890,10 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ref $ llvmType "LLVMContext"
                                       , ftName = "getContext"
                                       },"moduleGetContext")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "GlobalValue"
+                                      , ftName = "getNamedValue"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                      },"moduleGetNamedValue")
                           ]
              }
        ,Spec { specHeader = if version>=llvm3_3
