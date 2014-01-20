@@ -10,13 +10,14 @@ data ClassName = ClassName { className :: String
 
 type NS = [ClassName]
 
-data Type = Type [TypeQualifier] TypeC 
+data Type = Type { qualifiers :: [TypeQualifier]
+                 , typeDesc :: TypeC }
           | TypeInt Integer
           deriving (Eq,Ord,Show)
 
 data TypeQualifier = QConst deriving (Eq,Ord,Show)
 
-data TypeC = NamedType NS String [Type]
+data TypeC = NamedType NS String [Type] Bool
            | EnumType NS String
            | PtrType TypeC
            | RefType TypeC

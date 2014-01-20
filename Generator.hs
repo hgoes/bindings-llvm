@@ -17,7 +17,8 @@ data Spec
          }
 
 data SpecType
-  = ClassSpec { cspecFuns :: [(FunSpec,String)] }
+  = ClassSpec { cspecFuns :: [(FunSpec,String)]
+              , isInterface :: Bool }
   | GlobalFunSpec { gfunReturnType :: Type
                   , gfunArgs :: [(Bool,Type)]
                   , gfunHSName :: String
@@ -25,6 +26,12 @@ data SpecType
   | EnumSpec { enumHSName :: String
              , enumElems :: [(String,String)]
              }
+
+classSpec :: [(FunSpec,String)] -> SpecType
+classSpec funs = ClassSpec funs False
+
+interfaceSpec :: [(FunSpec,String)] -> SpecType
+interfaceSpec funs = ClassSpec funs True
 
 specFullName :: Spec -> String
 specFullName cs = renderNS (specNS cs) ++
@@ -36,7 +43,10 @@ specFullNameHS cs = (concat [ cname++"_" | ClassName cname _ <- specNS cs ])++
                     (specName cs)
 
 specFullType :: Spec -> Type
-specFullType cs = Type [] (NamedType (specNS cs) (specName cs) (specTemplateArgs cs))
+specFullType cs = Type [] (NamedType (specNS cs) (specName cs) (specTemplateArgs cs)
+                           (case specType cs of
+                               ClassSpec { isInterface = iface } -> iface
+                               _ -> False))
 
 data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                            }
@@ -111,7 +121,7 @@ renderType (Type qual tp)
     ++ renderC tp
   where
     renderQualifier QConst = "const"
-    renderC (NamedType ns str templ) = renderNS ns ++ str ++ renderTempl templ
+    renderC (NamedType ns str templ _) = renderNS ns ++ str ++ renderTempl templ
     renderC (EnumType ns str) = renderNS ns ++ str
     renderC (PtrType tp) = renderC tp++"*"
     renderC (RefType tp) = renderC tp++"&"
@@ -125,25 +135,25 @@ renderTempl [] = ""
 renderTempl xs = "<"++concat (intersperse "," $ fmap renderType xs)++" >"
 
 normalT :: TypeC -> Type
-normalT = Type []
+normalT c = Type [] c
 
 constT :: TypeC -> Type
 constT = Type [QConst]
 
-char = NamedType [] "char" []
-void = NamedType [] "void" []
-size_t = NamedType [] "size_t" []
-bool = NamedType [] "bool" []
-unsigned = NamedType [] "unsigned" []
-int = NamedType [] "int" []
-uint64_t = NamedType [] "uint64_t" []
-uint8_t = NamedType [] "uint8_t" []
-int64_t = NamedType [] "int64_t" []
-double = NamedType [] "double" []
-float = NamedType [] "float" []
+char = NamedType [] "char" [] False
+void = NamedType [] "void" [] False
+size_t = NamedType [] "size_t" [] False
+bool = NamedType [] "bool" [] False
+unsigned = NamedType [] "unsigned" [] False
+int = NamedType [] "int" [] False
+uint64_t = NamedType [] "uint64_t" [] False
+uint8_t = NamedType [] "uint8_t" [] False
+int64_t = NamedType [] "int64_t" [] False
+double = NamedType [] "double" [] False
+float = NamedType [] "float" [] False
 ptr = PtrType
 ref = RefType
-llvmType name = NamedType llvmNS name []
+llvmType name = NamedType llvmNS name [] False
 
 llvmNS = [ClassName "llvm" []]
 
@@ -160,7 +170,7 @@ toConstPtr (Type _ tp) = Type [QConst] (PtrType tp)
 cstring = PtrType char
 
 isCType :: TypeC -> Bool
-isCType (NamedType [] name []) = case name of
+isCType (NamedType [] name [] _) = case name of
   "void" -> True
   "char" -> True
   "size_t" -> True
@@ -190,7 +200,7 @@ toCType (Type q c) = let (x,out,inC) = toCType' c
     toCType' (PtrType t) = if isCType t
                            then (PtrType t,idOut,idIn)
                            else (PtrType void,voidCastOut (QConst `elem` q),voidCastIn (Type q t))
-    toCType' (EnumType ns name) = (NamedType [] "int" [],idOut,enumCastIn ns name)
+    toCType' (EnumType ns name) = (NamedType [] "int" [] False,idOut,enumCastIn ns name)
     toCType' t = if isCType t
                  then (t,idOut,idIn)
                  else (ptr void,copyOut (Type q t),passAsPointer (Type q t))
@@ -206,7 +216,7 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
     toHSType _ (PtrType t) = HsTyApp 
                              (HsTyCon $ UnQual $ HsIdent "Ptr")
                              (toHSType True t)
-    toHSType isP (NamedType [] name []) = case name of
+    toHSType isP (NamedType [] name [] iface) = case name of
       "void" -> HsTyTuple []
       "char" -> HsTyCon $ UnQual $ HsIdent "CChar"
       "size_t" -> HsTyCon $ UnQual $ HsIdent "CSize"
@@ -221,16 +231,21 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
       _ -> (if isP
             then id 
             else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
-           ) $ HsTyCon $ UnQual $ HsIdent $ hsName name
-    toHSType isP (NamedType ns name tmpl) 
+           ) $ HsTyCon $ UnQual $ HsIdent $ if iface
+                                            then fmap toLower name
+                                            else hsName name
+    toHSType isP (NamedType ns name tmpl iface) 
       = (if isP
          then id
          else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
-        ) $ foldl HsTyApp (toHSType True (NamedType [] name [])) (fmap (toHaskellType False Nothing) $
-                                                                  filter (\tp -> case tp of
-                                                                             Type _ _ -> True
-                                                                             _ -> False) $
-                                                                  concat (fmap classArgs ns)++tmpl)
+        ) $ foldl HsTyApp (toHSType True (NamedType [] name [] iface))
+        (if iface
+         then []
+         else (fmap (toHaskellType False Nothing) $
+               filter (\tp -> case tp of
+                          Type _ _ -> True
+                          _ -> False) $
+               concat (fmap classArgs ns)++tmpl))
     toHSType isP (EnumType ns name)
       = HsTyCon $ UnQual $ HsIdent "CInt"
 
@@ -246,7 +261,7 @@ generateWrapper :: String -> [Spec] -> (String,String)
 generateWrapper inc_sym spec
   = let includes = ["#include <"++cs++">" | cs <- nub $ fmap specHeader spec]
         all_cont = concat [ case specType cs of
-                               ClassSpec funs -> fmap (generateWrapperFunction cs) funs
+                               ClassSpec funs _ -> fmap (generateWrapperFunction cs) funs
                                GlobalFunSpec rtp args hsname -> [generateGlobalWrapper cs rtp args hsname]
                                EnumSpec _ elems -> [generateEnum cs elems]
                           | cs <- spec ]
@@ -366,7 +381,7 @@ generateFFI mname header specs
     dts = [ "data "++hsName (specName cs) ++
             concat (fmap (\(_,i) -> " a"++show i) (zip (specCollectTemplateArgs cs) [0..]))++
             " = "++hsName (specName cs)
-          | cs@Spec { specType = ClassSpec {} } <- nubBy (\x y -> specName x == specName y) specs
+          | cs@Spec { specType = ClassSpec { isInterface = False } } <- nubBy (\x y -> specName x == specName y) specs
           ] ++
           [ "data "++hsname++" = "++(concat $ intersperse " | " [ el | (_,el) <- els ])++" deriving (Show,Eq,Ord)"
           | Spec { specType = EnumSpec { enumHSName = hsname
