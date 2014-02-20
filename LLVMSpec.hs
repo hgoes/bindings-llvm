@@ -601,6 +601,28 @@ llvm version
              }
        ,Spec { specHeader = irInclude version "Metadata.h"
              , specNS = llvmNS
+             , specName = "NamedMDNode"
+             , specTemplateArgs = []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Module"
+                                      , ftName = "getParent"
+                                      },"namedMDNodeGetParent")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDNode"
+                                      , ftName = "getOperand"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },"namedMDNodeGetOperand")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumOperands"
+                                      },"namedMDNodeGetNumOperands")
+                          ,(memberFun { ftName = "addOperand"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "MDNode")]
+                                      },"namedMDNodeAddOperand")
+                          ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                      , ftName = "getName"
+                                      },"namedMDNodeGetName")]
+             }
+       ,Spec { specHeader = irInclude version "Metadata.h"
+             , specNS = llvmNS
              , specName = "MDString"
              , specTemplateArgs = []
              , specType = classSpec []
