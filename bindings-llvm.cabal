@@ -34,6 +34,7 @@ library
     LLVM.FFI.OwningPtr
     LLVM.FFI.SMDiagnostic
     LLVM.FFI.Value
+    LLVM.FFI.Metadata
     LLVM.FFI.User
     LLVM.FFI.IPList
     LLVM.FFI.Function

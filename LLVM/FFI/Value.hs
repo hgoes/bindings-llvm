@@ -5,19 +5,6 @@ module LLVM.FFI.Value
         argumentGetParent,
         argumentGetArgNo,
         InlineAsm(),
-        MDNode(),
-        newMDNode,
-        mdNodeGetNumOperands,
-        mdNodeGetOperand,
-        mdNodeIsFunctionLocal,
-        mdNodeGetFunction,
-        MDString(),
-        NamedMDNode(),
-        namedMDNodeGetParent,
-        namedMDNodeGetOperand,
-        namedMDNodeGetNumOperands,
-        namedMDNodeAddOperand,
-        namedMDNodeGetName,
         PseudoSourceValue(),
         FixedStackPseudoSourceValue(),
         GetType(..),
@@ -55,10 +42,6 @@ SUBTYPE(Value,Argument)
 SPECIALIZE_IPLIST(Argument,capi)
 TYPE_LEAF(InlineAsm)
 SUBTYPE(Value,InlineAsm)
-TYPE_LEAF(MDNode)
-SUBTYPE(Value,MDNode)
-TYPE_LEAF(MDString)
-SUBTYPE(Value,MDString)
 TYPE(PseudoSourceValue)
 SUBTYPE(Value,PseudoSourceValue)
 TYPE_LEAF(FixedStackPseudoSourceValue)
@@ -71,8 +54,6 @@ class GetType value where
 GETTYPE(Value)
 GETTYPE(Argument)
 GETTYPE(InlineAsm)
-GETTYPE(MDNode)
-GETTYPE(MDString)
 GETTYPE(PseudoSourceValue)
 GETTYPE(FixedStackPseudoSourceValue)
 

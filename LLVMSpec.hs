@@ -615,7 +615,7 @@ llvm version
                                       , ftName = "getNumOperands"
                                       },"namedMDNodeGetNumOperands")
                           ,(memberFun { ftName = "addOperand"
-                                      , ftArgs = [(True,normalT $ ptr $ llvmType "MDNode")]
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "MDNode")]
                                       },"namedMDNodeAddOperand")
                           ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
                                       , ftName = "getName"

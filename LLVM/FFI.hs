@@ -18,6 +18,7 @@ module LLVM.FFI
        ,module LLVM.FFI.Loop
        ,module LLVM.FFI.MachineCodeInfo
        ,module LLVM.FFI.MemoryBuffer
+       ,module LLVM.FFI.Metadata
        ,module LLVM.FFI.Module
        ,module LLVM.FFI.OOP
        ,module LLVM.FFI.OStream
@@ -60,6 +61,7 @@ import LLVM.FFI.Instruction
 import LLVM.FFI.Loop
 import LLVM.FFI.MachineCodeInfo
 import LLVM.FFI.MemoryBuffer
+import LLVM.FFI.Metadata
 import LLVM.FFI.Module
 import LLVM.FFI.OOP
 import LLVM.FFI.OStream
