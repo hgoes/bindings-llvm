@@ -584,7 +584,20 @@ llvm version
                                       },"mdNodeGetOperand")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumOperands"
-                                      },"mdNodeGetNumOperands")]
+                                      },"mdNodeGetNumOperands")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isFunctionLocal"
+                                      },"mdNodeIsFunctionLocal")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
+                                      , ftName = "getFunction"
+                                      },"mdNodeGetFunction")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDNode"
+                                      , ftName = "get"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                                         [normalT $ ptr $ llvmType "Value"] False)]
+                                      , ftStatic = True
+                                      },"newMDNode")]
              }
        ,Spec { specHeader = irInclude version "Metadata.h"
              , specNS = llvmNS
