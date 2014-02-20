@@ -6,6 +6,8 @@ module LLVM.FFI.Metadata
         mdNodeIsFunctionLocal,
         mdNodeGetFunction,
         MDString(),
+        newMDString,
+        mdStringGetString,
         NamedMDNode(),
         namedMDNodeGetParent,
         namedMDNodeGetOperand,

@@ -625,7 +625,15 @@ llvm version
              , specNS = llvmNS
              , specName = "MDString"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                      , ftName = "getString"
+                                      },"mdStringGetString")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDString"
+                                      , ftName = "get"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                 ,(False,normalT $ llvmType "StringRef")]
+                                      , ftStatic = True },"newMDString")]
              }
        ,Spec { specHeader = "llvm/CodeGen/PseudoSourceValue.h"
              , specNS = llvmNS
