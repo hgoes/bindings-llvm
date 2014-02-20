@@ -150,7 +150,7 @@ llvm version
                                            },"listNode"++tp++"Next")]
                   }
             ]
-            | tp <- ["Function","Instruction","BasicBlock","GlobalVariable","Argument"]
+            | tp <- ["Function","Instruction","BasicBlock","GlobalVariable","Argument","NamedMDNode"]
            , let rtp = Type [] (NamedType llvmNS tp [] False)
            ]++
     concat [[Spec { specHeader = "llvm/ADT/SetVector.h"
@@ -957,6 +957,21 @@ llvm version
                                       , ftName = "getNamedValue"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
                                       },"moduleGetNamedValue")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "NamedMDNode"
+                                      , ftName = "getNamedMetadata"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "Twine")]
+                                      },"moduleGetNamedMetadata")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "NamedMDNode"
+                                      , ftName = "getOrInsertNamedMetadata"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                      },"moduleGetOrInsertNamedMetadata")
+                          ,(memberFun { ftName = "eraseNamedMetadata"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "NamedMDNode")]
+                                      },"moduleEraseNamedMetadata")
+                          ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "iplist"
+                                                       [normalT $ llvmType "NamedMDNode"] False
+                                      , ftName = "getNamedMDList"
+                                      },"moduleGetNamedMDList")
                           ]
              }
        ,Spec { specHeader = if version>=llvm3_3

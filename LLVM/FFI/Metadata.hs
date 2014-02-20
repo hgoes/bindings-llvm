@@ -19,6 +19,7 @@ module LLVM.FFI.Metadata
 import LLVM.FFI.Interface
 import LLVM.FFI.OOP
 import LLVM.FFI.Value
+import LLVM.FFI.IPList
 
 #include "Helper.h"
 
@@ -29,3 +30,5 @@ SUBTYPE(Value,MDString)
 
 GETTYPE(MDNode)
 GETTYPE(MDString)
+
+SPECIALIZE_IPLIST(NamedMDNode,capi)

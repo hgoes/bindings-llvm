@@ -11,9 +11,14 @@ module LLVM.FFI.Module
         -- * Generic Value Accessors
        ,moduleGetNamedValue
        ,moduleGetTypeByName
+        -- * Named Metadata Accessors
+       ,moduleGetNamedMetadata
+       ,moduleGetOrInsertNamedMetadata
+       ,moduleEraseNamedMetadata
         -- * Globals list, functions list, and symbol table
        ,moduleGetGlobalList
        ,moduleGetFunctionList
+       ,moduleGetNamedMDList
        ,parseIR
        ,writeBitCodeToFile
        ) where
