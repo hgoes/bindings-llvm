@@ -6,6 +6,9 @@ module LLVM.FFI.Module
        ,deleteModule
         -- ** Module Level Accessors
        ,moduleGetContext
+        -- ** Function Accessors
+       ,moduleGetFunction
+       ,moduleGetFunctionString
         -- ** Utility functions for printing and dumping Module objects
        ,moduleDump
         -- * Generic Value Accessors
@@ -24,6 +27,8 @@ module LLVM.FFI.Module
        ) where
 
 import LLVM.FFI.Interface
+import LLVM.FFI.StringRef
+
 import Foreign
 import Foreign.C
 
@@ -32,6 +37,10 @@ writeBitCodeToFile md name = withCString name
                              $ \str -> do
                                res <- writeBitCodeToFile_ md str
                                return $ res==0
+
+moduleGetFunctionString :: Ptr Module -> String -> IO (Ptr Function)
+moduleGetFunctionString md name
+  = withStringRef name (moduleGetFunction md)
 
 foreign import capi "extra.h writeBitCodeToFile"
   writeBitCodeToFile_ :: Ptr Module -> CString -> IO CInt

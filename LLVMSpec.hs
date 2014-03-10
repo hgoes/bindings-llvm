@@ -972,6 +972,10 @@ llvm version
                                                        [normalT $ llvmType "NamedMDNode"] False
                                       , ftName = "getNamedMDList"
                                       },"moduleGetNamedMDList")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
+                                      , ftName = "getFunction"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                      },"moduleGetFunction")
                           ]
              }
        ,Spec { specHeader = if version>=llvm3_3
