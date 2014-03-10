@@ -26,6 +26,7 @@ module LLVM.FFI.Instruction
          instructionGetMetadataByName,
          instructionGetAllMetadata,
          instructionGetDebugLoc,
+         instructionIsUsedOutsideOfBlock,
 #if HS_LLVM_VERSION>=300
          -- ** Atomic Compare & Exchange Instruction
          AtomicCmpXchgInst(),
@@ -262,6 +263,9 @@ instructionGetMetadataByName = instructionGetMetadataByName_
 
 instructionGetAllMetadata :: InstructionC i => Ptr i -> Ptr (SmallVector (Pair CUInt (Ptr MDNode))) -> IO ()
 instructionGetAllMetadata = instructionGetAllMetadata_
+
+instructionIsUsedOutsideOfBlock :: InstructionC i => Ptr i -> Ptr BasicBlock -> IO Bool
+instructionIsUsedOutsideOfBlock = instructionIsUsedOutsideOfBlock_
 
 newSelectInst :: (ValueC c,ValueC s1,ValueC s2) => Ptr c -> Ptr s1 -> Ptr s2 -> Ptr Twine -> IO (Ptr SelectInst)
 newSelectInst = newSelectInst_

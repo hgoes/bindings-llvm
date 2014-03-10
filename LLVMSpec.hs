@@ -1152,7 +1152,12 @@ llvm version
                                                                                                              ,normalT $ ptr $ llvmType "MDNode"] False
                                                             ,TypeInt 16] False)]
                                       , ftOverloaded = True
-                                      },"instructionGetAllMetadata_")]
+                                      },"instructionGetAllMetadata_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isUsedOutsideOfBlock"
+                                      , ftArgs = [(False,constT $ ptr $ llvmType "BasicBlock")]
+                                      , ftOverloaded = True
+                                      },"instructionIsUsedOutsideOfBlock_")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
