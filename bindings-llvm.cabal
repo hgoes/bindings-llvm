@@ -22,6 +22,7 @@ library
     MultiParamTypeClasses
     FlexibleInstances
     TypeFamilies
+    DeriveDataTypeable
   exposed-modules:
     LLVM.FFI
     LLVM.FFI.StringRef

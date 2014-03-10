@@ -376,14 +376,15 @@ generateFFI mname header specs
              ,""
              ,"import Foreign"
              ,"import Foreign.C"
+             ,"import Data.Typeable"
              ,""]++dts++fns++conv)
   where
     dts = [ "data "++hsName (specName cs) ++
             concat (fmap (\(_,i) -> " a"++show i) (zip (specCollectTemplateArgs cs) [0..]))++
-            " = "++hsName (specName cs)
+            " = "++hsName (specName cs)++" deriving (Typeable)"
           | cs@Spec { specType = ClassSpec { isInterface = False } } <- nubBy (\x y -> specName x == specName y) specs
           ] ++
-          [ "data "++hsname++" = "++(concat $ intersperse " | " [ el | (_,el) <- els ])++" deriving (Show,Eq,Ord)"
+          [ "data "++hsname++" = "++(concat $ intersperse " | " [ el | (_,el) <- els ])++" deriving (Typeable,Show,Eq,Ord)"
           | Spec { specType = EnumSpec { enumHSName = hsname
                                        , enumElems = els } } <- specs ]
     conv = concat
