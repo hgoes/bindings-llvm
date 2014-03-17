@@ -992,10 +992,10 @@ llvm version
                                                  ,(False,normalT (ref $ llvmType "LLVMContext"))]
                                       , ftStatic = True
                                       },"parseIR")
-                          {-,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionPass"
-                                      , ftName = "createCFGSimplificationPass"
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionPass"
+                                      , ftName = "createInstructionNamerPass"
                                       , ftStatic = True
-                                      },"createCFGSimplificationPass")-}
+                                      },"createInstructionNamerPass")
                           ]++
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isa"

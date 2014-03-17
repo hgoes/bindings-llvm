@@ -36,6 +36,7 @@ module LLVM.FFI
        ,module LLVM.FFI.TargetMachine
        ,module LLVM.FFI.Transforms.IPO
        ,module LLVM.FFI.Transforms.Scalar
+       ,module LLVM.FFI.Transforms.Misc
        ,module LLVM.FFI.Twine
        ,module LLVM.FFI.Type
        ,module LLVM.FFI.Use
@@ -79,6 +80,7 @@ import LLVM.FFI.Target
 import LLVM.FFI.TargetMachine
 import LLVM.FFI.Transforms.IPO
 import LLVM.FFI.Transforms.Scalar
+import LLVM.FFI.Transforms.Misc
 import LLVM.FFI.Twine
 import LLVM.FFI.Type
 import LLVM.FFI.Use

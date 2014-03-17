@@ -69,6 +69,7 @@ library
     LLVM.Target.XCore
     LLVM.FFI.Transforms.Scalar
     LLVM.FFI.Transforms.IPO
+    LLVM.FFI.Transforms.Misc
     LLVM.FFI.OStream
     LLVM.FFI.AliasAnalysis
     LLVM.FFI.Twine
