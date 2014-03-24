@@ -38,7 +38,11 @@ extern "C" {
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;
+#if HS_LLVM_VERSION <= 303
     llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::raw_fd_ostream::F_Binary);
+#else
+    llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::sys::fs::F_None);
+#endif
     if (!ErrorInfo.empty())
       return -1;
     llvm::WriteBitcodeToFile((llvm::Module*)m, OS);

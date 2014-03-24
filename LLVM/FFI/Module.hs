@@ -21,7 +21,9 @@ module LLVM.FFI.Module
         -- * Globals list, functions list, and symbol table
        ,moduleGetGlobalList
        ,moduleGetFunctionList
+#if HS_LLVM_VERSION >= 302
        ,moduleGetNamedMDList
+#endif
        ,parseIR
        ,writeBitCodeToFile
        ) where

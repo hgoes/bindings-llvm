@@ -20,7 +20,9 @@ module LLVM.FFI.Transforms.Scalar
        ,createMemCpyOptPass
        ,createSCCPPass
        ,createScalarReplAggregatesPass
+#if HS_LLVM_VERSION<=302
        ,createSimplifyLibCallsPass
+#endif
        ,createTailCallEliminationPass
        ,createVerifierPass
        ) where

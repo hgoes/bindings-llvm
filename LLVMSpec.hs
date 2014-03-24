@@ -928,7 +928,7 @@ llvm version
              , specNS = llvmNS
              , specName = "Module"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpec $
                           [(Constructor [(False,normalT $ llvmType "StringRef")
                                         ,(False,normalT $ ref $ llvmType "LLVMContext")
                                         ],"newModule")
@@ -967,12 +967,14 @@ llvm version
                                       },"moduleGetOrInsertNamedMetadata")
                           ,(memberFun { ftName = "eraseNamedMetadata"
                                       , ftArgs = [(False,normalT $ ptr $ llvmType "NamedMDNode")]
-                                      },"moduleEraseNamedMetadata")
-                          ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "iplist"
-                                                       [normalT $ llvmType "NamedMDNode"] False
-                                      , ftName = "getNamedMDList"
-                                      },"moduleGetNamedMDList")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
+                                      },"moduleEraseNamedMetadata")]++
+                          (if version>=llvm3_2
+                           then [(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "iplist"
+                                                             [normalT $ llvmType "NamedMDNode"] False
+                                            , ftName = "getNamedMDList"
+                                            },"moduleGetNamedMDList")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
                                       , ftName = "getFunction"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
                                       },"moduleGetFunction")
@@ -2275,11 +2277,13 @@ llvm version
                                       },"setPassManagerBuilderSizeLevel")
                              ,(Setter { ftSetVar = "Inliner"
                                       , ftSetType = normalT $ ptr $ llvmType "Pass"
-                                      },"setPassManagerBuilderInliner")
-                             ,(Setter { ftSetVar = "DisableSimplifyLibCalls"
-                                      , ftSetType = normalT bool
-                                      },"setPassManagerBuilderDisableSimplifyLibCalls")
-                             ,(Setter { ftSetVar = "DisableUnitAtATime"
+                                      },"setPassManagerBuilderInliner")]++
+                             (if version<=llvm3_3
+                              then [(Setter { ftSetVar = "DisableSimplifyLibCalls"
+                                            , ftSetType = normalT bool
+                                            },"setPassManagerBuilderDisableSimplifyLibCalls")]
+                              else [])++
+                             [(Setter { ftSetVar = "DisableUnitAtATime"
                                       , ftSetType = normalT bool
                                       },"setPassManagerBuilderDisableUnitAtATime")
                              ,(Setter { ftSetVar = "DisableUnrollLoops"
@@ -2295,10 +2299,12 @@ llvm version
                                                   },"setPassManagerBuilderSLPVectorize")]
                                     else [(Setter { ftSetVar = "Vectorize"
                                                   , ftSetType = normalT bool
-                                                  },"setPassManagerBuilderVectorize")])++
-                                   [(Setter { ftSetVar = "LoopVectorize"
-                                            , ftSetType = normalT bool
-                                            },"setPassManagerBuilderLoopVectorize")]
+                                                  },"setPassManagerBuilderVectorize")]++
+                                         (if version>=llvm3_2
+                                          then [(Setter { ftSetVar = "LoopVectorize"
+                                                        , ftSetType = normalT bool
+                                                        },"setPassManagerBuilderLoopVectorize")]
+                                          else []))
                               else [])
                 }]
      else [])++
@@ -2330,10 +2336,11 @@ llvm version
                      ,"createLoopUnswitchPass"
                      ,"createMemCpyOptPass"
                      ,"createSCCPPass"
-                     ,"createScalarReplAggregatesPass"
-                     ,"createSimplifyLibCallsPass"
-                     ,"createTailCallEliminationPass"
-                     ]
+                     ,"createScalarReplAggregatesPass"]++
+                     (if version<=llvm3_2
+                      then ["createSimplifyLibCallsPass"]
+                      else [])++
+                     ["createTailCallEliminationPass"]
        ]++
        [Spec { specHeader = "llvm/Transforms/IPO.h"
              , specNS = llvmNS
@@ -2959,8 +2966,10 @@ llvm version
                                  ,"MSP430_INTR"
                                  ,"X86_ThisCall"]++
                                  (if version>=llvm2_9
-                                  then ["PTX_Kernel","PTX_Device"
-                                       ,"MBLAZE_INTR","MBLAZE_SVOL"]
+                                  then ["PTX_Kernel","PTX_Device"]++
+                                       (if version<=llvm3_3
+                                        then ["MBLAZE_INTR","MBLAZE_SVOL"]
+                                        else [])
                                   else [])++
                                  (if version>llvm3_1
                                   then ["SPIR_FUNC"
@@ -3040,13 +3049,19 @@ llvm version
                        [(memberFun { ftReturnType = normalT bool
                                    , ftName = "has"++name
                                    },"targetHas"++name)
-                        | name <- ["JIT","TargetMachine","AsmPrinter"]++
-                                 (if version>=llvm2_9
+                        | name <- ["JIT","TargetMachine"]++
+                                  (if version<=llvm3_3
+                                   then ["AsmPrinter"]
+                                   else [])++
+                                 (if version>=llvm2_9 && version<=llvm3_3
                                   then ["AsmStreamer"]
                                   else [])++
                                  (if version>=llvm3_0
-                                  then ["MCAsmBackend","MCAsmParser","MCDisassembler","MCInstPrinter"
-                                       ,"MCCodeEmitter","MCObjectStreamer"]
+                                  then ["MCAsmBackend"]++
+                                       (if version<=llvm3_3
+                                        then ["MCAsmParser","MCDisassembler","MCInstPrinter"
+                                             ,"MCCodeEmitter","MCObjectStreamer"]
+                                        else [])
                                   else []) ]
           }
     ,Spec { specHeader = "llvm/Target/TargetMachine.h"
