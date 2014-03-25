@@ -19,9 +19,9 @@ module LLVM.FFI.PassManagerBuilder
        ,setPassManagerBuilderSLPVectorize
 #else
        ,setPassManagerBuilderVectorize
-#endif
 #if HS_LLVM_VERSION >= 302
        ,setPassManagerBuilderLoopVectorize
+#endif
 #endif
 #endif
 #endif
