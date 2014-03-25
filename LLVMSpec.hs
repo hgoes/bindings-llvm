@@ -593,9 +593,13 @@ llvm version
                                       },"mdNodeGetFunction")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDNode"
                                       , ftName = "get"
-                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef"
-                                                         [normalT $ ptr $ llvmType "Value"] False)]
+                                      , ftArgs = if version>=llvm2_9
+                                                 then [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                      ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                                              [normalT $ ptr $ llvmType "Value"] False)]
+                                                 else [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                      ,(False,normalT $ ptr $ ptr $ llvmType "Value")
+                                                      ,(False,normalT unsigned)]
                                       , ftStatic = True
                                       },"newMDNode")]
              }
