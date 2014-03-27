@@ -10,5 +10,6 @@ env:
 install:
   - sudo apt-get install llvm-${LLVM_VERSION}-dev
   - cabal install haskell-src filepath
+  - cabal install --only-dependencies
 script:
   - runghc Setup.hs configure --with-llvm-config=llvm-config-${LLVM_VERSION} && runghc Setup.hs build
