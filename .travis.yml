@@ -7,7 +7,11 @@ env:
   - LLVM_VERSION=2.9
   - LLVM_VERSION=3.0
   - LLVM_VERSION=3.1
+  - LLVM_VERSION=3.4
 install:
+  - sudo sh -c "echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise main' >> /etc/apt/sources.list"
+  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
+  - sudo apt-get update
   - sudo apt-get install llvm-${LLVM_VERSION}-dev
   - cabal install haskell-src filepath cpphs
   - cabal install --only-dependencies
