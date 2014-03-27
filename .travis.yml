@@ -12,4 +12,4 @@ install:
   - cabal install haskell-src filepath
   - cabal install --only-dependencies
 script:
-  - runghc Setup.hs configure --with-llvm-config=llvm-config-${LLVM_VERSION} && runghc Setup.hs build
+  - runghc Setup.hs configure --user --with-llvm-config=llvm-config-${LLVM_VERSION} && runghc Setup.hs build
