@@ -1,0 +1,13 @@
+language: haskell
+ghc:
+  - 7.4
+  - 7.6
+env:
+  - LLVM_VERSION=2.8
+  - LLVM_VERSION=2.9
+  - LLVM_VERSION=3.0
+  - LLVM_VERSION=3.1
+install:
+  - sudo apt-get install llvm-${LLVM_VERSION}-dev
+script:
+  - runghc Setup.hs configure --with-llvm-config=llvm-config-${LLVM_VERSION} && runghc Setup.hs build
