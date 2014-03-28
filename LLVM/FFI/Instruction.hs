@@ -130,8 +130,10 @@ module LLVM.FFI.Instruction
          selectInstGetFalseValue,
          -- ** Shuffle Vector Instruction
          ShuffleVectorInst(),
+         newShuffleVectorInst,
          -- ** Store Instruction
          StoreInst(),
+         newStoreInst,
          storeInstIsVolatile,
          storeInstGetAlignment,
 #if HS_LLVM_VERSION>=300
@@ -146,12 +148,20 @@ module LLVM.FFI.Instruction
          terminatorInstGetSuccessor,
          -- *** Branch Instruction
          BranchInst(),
+         newBranchInst,
+         newBranchInstCond,
          branchInstIsConditional,
          branchInstGetCondition,
          -- *** Indirect Branch Instruction
          IndirectBrInst(),
+         newIndirectBrInst,
+         indirectBrInstGetAddress,
+         indirectBrInstGetNumDestinations,
+         indirectBrInstGetDestination,
+         indirectBrInstAddDestination,
          -- *** Invoke Instruction
          InvokeInst(),
+         newInvokeInst,
          invokeInstGetNumArgOperands,
          invokeInstGetArgOperand,
          invokeInstGetCallingConv,
@@ -162,16 +172,21 @@ module LLVM.FFI.Instruction
          invokeInstGetLandingPadInst,
          -- *** Resume Instruction
          ResumeInst(),
+         newResumeInst,
+         resumeInstGetValue,
 #endif
          -- *** Return Instruction
          ReturnInst(),
+         newReturnInst,
          returnInstGetReturnValue,
          -- *** Switch Instruction
          SwitchInst(),
+         newSwitchInst,
+         switchInstGetCondition,
+         switchInstGetDefaultDest,
 #if HS_LLVM_VERSION>=301
          CaseIt(),
 #endif
-         switchInstGetCondition,
 #if HS_LLVM_VERSION>=301
          switchInstCaseBegin,
          switchInstCaseEnd,
@@ -181,14 +196,18 @@ module LLVM.FFI.Instruction
          caseItEq,
          caseItGetCaseValue,
          caseItGetCaseSuccessor,
+#else
+         switchInstGetCaseValue,
 #endif
          -- *** Unreachable Instruction
          UnreachableInst(),
+         newUnreachableInst,
          -- ** Unary Instructions
          UnaryInstruction(),
          UnaryInstructionC(),
          -- *** Allocation Instruction
          AllocaInst(),
+         newAllocaInst,
          allocaInstIsArrayAllocation,
          allocaInstGetArraySize,
          allocaInstGetAlignment,
@@ -197,33 +216,56 @@ module LLVM.FFI.Instruction
          CastInstC(),
          -- **** Bitcasting Instruction
          BitCastInst(),
+         newBitCastInst,
 #if HS_LLVM_VERSION>=304
          AddrSpaceCastInst(),
+         newAddrSpaceCastInst,
 #endif
          -- **** Floating Point Extend Instruction
          FPExtInst(),
+         newFPExtInst,
+         -- **** Floating Point to Signed Integer Instruction
+         FPToSIInst(),
+         newFPToSIInst,
          -- **** Floating Point to Unsigned Integer Instruction
          FPToUIInst(),
+         newFPToUIInst,
          -- **** Floatting Point Truncation Instruction
          FPTruncInst(),
+         newFPTruncInst,
          -- **** Integer to Pointer Instruction
          IntToPtrInst(),
+         newIntToPtrInst,
          -- **** Pointer to Integer Instruction
          PtrToIntInst(),
+         newPtrToIntInst,
          -- **** Signed Extend Instruction
          SExtInst(),
+         newSExtInst,
          -- **** Signed Integer to Floating Point Instruction
          SIToFPInst(),
+         newSIToFPInst,
          -- **** Truncation Instruction
          TruncInst(),
+         newTruncInst,
          -- **** Unsigned Integer to Floating Point Instruction
          UIToFPInst(),
+         newUIToFPInst,
          -- **** Zero Extend Instrruction
          ZExtInst(),
+         newZExtInst,
          -- *** ExtractValue Instruction
          ExtractValueInst(),
+         newExtractValueInst,
+         extractValueInstIdxBegin,
+         extractValueInstIdxEnd,
+         extractValueInstGetNumIndices,
+#if HS_LLVM_VERSION>=300
+         extractValueInstGetIndices,
+#endif
          -- *** Loading Instruction
          LoadInst(),
+         newLoadInst,
          loadInstIsVolatile,
          loadInstGetAlignment,
 #if HS_LLVM_VERSION>=300
@@ -231,7 +273,8 @@ module LLVM.FFI.Instruction
 #endif
          loadInstGetPointerOperand,
          -- *** VarArg Instruction
-         VAArgInst()
+         VAArgInst(),
+         newVAArgInst
        ) where
 
 import LLVM.FFI.Interface
@@ -272,6 +315,9 @@ instructionIsUsedOutsideOfBlock = instructionIsUsedOutsideOfBlock_
 
 newSelectInst :: (ValueC c,ValueC s1,ValueC s2) => Ptr c -> Ptr s1 -> Ptr s2 -> Ptr Twine -> IO (Ptr SelectInst)
 newSelectInst = newSelectInst_
+
+newShuffleVectorInst :: (ValueC v1,ValueC v2,ValueC mask) => Ptr v1 -> Ptr v2 -> Ptr mask -> Ptr Twine -> IO (Ptr ShuffleVectorInst)
+newShuffleVectorInst = newShuffleVectorInst_
 
 phiNodeAddIncoming :: ValueC val => Ptr PHINode -> Ptr val -> Ptr BasicBlock -> IO ()
 phiNodeAddIncoming = phiNodeAddIncoming_
@@ -357,6 +403,15 @@ isMallocLikeFn :: ValueC t => Ptr t -> IO Bool
 isMallocLikeFn = isMallocLikeFn_
 
 #if HS_LLVM_VERSION >= 300
+newStoreInst :: (ValueC val,ValueC ptr) => Ptr val -> Ptr ptr -> Bool -> CUInt -> AtomicOrdering -> SynchronizationScope -> IO (Ptr StoreInst)
+newStoreInst val ptr volatile align aord sync
+  = newStoreInst_ val ptr volatile align (fromAtomicOrdering aord) (fromSynchronizationScope sync)
+#else
+newStoreInst :: (ValueC val,ValueC ptr) => Ptr val -> Ptr ptr -> Bool -> CUInt -> IO (Ptr StoreInst)
+newStoreInst = newStoreInst_
+#endif
+
+#if HS_LLVM_VERSION >= 300
 loadInstGetOrdering :: Ptr LoadInst -> IO AtomicOrdering
 loadInstGetOrdering = fmap toAtomicOrdering . loadInstGetOrdering_
 
@@ -400,11 +455,35 @@ invokeInstGetNumArgOperands = fmap toInteger . invokeInstGetNumArgOperands_
 invokeInstGetArgOperand :: Ptr InvokeInst -> Integer -> IO (Ptr Value)
 invokeInstGetArgOperand ptr i = invokeInstGetArgOperand_ ptr (fromInteger i)
 
+#if HS_LLVM_VERSION>=300
+newInvokeInst :: ValueC func => Ptr func -> Ptr BasicBlock -> Ptr BasicBlock -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr InvokeInst)
+#else
+newInvokeInst :: ValueC func => Ptr func -> Ptr BasicBlock -> Ptr BasicBlock
+              -> Ptr (Const_iterator (Ptr Value))
+              -> Ptr (Const_iterator (Ptr Value))
+              -> Ptr Twine -> IO (Ptr InvokeInst)
+#endif
+newInvokeInst = newInvokeInst_
+
+#if HS_LLVM_VERSION>=300
+newResumeInst :: ValueC val => Ptr val -> IO (Ptr ResumeInst)
+newResumeInst = newResumeInst_
+#endif
+
+newReturnInst :: ValueC val => Ptr LLVMContext -> Ptr val -> IO (Ptr ReturnInst)
+newReturnInst = newReturnInst_
+
+newSwitchInst :: ValueC cond => Ptr cond -> Ptr BasicBlock -> CUInt -> IO (Ptr SwitchInst)
+newSwitchInst = newSwitchInst_
+
 getElementPtrInstGetNumIndices :: Ptr GetElementPtrInst -> IO Integer
 getElementPtrInstGetNumIndices ptr = fmap toInteger (getElementPtrInstGetNumIndices_ ptr)
 
 loadInstGetAlignment :: Ptr LoadInst -> IO Integer
 loadInstGetAlignment ptr = fmap toInteger (loadInstGetAlignment_ ptr)
+
+newAllocaInst :: (TypeC tp,ValueC arrsz) => Ptr tp -> Ptr arrsz -> CUInt -> Ptr Twine -> IO (Ptr AllocaInst)
+newAllocaInst = newAllocaInst_
 
 allocaInstGetAlignment :: Ptr AllocaInst -> IO Integer
 allocaInstGetAlignment ptr = fmap toInteger (allocaInstGetAlignment_ ptr)
@@ -426,6 +505,77 @@ phiNodeGetIncomingValue ptr idx = phiNodeGetIncomingValue_ ptr (fromInteger idx)
 
 phiNodeGetIncomingBlock :: Ptr PHINode -> Integer -> IO (Ptr BasicBlock)
 phiNodeGetIncomingBlock ptr idx = phiNodeGetIncomingBlock_ ptr (fromInteger idx)
+
+newBranchInstCond :: ValueC cond => Ptr BasicBlock -> Ptr BasicBlock -> Ptr cond -> IO (Ptr BranchInst)
+newBranchInstCond = newBranchInstCond_
+
+newIndirectBrInst :: ValueC address => Ptr address -> CUInt -> IO (Ptr IndirectBrInst)
+newIndirectBrInst = newIndirectBrInst_
+
+newBitCastInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr BitCastInst)
+newBitCastInst = newBitCastInst_
+
+#if HS_LLVM_VERSION>=304
+newAddrSpaceCastInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr AddrSpaceCastInst)
+newAddrSpaceCastInst = newAddrSpaceCastInst_
+#endif
+
+newFPExtInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr FPExtInst)
+newFPExtInst = newFPExtInstInst_
+
+newFPToSIInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr FPToSIInst)
+newFPToSIInst = newFPToSIInst_
+
+newFPToUIInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr FPToUIInst)
+newFPToUIInst = newFPToUIInst_
+
+newFPTruncInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr FPTruncInst)
+newFPTruncInst = newFPTruncInst_
+
+newIntToPtrInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr IntToPtrInst)
+newIntToPtrInst = newIntToPtrInst_
+
+newPtrToIntInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr PtrToIntInst)
+newPtrToIntInst = newPtrToIntInst_
+
+newSExtInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr SExtInst)
+newSExtInst = newSExtInst_
+
+newSIToFPInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr SIToFPInst)
+newSIToFPInst = newSIToFPInst_
+
+newTruncInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr TruncInst)
+newTruncInst = newTruncInst_
+
+newUIToFPInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr UIToFPInst)
+newUIToFPInst = newUIToFPInst_
+
+newZExtInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr ZExtInst)
+newZExtInst = newZExtInst_
+
+#if HS_LLVM_VERSION>=300
+newExtractValueInst :: ValueC val => Ptr val -> Ptr (ArrayRef CUInt) -> Ptr Twine
+                    -> IO (Ptr ExtractValueInst)
+#else
+newExtractValueInst :: ValueC val => Ptr val
+                    -> Ptr (Const_iterator CUInt)
+                    -> Ptr (Const_iterator CUInt)
+                    -> Ptr Twine
+                    -> IO (Ptr ExtractValueInst)
+#endif
+newExtractValueInst = newExtractValueInst_
+
+#if HS_LLVM_VERSION>=300
+newLoadInst :: ValueC val => Ptr val -> Ptr Twine -> Bool -> CUInt -> AtomicOrdering -> SynchronizationScope -> IO (Ptr LoadInst)
+newLoadInst val name volatile align ordering scope
+  = newLoadInst_ val name volatile align (fromAtomicOrdering ordering) (fromSynchronizationScope scope)
+#else
+newLoadInst :: ValueC val => Ptr val -> Ptr Twine -> Bool -> CUInt -> IO (Ptr LoadInst)
+newLoadInst = newLoadInst_
+#endif
+
+newVAArgInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr VAArgInst)
+newVAArgInst = newVAArgInst_
 
 data OpType 
   = TermOp TermOpType
@@ -655,6 +805,8 @@ SUBTYPE5(Value,User,Instruction,UnaryInstruction,CastInst,AddrSpaceCastInst)
 #endif
 TYPE_LEAF(FPExtInst)
 SUBTYPE5(Value,User,Instruction,UnaryInstruction,CastInst,FPExtInst)
+TYPE_LEAF(FPToSIInst)
+SUBTYPE5(Value,User,Instruction,UnaryInstruction,CastInst,FPToSIInst)
 TYPE_LEAF(FPToUIInst)
 SUBTYPE5(Value,User,Instruction,UnaryInstruction,CastInst,FPToUIInst)
 TYPE_LEAF(FPTruncInst)

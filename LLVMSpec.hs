@@ -1542,7 +1542,12 @@ llvm version
              , specType = classSpec
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "VectorType"
                                       , ftName = "getType"
-                                      },"shuffleVectorInstGetType")]
+                                      },"shuffleVectorInstGetType")
+                          ,(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Value")
+                                        ,(False,constT $ ref $ llvmType "Twine")
+                                        ],"newShuffleVectorInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1554,7 +1559,15 @@ llvm version
                                       },"storeInstIsVolatile")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
-                                      },"storeInstGetAlignment_")]++
+                                      },"storeInstGetAlignment_")
+                          ,(Constructor $ [(True,normalT $ ptr $ llvmType "Value")
+                                          ,(True,normalT $ ptr $ llvmType "Value")
+                                          ,(False,normalT bool)
+                                          ,(False,normalT unsigned)]++
+                            (if version>=llvm3_0
+                             then [(False,normalT $ EnumType llvmNS "AtomicOrdering")
+                                  ,(False,normalT $ EnumType llvmNS "SynchronizationScope")]
+                             else []),"newStoreInst_")]++
                (if version>=llvm3_0
                 then [(memberFun { ftReturnType = normalT int
                                  , ftName = "getOrdering"
@@ -1593,13 +1606,44 @@ llvm version
                                       },"branchInstIsConditional")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCondition"
-                                      },"branchInstGetCondition")]
+                                      },"branchInstGetCondition")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BranchInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                      , ftStatic = True
+                                      },"newBranchInst")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BranchInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")
+                                                 ,(False,normalT $ ptr $ llvmType "BasicBlock")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")]
+                                      , ftStatic = True
+                                      },"newBranchInstCond_")]
              }
        ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = llvmNS
              , specName = "IndirectBrInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                      , ftName = "getAddress"
+                                      },"indirectBrInstGetAddress")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumDestinations"
+                                      },"indirectBrInstGetNumDestinations")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                      , ftName = "getDestination"
+                                      , ftArgs = [(False,normalT unsigned)]
+                                      },"indirectBrInstGetDestination")
+                          ,(memberFun { ftName = "addDestination"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                      },"indirectBrInstAddDestination")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "IndirectBrInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,normalT unsigned)]
+                                      , ftStatic = True
+                                      },"newIndirectBrInst_")]
              }
        ,Spec { specHeader = irInclude version "InstrTypes.h"
              , specNS = llvmNS
@@ -1629,14 +1673,47 @@ llvm version
                            then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
                                             , ftName = "getLandingPadInst"
                                             },"invokeInstGetLandingPadInst")]
-                           else [])
+                           else [])++
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "InvokeInst"
+                                      , ftName = "Create"
+                                      , ftArgs = if version>=llvm3_0
+                                                 then [(True,normalT $ ptr $ llvmType "Value")
+                                                      ,(False,normalT $ ptr $ llvmType "BasicBlock")
+                                                      ,(False,normalT $ ptr $ llvmType "BasicBlock")
+                                                      ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                                              [normalT $ ptr $ llvmType "Value"] False)
+                                                      ,(False,normalT $ ref $ llvmType "Twine")]
+                                                 else [(True,normalT $ ptr $ llvmType "Value")
+                                                      ,(False,normalT $ ptr $ llvmType "BasicBlock")
+                                                      ,(False,normalT $ ptr $ llvmType "BasicBlock")
+                                                      ,(False,normalT $ NamedType
+                                                              [ClassName "std" []
+                                                              ,ClassName "vector"
+                                                               [normalT $ ptr $ llvmType "Value"]]
+                                                              "const_iterator" [] False)
+                                                      ,(False,normalT $ NamedType
+                                                              [ClassName "std" []
+                                                              ,ClassName "vector"
+                                                               [normalT $ ptr $ llvmType "Value"]]
+                                                              "const_iterator" [] False)
+                                                      ,(False,normalT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },"newInvokeInst_")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "InstrTypes.h"
                 , specNS = llvmNS
                 , specName = "ResumeInst"
                 , specTemplateArgs = []
-                , specType = classSpec []
+                , specType = classSpec
+                             [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                         , ftName = "getValue"
+                                         },"resumeInstGetValue")
+                             ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ResumeInst"
+                                         , ftName = "Create"
+                                         , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                         , ftStatic = True
+                                         },"newResumeInst_")]
                 }]
      else [])++
        [Spec { specHeader = irInclude version "InstrTypes.h"
@@ -1646,7 +1723,13 @@ llvm version
              , specType = classSpec 
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getReturnValue"
-                                      },"returnInstGetReturnValue")]
+                                      },"returnInstGetReturnValue")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ReturnInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                 ,(True,normalT $ ptr $ llvmType "Value")]
+                                      , ftStatic = True
+                                      },"newReturnInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1655,7 +1738,14 @@ llvm version
              , specType = classSpec $
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCondition"
-                                      },"switchInstGetCondition")]++
+                                      },"switchInstGetCondition")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                      , ftName = "getDefaultDest"
+                                      },"switchInstGetDefaultDest")
+                          ,(memberFun { ftName = "addCase"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "ConstantInt")
+                                                 ,(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                      },"switchInstAddCase")]++
                           (if version>=llvm3_1
                            then [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" [] False
                                             , ftName = "case_begin"
@@ -1666,7 +1756,17 @@ llvm version
                                 ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "SwitchInst" []] "CaseIt" [] False
                                             , ftName = "case_default"
                                             },"switchInstCaseDefault")]
-                           else [])
+                           else [(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
+                                            , ftName = "getCaseValue"
+                                            , ftArgs = [(False,normalT unsigned)]
+                                            },"switchInstGetCaseValue")])++
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "SwitchInst"
+                                      , ftName = "Create"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                                 ,(False,normalT $ ptr $ llvmType "BasicBlock")
+                                                 ,(False,normalT unsigned)]
+                                      , ftStatic = True
+                                      },"newSwitchInst_")]
              }]++
     (if version>=llvm3_1
      then [Spec { specHeader = irInclude version "InstrTypes.h"
@@ -1696,7 +1796,8 @@ llvm version
              , specNS = llvmNS
              , specName = "UnreachableInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(False,normalT $ ref $ llvmType "LLVMContext")],"newUnreachableInst")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1720,7 +1821,12 @@ llvm version
                                       },"allocaInstGetArraySize")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAlignment"
-                                      },"allocaInstGetAlignment_")]
+                                      },"allocaInstGetAlignment_")
+                          ,(Constructor [(True,normalT $ ptr $ llvmType "Type")
+                                        ,(True,normalT $ ptr $ llvmType "Value")
+                                        ,(False,normalT unsigned)
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newAllocaInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1732,81 +1838,173 @@ llvm version
              , specNS = llvmNS
              , specName = "BitCastInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newBitCastInst_")]
              }]++
        (if version>=llvm3_4
         then [Spec { specHeader = irInclude version "Instructions.h"
                    , specNS = llvmNS
                    , specName = "AddrSpaceCastInst"
                    , specTemplateArgs = []
-                   , specType = classSpec []
+                   , specType = classSpec
+                                [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                              ,(True,normalT $ ptr $ llvmType "Type")
+                                              ,(False,normalT $ ref $ llvmType "Twine")
+                                              ],"newAddrSpaceCastInst_")]
                    }]
         else [])++
        [Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "FPExtInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newFPExtInstInst_")]
+             }
+       ,Spec { specHeader = irInclude version "Instructions.h"
+             , specNS = llvmNS
+             , specName = "FPToSIInst"
+             , specTemplateArgs = []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newFPToSIInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "FPToUIInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newFPToUIInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "FPTruncInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newFPTruncInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "IntToPtrInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newIntToPtrInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "PtrToIntInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newPtrToIntInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "SExtInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newSExtInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "SIToFPInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newSIToFPInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "TruncInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newTruncInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "UIToFPInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newUIToFPInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "ZExtInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT $ ref $ llvmType "Twine")
+                                        ],"newZExtInst_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "ExtractValueInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec $
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExtractValueInst"
+                                      , ftName = "Create"
+                                      , ftArgs = if version>=llvm3_0
+                                                 then [(True,normalT $ ptr $ llvmType "Value")
+                                                      ,(False,normalT $ NamedType llvmNS "ArrayRef" [normalT unsigned] False)
+                                                      ,(False,constT $ ref $ llvmType "Twine")]
+                                                 else [(True,normalT $ ptr $ llvmType "Value")
+                                                      ,(False,normalT $ NamedType
+                                                              [ClassName "std" []
+                                                              ,ClassName "vector"
+                                                               [normalT unsigned]]
+                                                              "const_iterator" [] False)
+                                                      ,(False,normalT $ NamedType
+                                                              [ClassName "std" []
+                                                              ,ClassName "vector"
+                                                               [normalT unsigned]]
+                                                              "const_iterator" [] False)
+                                                      ,(False,constT $ ref $ llvmType "Twine")]
+                                      , ftStatic = True
+                                      },"newExtractValueInst_")
+                          ,(memberFun { ftReturnType = constT $ ptr unsigned
+                                      , ftName = "idx_begin"
+                                      },"extractValueInstIdxBegin")
+                          ,(memberFun { ftReturnType = constT $ ptr unsigned
+                                      , ftName = "idx_end"
+                                      },"extractValueInstIdxEnd")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumIndices"
+                                      },"extractValueInstGetNumIndices")]++
+                          (if version>=llvm3_0
+                           then [(memberFun { ftReturnType = normalT $ NamedType llvmNS "ArrayRef" [normalT unsigned] False
+                                            , ftName = "getIndices"
+                                            },"extractValueInstGetIndices")]
+                           else [])
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
@@ -1827,13 +2025,25 @@ llvm version
                [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                            , ftName = "getPointerOperand"
                            },"loadInstGetPointerOperand")
+               ,(Constructor $ [(True,normalT $ ptr $ llvmType "Value")
+                               ,(False,constT $ ref $ llvmType "Twine")
+                               ,(False,normalT bool)
+                               ,(False,normalT unsigned)]++
+                 (if version>=llvm3_0
+                  then [(False,normalT $ EnumType llvmNS "AtomicOrdering")
+                       ,(False,normalT $ EnumType llvmNS "SynchronizationScope")]
+                  else []),"newLoadInst_")
                ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "VAArgInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Value")
+                                        ,(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,constT $ ref $ llvmType "Twine")
+                                        ],"newVAArgInst_")]
              }
        ,Spec { specHeader = irInclude version "User.h"
              , specNS = llvmNS
