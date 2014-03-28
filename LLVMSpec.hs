@@ -4,6 +4,11 @@ import Data.Version
 import Generator
 import CPPType
 
+llvm3_4 :: Version
+llvm3_4 = Version { versionBranch = [3,4]
+                  , versionTags = []
+                  }
+
 llvm3_3 :: Version
 llvm3_3 = Version { versionBranch = [3,3]
                   , versionTags = []
@@ -1088,8 +1093,11 @@ llvm version
                                                       ,"UnaryInstruction"
                                                       ,"AllocaInst"
                                                       ,"CastInst"
-                                                      ,"BitCastInst"
-                                                      ,"FPExtInst"
+                                                      ,"BitCastInst"]++
+                                                      (if version>=llvm3_4
+                                                       then ["AddrSpaceCastInst"]
+                                                       else [])++
+                                                      ["FPExtInst"
                                                       ,"FPToSIInst"
                                                       ,"FPToUIInst"
                                                       ,"FPTruncInst"
@@ -1725,8 +1733,16 @@ llvm version
              , specName = "BitCastInst"
              , specTemplateArgs = []
              , specType = classSpec []
-             }
-       ,Spec { specHeader = irInclude version "Instructions.h"
+             }]++
+       (if version>=llvm3_4
+        then [Spec { specHeader = irInclude version "Instructions.h"
+                   , specNS = llvmNS
+                   , specName = "AddrSpaceCastInst"
+                   , specTemplateArgs = []
+                   , specType = classSpec []
+                   }]
+        else [])++
+       [Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS
              , specName = "FPExtInst"
              , specTemplateArgs = []

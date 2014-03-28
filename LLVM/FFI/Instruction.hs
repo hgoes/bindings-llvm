@@ -197,6 +197,9 @@ module LLVM.FFI.Instruction
          CastInstC(),
          -- **** Bitcasting Instruction
          BitCastInst(),
+#if HS_LLVM_VERSION>=304
+         AddrSpaceCastInst(),
+#endif
          -- **** Floating Point Extend Instruction
          FPExtInst(),
          -- **** Floating Point to Unsigned Integer Instruction
@@ -646,6 +649,10 @@ TYPE(CastInst)
 SUBTYPE4(Value,User,Instruction,UnaryInstruction,CastInst)
 TYPE_LEAF(BitCastInst)
 SUBTYPE5(Value,User,Instruction,UnaryInstruction,CastInst,BitCastInst)
+#if HS_LLVM_VERSION>=304
+TYPE_LEAF(AddrSpaceCastInst)
+SUBTYPE5(Value,User,Instruction,UnaryInstruction,CastInst,AddrSpaceCastInst)
+#endif
 TYPE_LEAF(FPExtInst)
 SUBTYPE5(Value,User,Instruction,UnaryInstruction,CastInst,FPExtInst)
 TYPE_LEAF(FPToUIInst)
@@ -726,6 +733,9 @@ instance GetType AllocaInst where
 
 GETTYPE(CastInst)
 GETTYPE(BitCastInst)
+#if HS_LLVM_VERSION >= 304
+GETTYPE(AddrSpaceCastInst)
+#endif
 GETTYPE(FPExtInst)
 GETTYPE(FPToUIInst)
 GETTYPE(FPTruncInst)
