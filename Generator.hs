@@ -216,6 +216,8 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
     toHSType _ (PtrType t) = HsTyApp 
                              (HsTyCon $ UnQual $ HsIdent "Ptr")
                              (toHSType True t)
+    toHSType isP (NamedType [ClassName "std" []] "string" [] False)
+      = HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr") (HsTyCon $ UnQual $ HsIdent "CPPString")
     toHSType isP (NamedType [] name [] iface) = case name of
       "void" -> HsTyTuple []
       "char" -> HsTyCon $ UnQual $ HsIdent "CChar"
@@ -377,6 +379,7 @@ generateFFI mname header specs
              ,"import Foreign"
              ,"import Foreign.C"
              ,"import Data.Typeable"
+             ,"import LLVM.FFI.CPP.String"
              ,""]++dts++fns++conv)
   where
     dts = [ "data "++hsName (specName cs) ++

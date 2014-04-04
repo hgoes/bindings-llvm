@@ -83,5 +83,6 @@ library
     LLVM.FFI.EngineBuilder
     LLVM.FFI.Target
     LLVM.FFI.TargetMachine
+    LLVM.FFI.CPP.String
   other-modules:
     LLVM.FFI.Interface

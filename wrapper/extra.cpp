@@ -23,6 +23,8 @@
 #include <llvm/Analysis/LoopInfo.h>
 #include <llvm/Analysis/FindUsedTypes.h>
 
+#include <string>
+
 extern "C" {
   char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
   char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
@@ -47,5 +49,21 @@ extern "C" {
       return -1;
     llvm::WriteBitcodeToFile((llvm::Module*)m, OS);
     return 0;
+  }
+
+  void* std_string_empty() {
+    return (void*)new std::string();
+  }
+
+  void* std_string_from_string(char* str) {
+    return (void*)new std::string(str);
+  }
+
+  void std_string_delete(void* str) {
+    delete (std::string*)str;
+  }
+
+  const char* std_string_to_string(void* str) {
+    return ((std::string*)str)->c_str();
   }
 }

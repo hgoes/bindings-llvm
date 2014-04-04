@@ -5,6 +5,7 @@ module LLVM.FFI
        ,module LLVM.FFI.ArrayRef
        ,module LLVM.FFI.BasicBlock
        ,module LLVM.FFI.CPP
+       ,module LLVM.FFI.CPP.String
        ,module LLVM.FFI.Constant
        ,module LLVM.FFI.Context
        ,module LLVM.FFI.DebugLoc
@@ -49,6 +50,7 @@ import LLVM.FFI.AliasAnalysis
 import LLVM.FFI.ArrayRef
 import LLVM.FFI.BasicBlock
 import LLVM.FFI.CPP
+import LLVM.FFI.CPP.String
 import LLVM.FFI.Constant
 import LLVM.FFI.Context
 import LLVM.FFI.DebugLoc
