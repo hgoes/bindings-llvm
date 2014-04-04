@@ -3678,4 +3678,22 @@ llvm version
                                   , ftName = "getDFSNumOut"
                                   },"domTreeNodeBaseGetDFSNumOut"++tp)]
          }
-    | tp <- ["BasicBlock"]]
+    | tp <- ["BasicBlock"]]++
+   [Spec { specHeader = "llvm/Linker.h"
+         , specNS = llvmNS
+         , specName = "Linker"
+         , specTemplateArgs = []
+         , specType = classSpec
+                      [(Constructor [(False,normalT $ ptr $ llvmType "Module")
+                                    ],"newLinker")
+                      ,(Destructor False,"deleteLinker")
+                      ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Module"
+                                  , ftName = "getModule"
+                                  },"linkerGetModule")
+                      ,(memberFun { ftReturnType = normalT bool
+                                  , ftName = "linkInModule"
+                                  , ftArgs = [(False,normalT $ ptr $ llvmType "Module")
+                                             ,(False,normalT unsigned)
+                                             ,(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)]
+                                  },"linkerLinkInModule")]
+         }]

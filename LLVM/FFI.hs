@@ -16,6 +16,7 @@ module LLVM.FFI
        ,module LLVM.FFI.GenericValue
        ,module LLVM.FFI.IPList
        ,module LLVM.FFI.Instruction
+       ,module LLVM.FFI.Linker
        ,module LLVM.FFI.Loop
        ,module LLVM.FFI.MachineCodeInfo
        ,module LLVM.FFI.MemoryBuffer
@@ -61,6 +62,7 @@ import LLVM.FFI.Function
 import LLVM.FFI.GenericValue
 import LLVM.FFI.IPList
 import LLVM.FFI.Instruction
+import LLVM.FFI.Linker
 import LLVM.FFI.Loop
 import LLVM.FFI.MachineCodeInfo
 import LLVM.FFI.MemoryBuffer
