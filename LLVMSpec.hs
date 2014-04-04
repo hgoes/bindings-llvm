@@ -3684,16 +3684,23 @@ llvm version
          , specName = "Linker"
          , specTemplateArgs = []
          , specType = classSpec
-                      [(Constructor [(False,normalT $ ptr $ llvmType "Module")
-                                    ],"newLinker")
+                      [(Constructor $ (if version>=llvm3_3
+                                       then []
+                                       else [(False,normalT $ llvmType "StringRef")])++
+                                      [(False,normalT $ ptr $ llvmType "Module")
+                                      ],"newLinker")
                       ,(Destructor False,"deleteLinker")
                       ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Module"
                                   , ftName = "getModule"
                                   },"linkerGetModule")
                       ,(memberFun { ftReturnType = normalT bool
-                                  , ftName = "linkInModule"
-                                  , ftArgs = [(False,normalT $ ptr $ llvmType "Module")
-                                             ,(False,normalT unsigned)
-                                             ,(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)]
+                                  , ftName = if version>=llvm3_3
+                                             then "linkInModule"
+                                             else "LinkInModule"
+                                  , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]++
+                                             (if version>=llvm3_3
+                                              then [(False,normalT unsigned)]
+                                              else [])++
+                                             [(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)]
                                   },"linkerLinkInModule")]
          }]
