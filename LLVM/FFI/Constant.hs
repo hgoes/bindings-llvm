@@ -15,6 +15,7 @@ module LLVM.FFI.Constant
 #endif
         ConstantExpr(),
         constantExprGetOpcode,
+        constantExprGetPredicate,
         --constantExprGetAsInstruction,
         {-BinaryConstantExpr(),
         CompareConstantExpr(),
@@ -70,6 +71,9 @@ constantExprGetOpcode ptr = do
   opc <- constantExprGetOpcode_ ptr
   let Just res = toOpCode opc
   return res
+
+constantExprGetPredicate :: Ptr ConstantExpr -> IO Predicate
+constantExprGetPredicate = fmap (toPredicate . fromIntegral) . constantExprGetPredicate_
 
 #if HS_LLVM_VERSION>=301
 constantGetAggregateElement :: ConstantC t => Ptr t -> Integer -> IO (Ptr Constant)

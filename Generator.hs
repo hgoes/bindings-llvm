@@ -23,9 +23,20 @@ data SpecType
                   , gfunArgs :: [(Bool,Type)]
                   , gfunHSName :: String
                   }
-  | EnumSpec { enumHSName :: String
-             , enumElems :: [(String,String)]
-             }
+  | EnumSpec EnumNode
+
+data EnumNode = EnumNode { enumNodeHSName :: String
+                         , enumNodeSubs :: [Either (String,EnumNode) EnumLeaf] }
+
+data EnumLeaf = EnumLeaf { enumLeafCName :: String
+                         , enumLeafHSName :: String }
+
+allCEnums :: EnumNode -> [String]
+allCEnums nd = concat [ allCEnums' el
+                      | el <- enumNodeSubs nd ]
+  where
+    allCEnums' (Left (_,nd)) = allCEnums nd
+    allCEnums' (Right leaf) = [enumLeafCName leaf]
 
 classSpec :: [(FunSpec,String)] -> SpecType
 classSpec funs = ClassSpec funs False
@@ -265,7 +276,7 @@ generateWrapper inc_sym spec
         all_cont = concat [ case specType cs of
                                ClassSpec funs _ -> fmap (generateWrapperFunction cs) funs
                                GlobalFunSpec rtp args hsname -> [generateGlobalWrapper cs rtp args hsname]
-                               EnumSpec _ elems -> [generateEnum cs elems]
+                               EnumSpec nd -> [generateEnum cs (allCEnums nd)]
                           | cs <- spec ]
         header_cont = unlines $ ["#ifndef "++inc_sym
                                 ,"#define "++inc_sym
@@ -365,12 +376,12 @@ generateWrapper inc_sym spec
               MemberFun { ftIgnoreReturn = i } -> i
               _ -> False
         in generateWrapperFunction' rt as args body ignore
-    generateEnum :: Spec -> [(String,String)] -> ([String],[String])
+    generateEnum :: Spec -> [String] -> ([String],[String])
     generateEnum cls elems
       = (["extern int enum_"++specFullNameHS cls++"_"++el++"();"
-         | (el,_) <- elems ],
+         | el <- elems ],
          ["int enum_"++specFullNameHS cls++"_"++el++"() { return "++renderNS (specNS cls)++el++"; }"
-         | (el,_) <- elems ])
+         | el<- elems ])
 
 generateFFI :: [String] -> String -> [Spec] -> String
 generateFFI mname header specs 
@@ -387,22 +398,48 @@ generateFFI mname header specs
             " = "++hsName (specName cs)++" deriving (Typeable)"
           | cs@Spec { specType = ClassSpec { isInterface = False } } <- nubBy (\x y -> specName x == specName y) specs
           ] ++
-          [ "data "++hsname++" = "++(concat $ intersperse " | " [ el | (_,el) <- els ])++" deriving (Typeable,Show,Eq,Ord)"
-          | Spec { specType = EnumSpec { enumHSName = hsname
-                                       , enumElems = els } } <- specs ]
+          concat [ declareEnumNode node
+                 | Spec { specType = EnumSpec node } <- specs ]
+    declareEnumNode node = ("data "++enumNodeHSName node++" = "++
+                            (concat $ intersperse " | " [ case el of
+                                                             Left (name,nd)
+                                                               -> name++" "++
+                                                                  (enumNodeHSName nd)
+                                                             Right l -> enumLeafHSName l
+                                                        | el <- enumNodeSubs node ])++
+                            " deriving (Typeable,Show,Eq,Ord)"):
+                           concat [ declareEnumNode nd
+                                  | Left (_,nd) <- enumNodeSubs node ]
     conv = concat
-           [ ["to"++hsname++" :: CInt -> "++hsname
-             ,"to"++hsname++" op"
-             ]++[ "  | op == enum_"++cname++"_"++el++" = "++el_hs
-                | (el,el_hs) <- els ]++
-             ["","from"++hsname++" :: "++hsname++" -> CInt"]++
-             ["from"++hsname++" "++el_hs++" = enum_"++cname++"_"++el
-             | (el,el_hs) <- els ]
-           | cs@Spec { specType = EnumSpec { enumHSName = hsname
-                                           , enumElems = els }
+           [ enumConvs cname nd
+           | cs@Spec { specType = EnumSpec nd
                      } <- specs
            , let cname = specFullNameHS cs
            ]
+    enumConvs cname node
+      = ["to"++(enumNodeHSName node)++" :: CInt -> "++(enumNodeHSName node)
+        ,"to"++(enumNodeHSName node)++" op"
+        ]++concat [ enumToConv cname [] sub
+                  | sub <- enumNodeSubs node ]++
+        ["","from"++(enumNodeHSName node)++" :: "++(enumNodeHSName node)++" -> CInt"]++
+        concat [ enumFromConv cname (enumNodeHSName node) [] sub
+               | sub <- enumNodeSubs node ]
+    enumToConv cname prevs (Right leaf)
+      = ["  | op == enum_"++cname++"_"++enumLeafCName leaf++
+         " = "++concat (intersperse " $ " (prevs++[enumLeafHSName leaf]))]
+    enumToConv cname prevs (Left (name,nd))
+      = concat
+        [ enumToConv cname (prevs++[enumNodeHSName nd]) sub
+        | sub <- enumNodeSubs nd ]
+    enumFromConv cname hsname prev (Right leaf)
+      = ["from"++hsname++" "++wrapCons (prev++[enumLeafHSName leaf])++
+         " = enum_"++cname++"_"++enumLeafCName leaf]
+    enumFromConv cname hsname prev (Left (name,nd))
+      = concat
+        [ enumFromConv cname hsname (prev++[name]) sub
+        | sub <- enumNodeSubs nd ]
+    wrapCons [x] = x
+    wrapCons (x:xs) = "("++x++" "++wrapCons xs++")"
     fns = concat [ [""
                    ,"foreign import capi \""++header++" "++c_name++"\""
                    ,"  "++c_name++" :: "++sig]
@@ -468,9 +505,8 @@ generateFFI mname header specs
                                         HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
                                         toHaskellType True Nothing rtp,
                                         hsname)]
-                   EnumSpec { enumElems = els
-                            } -> [([],toHaskellType True Nothing $ normalT int,"enum_"++specFullNameHS cs++"_"++el)
-                                 | (el,_) <- els ]
+                   EnumSpec nd -> [([],toHaskellType True Nothing $ normalT int,"enum_"++specFullNameHS cs++"_"++el)
+                                  | el <- allCEnums nd ]
                  , let sig = (concat [ prettyPrint tp ++ " -> " 
                                      | tp <- tps
                                      ]) ++

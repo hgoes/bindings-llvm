@@ -740,7 +740,10 @@ llvm version
              , specType = classSpec 
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getOpcode"
-                                      },"constantExprGetOpcode_")]
+                                      },"constantExprGetOpcode_")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getPredicate"
+                                      },"constantExprGetPredicate_")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
@@ -3046,11 +3049,11 @@ llvm version
                      ,ClassName "CodeGenOpt" []]
           , specName = "Level"
           , specTemplateArgs = []
-          , specType = EnumSpec "CodeGenOptLevel"
-                       [("None","CodeGenOptNone")
-                       ,("Less","CodeGenOptLess")
-                       ,("Default","CodeGenOptDefault")
-                       ,("Aggressive","CodeGenOptAggressive")]
+          , specType = EnumSpec (EnumNode "CodeGenOptLevel"
+                                 [Right $ EnumLeaf "None" "CodeGenOptNone"
+                                 ,Right $ EnumLeaf "Less" "CodeGenOptLess"
+                                 ,Right $ EnumLeaf "Default" "CodeGenOptDefault"
+                                 ,Right $ EnumLeaf "Aggressive" "CodeGenOptAggressive"])
           }
     ,Spec { specHeader = if version>=llvm3_0
                          then "llvm/Support/CodeGen.h"
@@ -3059,15 +3062,15 @@ llvm version
                      ,ClassName "CodeModel" []]
           , specName = "Model"
           , specTemplateArgs = []
-          , specType = EnumSpec "CodeModel" $
-                       [("Default","CodeModelDefault")
-                       ,("Small","CodeModelSmall")
-                       ,("Kernel","CodeModelKernel")
-                       ,("Medium","CodeModelMedium")
-                       ,("Large","CodeModelLarge")]++
-                       (if version>=llvm3_0
-                        then [("JITDefault","CodeModelJITDefault")]
-                        else [])
+          , specType = EnumSpec (EnumNode "CodeModel" $
+                                 [Right $ EnumLeaf "Default" "CodeModelDefault"
+                                 ,Right $ EnumLeaf "Small" "CodeModelSmall"
+                                 ,Right $ EnumLeaf "Kernel" "CodeModelKernel"
+                                 ,Right $ EnumLeaf "Medium" "CodeModelMedium"
+                                 ,Right $ EnumLeaf "Large" "CodeModelLarge"]++
+                                 (if version>=llvm3_0
+                                  then [Right $ EnumLeaf "JITDefault" "CodeModelJITDefault"]
+                                  else []))
           }
     ,Spec { specHeader = if version>=llvm3_0
                          then "llvm/Support/CodeGen.h"
@@ -3076,11 +3079,11 @@ llvm version
                      ,ClassName "Reloc" []]
           , specName = "Model"
           , specTemplateArgs = []
-          , specType = EnumSpec "RelocModel" $
-                       [("Default","RelocModelDefault")
-                       ,("Static","RelocModelStatic")
-                       ,("PIC_","RelocModelPIC")
-                       ,("DynamicNoPIC","RelocModelDynamicNoPIC")]
+          , specType = EnumSpec (EnumNode "RelocModel"
+                                 [Right $ EnumLeaf "Default" "RelocModelDefault"
+                                 ,Right $ EnumLeaf "Static" "RelocModelStatic"
+                                 ,Right $ EnumLeaf "PIC_" "RelocModelPIC"
+                                 ,Right $ EnumLeaf "DynamicNoPIC" "RelocModelDynamicNoPIC"])
           }
     ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
           , specNS = llvmNS
@@ -3123,9 +3126,9 @@ llvm version
           , specNS = [ClassName "llvm" [],ClassName "EngineKind" []]
           , specName = "Kind"
           , specTemplateArgs = []
-          , specType = EnumSpec "EngineKind" [("JIT","JIT")
-                                             ,("Interpreter","Interpreter")
-                                             ,("Either","EitherEngine")]
+          , specType = EnumSpec (EnumNode "EngineKind" [Right $ EnumLeaf "JIT" "JIT"
+                                                       ,Right $ EnumLeaf "Interpreter" "Interpreter"
+                                                       ,Right $ EnumLeaf "Either" "EitherEngine"])
           }
     ,Spec { specHeader = "llvm/CodeGen/MachineCodeInfo.h"
           , specNS = llvmNS
@@ -3150,115 +3153,113 @@ llvm version
           , specNS = llvmNS
           , specName = "PassKind"
           , specTemplateArgs = []
-          , specType = EnumSpec "PassKind" [("PT_"++name,"PassKind"++name)
-                                            | name <- ["BasicBlock"]++
-                                                     (if version>=llvm2_9
-                                                      then ["Region"]
-                                                      else [])++
-                                                     ["Loop"
-                                                     ,"Function"
-                                                     ,"CallGraphSCC"
-                                                     ,"Module"
-                                                     ,"PassManager"]]
+          , specType = EnumSpec (EnumNode "PassKind"
+                                 [Right $ EnumLeaf ("PT_"++name) ("PassKind"++name)
+                                 | name <- ["BasicBlock"]++
+                                           (if version>=llvm2_9
+                                            then ["Region"]
+                                            else [])++
+                                           ["Loop"
+                                           ,"Function"
+                                           ,"CallGraphSCC"
+                                           ,"Module"
+                                           ,"PassManager"]])
           }
     ,Spec { specHeader = irInclude version "InstrTypes.h"
           , specNS = [ClassName "llvm" [],ClassName "CmpInst" []]
           , specName = "Predicate"
           , specTemplateArgs = []
-          , specType = EnumSpec "FCmpOp"
-                       [("FCMP_"++name,"F_"++name)
-                        | name <- ["OEQ","OGT","OGE","OLT"
-                                 ,"OLE","ONE","ORD","UNO"
-                                 ,"UEQ","UGT","UGE","ULT"
-                                 ,"ULE","UNE"]]
-          }
-    ,Spec { specHeader = irInclude version "InstrTypes.h"
-          , specNS = [ClassName "llvm" [],ClassName "CmpInst" []]
-          , specName = "Predicate"
-          , specTemplateArgs = []
-          , specType = EnumSpec "ICmpOp"
-                       [("ICMP_"++name,"I_"++name)
-                        | name <- ["EQ","NE","UGT","UGE"
-                                 ,"ULT","ULE","SGT","SGE"
-                                 ,"SLT","SLE"]]
+          , specType = EnumSpec (EnumNode "Predicate"
+                                 [Left ("ICmpOp",EnumNode "ICmpOp"
+                                        [Right $ EnumLeaf ("ICMP_"++name) ("I_"++name)
+                                        | name <- ["EQ","NE","UGT","UGE"
+                                                  ,"ULT","ULE","SGT","SGE"
+                                                  ,"SLT","SLE"]])
+                                 ,Left ("FCmpOp",EnumNode "FCmpOp"
+                                        [Right $ EnumLeaf ("FCMP_"++name) ("F_"++name)
+                                        | name <- ["OEQ","OGT","OGE","OLT"
+                                                  ,"OLE","ONE","ORD","UNO"
+                                                  ,"UEQ","UGT","UGE","ULT"
+                                                  ,"ULE","UNE"]])])
           }
     ,Spec { specHeader = irInclude version "CallingConv.h"
           , specNS = [ClassName "llvm" [],ClassName "CallingConv" []]
           , specName = "ID"
           , specTemplateArgs = []
-          , specType = EnumSpec "CallingConv"
-                       [(name,name)
-                        | name <- ["C","Fast","Cold","GHC"
-                                 ,"FirstTargetCC"
-                                 ,"X86_StdCall","X86_FastCall"
-                                 ,"ARM_APCS","ARM_AAPCS"
-                                 ,"ARM_AAPCS_VFP"
-                                 ,"MSP430_INTR"
-                                 ,"X86_ThisCall"]++
-                                 (if version>=llvm2_9
-                                  then ["PTX_Kernel","PTX_Device"]++
-                                       (if version<=llvm3_3
-                                        then ["MBLAZE_INTR","MBLAZE_SVOL"]
-                                        else [])
-                                  else [])++
-                                 (if version>llvm3_1
-                                  then ["SPIR_FUNC"
-                                       ,"SPIR_KERNEL"
-                                       ,"Intel_OCL_BI"]
-                                  else [])]
+          , specType = EnumSpec (EnumNode "CallingConv"
+                                 [Right $ EnumLeaf name name
+                                 | name <- ["C","Fast","Cold","GHC"
+                                           ,"FirstTargetCC"
+                                           ,"X86_StdCall","X86_FastCall"
+                                           ,"ARM_APCS","ARM_AAPCS"
+                                           ,"ARM_AAPCS_VFP"
+                                           ,"MSP430_INTR"
+                                           ,"X86_ThisCall"]++
+                                           (if version>=llvm2_9
+                                            then ["PTX_Kernel","PTX_Device"]++
+                                                 (if version<=llvm3_3
+                                                  then ["MBLAZE_INTR","MBLAZE_SVOL"]
+                                                  else [])
+                                            else [])++
+                                           (if version>llvm3_1
+                                            then ["SPIR_FUNC"
+                                                 ,"SPIR_KERNEL"
+                                                 ,"Intel_OCL_BI"]
+                                            else [])])
           }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
                 , specNS = llvmNS
                 , specName = "SynchronizationScope"
                 , specTemplateArgs = []
-                , specType = EnumSpec "SynchronizationScope"
-                             [("SingleThread","SingleThread")
-                             ,("CrossThread","CrossThread")]
+                , specType = EnumSpec (EnumNode "SynchronizationScope"
+                                       [Right $ EnumLeaf "SingleThread" "SingleThread"
+                                       ,Right $ EnumLeaf "CrossThread" "CrossThread"])
                 }
           ,Spec { specHeader = irInclude version "Instructions.h"
                 , specNS = llvmNS
                 , specName = "AtomicOrdering"
                 , specTemplateArgs = []
-                , specType = EnumSpec "AtomicOrdering"
-                             [(name,name) | name <- ["NotAtomic"
-                                                   ,"Unordered"
-                                                   ,"Monotonic"
-                                                   ,"Acquire"
-                                                   ,"Release"
-                                                   ,"AcquireRelease"
-                                                   ,"SequentiallyConsistent"]]
+                , specType = EnumSpec (EnumNode "AtomicOrdering"
+                                       [Right $ EnumLeaf name name
+                                       | name <- ["NotAtomic"
+                                                 ,"Unordered"
+                                                 ,"Monotonic"
+                                                 ,"Acquire"
+                                                 ,"Release"
+                                                 ,"AcquireRelease"
+                                                 ,"SequentiallyConsistent"]])
                 }
           ,Spec { specHeader = irInclude version "Instructions.h"
                 , specNS = [ClassName "llvm" [],ClassName "AtomicRMWInst" []]
                 , specName = "BinOp"
                 , specTemplateArgs = []
-                , specType = EnumSpec "RMWBinOp"
-                             [(name,"RMW"++name)
-                                  | name <- ["Xchg"
-                                           ,"Add"
-                                           ,"Sub"
-                                           ,"And"
-                                           ,"Nand"
-                                           ,"Or"
-                                           ,"Xor"
-                                           ,"Max"
-                                           ,"Min"
-                                           ,"UMax"
-                                           ,"UMin"]]
+                , specType = EnumSpec (EnumNode "RMWBinOp"
+                                       [Right $ EnumLeaf name ("RMW"++name)
+                                       | name <- ["Xchg"
+                                                 ,"Add"
+                                                 ,"Sub"
+                                                 ,"And"
+                                                 ,"Nand"
+                                                 ,"Or"
+                                                 ,"Xor"
+                                                 ,"Max"
+                                                 ,"Min"
+                                                 ,"UMax"
+                                                 ,"UMin"]])
                 }]
      else [])++
     [Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
           , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
           , specName = "AliasResult"
           , specTemplateArgs = []
-          , specType = EnumSpec "AliasResult" $
-                       [("NoAlias","NoAlias")
-                       ,("MayAlias","MayAlias")]++
-                       (if version>=llvm2_9
-                        then [("PartialAlias","PartialAlias")]
-                        else [])++
-                       [("MustAlias","MustAlias")]
+          , specType = EnumSpec (EnumNode "AliasResult" $
+                                 [Right $ EnumLeaf "NoAlias" "NoAlias"
+                                 ,Right $ EnumLeaf "MayAlias" "MayAlias"]++
+                                 (if version>=llvm2_9
+                                  then [Right $ EnumLeaf "PartialAlias" "PartialAlias"]
+                                  else [])++
+                                 [Right $ EnumLeaf "MustAlias" "MustAlias"])
           }
     ,Spec { specHeader = if version>=llvm3_0
                          then "llvm/Support/TargetRegistry.h"
@@ -3310,8 +3311,9 @@ llvm version
                 , specNS = [ClassName "llvm" [],ClassName "LibFunc" []]
                 , specName = "Func"
                 , specTemplateArgs = []
-                , specType = EnumSpec "LibFunc"
-                             [(name,"Func_"++name)
+                , specType = EnumSpec $
+                             EnumNode "LibFunc"
+                             [Right $ EnumLeaf name ("Func_"++name)
                               | name <- ["fiprintf"
                                        ,"iprintf"
                                        ,"memcpy"

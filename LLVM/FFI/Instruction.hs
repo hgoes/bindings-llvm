@@ -63,6 +63,8 @@ module LLVM.FFI.Instruction
          -- ** Compare Instructions
          CmpInst(),
          CmpInstC(),
+         Predicate(..),
+         cmpInstGetPredicate,
          -- *** Float Compare Instruction
          FCmpInst(),
          FCmpOp(..),
@@ -361,6 +363,25 @@ newFenceInst ctx ord sync = newFenceInst_ ctx (fromAtomicOrdering ord) (fromSync
 
 newExtractElementInst :: (ValueC vec,ValueC idx) => Ptr vec -> Ptr idx -> Ptr Twine -> IO (Ptr ExtractElementInst)
 newExtractElementInst = newExtractElementInst_
+
+cmpInstGetPredicate :: Ptr CmpInst -> IO Predicate
+cmpInstGetPredicate = fmap toPredicate . cmpInstGetPredicate_
+
+fromICmpOp :: ICmpOp -> CInt
+fromICmpOp = fromPredicate . ICmpOp
+
+fromFCmpOp :: FCmpOp -> CInt
+fromFCmpOp = fromPredicate . FCmpOp
+
+toICmpOp :: CInt -> ICmpOp
+toICmpOp op = op'
+  where
+    ICmpOp op' = toPredicate op
+
+toFCmpOp :: CInt -> FCmpOp
+toFCmpOp op = op'
+  where
+    FCmpOp op' = toPredicate op
 
 newICmpInst :: (ValueC v1,ValueC v2) => ICmpOp -> Ptr v1 -> Ptr v2 -> Ptr Twine -> IO (Ptr ICmpInst)
 newICmpInst op = newICmpInst_ (fromICmpOp op)
