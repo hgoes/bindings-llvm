@@ -51,6 +51,9 @@ module LLVM.FFI.Instruction
          BinaryOperator(),
          newBinaryOperator,
          binOpGetOpCode,
+         binOpHasNoUnsignedWrap,
+         binOpHasNoSignedWrap,
+         binOpIsExact,
          -- ** Call Instructions
          CallInst(),
          newCallInst,

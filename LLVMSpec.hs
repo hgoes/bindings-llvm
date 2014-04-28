@@ -1260,6 +1260,15 @@ llvm version
                                                  ,(False,constT $ ref $ llvmType "Twine")]
                                       , ftStatic = True
                                       },"newBinaryOperator_")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "hasNoUnsignedWrap"
+                                      },"binOpHasNoUnsignedWrap")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "hasNoSignedWrap"
+                                      },"binOpHasNoSignedWrap")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isExact"
+                                      },"binOpIsExact")
                           ]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
