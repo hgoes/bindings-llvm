@@ -1178,7 +1178,15 @@ llvm version
                                       , ftName = "isUsedOutsideOfBlock"
                                       , ftArgs = [(False,constT $ ptr $ llvmType "BasicBlock")]
                                       , ftOverloaded = True
-                                      },"instructionIsUsedOutsideOfBlock_")]
+                                      },"instructionIsUsedOutsideOfBlock_")
+                          ,(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOpcode"
+                                      , ftOverloaded = True
+                                      },"instructionGetOpcode_")
+                          ,(memberFun { ftReturnType = constT $ ptr char
+                                      , ftName = "getOpcodeName"
+                                      , ftOverloaded = True
+                                      },"instructionGetOpcodeName_")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
@@ -1835,7 +1843,11 @@ llvm version
              , specNS = llvmNS
              , specName = "CastInst"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = normalT int
+                                      , ftName = "getOpcode"
+                                      , ftOverloaded = True
+                                      },"castInstGetOpcode_")]
              }
        ,Spec { specHeader = irInclude version "Instructions.h"
              , specNS = llvmNS

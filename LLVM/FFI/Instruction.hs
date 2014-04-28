@@ -27,6 +27,8 @@ module LLVM.FFI.Instruction
          instructionGetAllMetadata,
          instructionGetDebugLoc,
          instructionIsUsedOutsideOfBlock,
+         instructionGetOpcode,
+         instructionGetOpcodeName,
 #if HS_LLVM_VERSION>=300
          -- ** Atomic Compare & Exchange Instruction
          AtomicCmpXchgInst(),
@@ -216,6 +218,7 @@ module LLVM.FFI.Instruction
          -- *** Casting Instructions
          CastInst(),
          CastInstC(),
+         castInstGetOpcode,
          -- **** Bitcasting Instruction
          BitCastInst(),
          newBitCastInst,
@@ -314,6 +317,17 @@ instructionGetAllMetadata = instructionGetAllMetadata_
 
 instructionIsUsedOutsideOfBlock :: InstructionC i => Ptr i -> Ptr BasicBlock -> IO Bool
 instructionIsUsedOutsideOfBlock = instructionIsUsedOutsideOfBlock_
+
+instructionGetOpcode :: InstructionC i => Ptr i -> IO OpType
+instructionGetOpcode i = do
+  c <- instructionGetOpcode_ i
+  let Just code = toOpCode c
+  return code
+
+instructionGetOpcodeName :: InstructionC i => Ptr i -> IO String
+instructionGetOpcodeName i = do
+  strPtr <- instructionGetOpcodeName_ i
+  peekCString strPtr
 
 newSelectInst :: (ValueC c,ValueC s1,ValueC s2) => Ptr c -> Ptr s1 -> Ptr s2 -> Ptr Twine -> IO (Ptr SelectInst)
 newSelectInst = newSelectInst_
@@ -532,6 +546,12 @@ newBranchInstCond = newBranchInstCond_
 
 newIndirectBrInst :: ValueC address => Ptr address -> CUInt -> IO (Ptr IndirectBrInst)
 newIndirectBrInst = newIndirectBrInst_
+
+castInstGetOpcode :: CastInstC cast => Ptr cast -> IO CastOpType
+castInstGetOpcode i = do
+  c <- castInstGetOpcode_ i
+  let Just code = toCastOpCode c
+  return code
 
 newBitCastInst :: (ValueC val,TypeC tp) => Ptr val -> Ptr tp -> Ptr Twine -> IO (Ptr BitCastInst)
 newBitCastInst = newBitCastInst_
