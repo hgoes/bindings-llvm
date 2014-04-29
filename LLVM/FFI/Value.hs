@@ -10,6 +10,7 @@ module LLVM.FFI.Value
         GetType(..),
         deleteValue,
         valueDump,
+        valueToString,
         valueGetType,
         hasName,
         getName,
@@ -84,6 +85,16 @@ valueUseBegin = valueUseBegin_
 
 valueUseEnd :: ValueC t => Ptr t -> IO (Ptr (Value_use_iterator User))
 valueUseEnd = valueUseEnd_
+
+foreign import capi "wrapper/extra.h value_to_string"
+  valueToString_ :: Ptr a -> IO CString
+
+valueToString :: ValueC t => Ptr t -> IO String
+valueToString val = do
+  cstr <- valueToString_ val
+  hstr <- peekCString cstr
+  free cstr
+  return hstr
 
 instance PairC CUInt (Ptr MDNode) where
   pairSize _ = sizeofPairUnsigned_MDNode

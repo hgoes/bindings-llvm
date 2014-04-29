@@ -66,4 +66,11 @@ extern "C" {
   const char* std_string_to_string(void* str) {
     return ((std::string*)str)->c_str();
   }
+
+  char* value_to_string(void* val) {
+    std::string outp;
+    llvm::raw_string_ostream stream(outp);
+    ((llvm::Value*)val)->print(stream);
+    return strdup(stream.str().c_str());
+  }
 }

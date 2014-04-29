@@ -19,4 +19,6 @@ extern void* std_string_empty();
 extern void* std_string_from_string(char* str);
 extern void std_string_delete(void* str);
 extern const char* std_string_to_string(void* str);
+
+extern char* value_to_string(void* val);
 #endif
