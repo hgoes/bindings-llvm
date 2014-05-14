@@ -6,7 +6,7 @@ build-type:     Custom
 
 library
   build-tools:    cpphs,llvm-config
-  build-depends: base,tagged>=0.4,unix
+  build-depends: base,tagged>=0.4,unix,containers
   includes:             
     wrapper/extra.h
     wrapper/HaskellPass.h
@@ -52,21 +52,6 @@ library
     LLVM.FFI.PassManagerBuilder
     LLVM.FFI.PassInfo
     LLVM.FFI.SetVector
-    LLVM.Target.Alpha
-    LLVM.Target.ARM
-    LLVM.Target.Blackfin
-    LLVM.Target.CBackend
-    LLVM.Target.CellSPU
-    LLVM.Target.CppBackend
-    LLVM.Target.Mips
-    LLVM.Target.MSP430
-    LLVM.Target.Native
-    LLVM.Target.PIC16
-    LLVM.Target.PowerPC
-    LLVM.Target.Sparc
-    LLVM.Target.SystemZ
-    LLVM.Target.X86
-    LLVM.Target.XCore
     LLVM.FFI.Transforms.Scalar
     LLVM.FFI.Transforms.IPO
     LLVM.FFI.Transforms.Misc
@@ -82,6 +67,7 @@ library
     LLVM.FFI.MachineCodeInfo
     LLVM.FFI.EngineBuilder
     LLVM.FFI.Target
+    LLVM.FFI.Targets
     LLVM.FFI.TargetMachine
     LLVM.FFI.Linker
     LLVM.FFI.CPP.String
