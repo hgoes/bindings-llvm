@@ -228,7 +228,8 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
                              (HsTyCon $ UnQual $ HsIdent "Ptr")
                              (toHSType True t)
     toHSType isP (NamedType [ClassName "std" []] "string" [] False)
-      = HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr") (HsTyCon $ UnQual $ HsIdent "CPPString")
+      = if isP then HsTyCon $ UnQual $ HsIdent "CPPString"
+        else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr") (HsTyCon $ UnQual $ HsIdent "CPPString")
     toHSType isP (NamedType [] name [] iface) = case name of
       "void" -> HsTyTuple []
       "char" -> HsTyCon $ UnQual $ HsIdent "CChar"

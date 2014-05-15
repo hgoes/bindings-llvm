@@ -3326,7 +3326,348 @@ llvm version
                                    , ftName = "getTarget"
                                    , ftOverloaded = True
                                    },"targetMachineTarget_")]
+          }
+    ,Spec { specHeader = if version>=llvm3_0
+                         then "llvm/Support/TargetRegistry.h"
+                         else "llvm/Target/TargetRegistry.h"
+          , specNS = llvmNS
+          , specName = "TargetRegistry"
+          , specTemplateArgs = []
+          , specType = classSpec $
+                       (if version>=llvm3_0
+                        then [(memberFun { ftName = "printRegisteredTargetsForVersion"
+                                         , ftStatic = True
+                                         },"targetRegistryPrintTargets")]
+                        else [])++
+                       [(memberFun { ftReturnType = constT $ ptr $ llvmType "Target"
+                                   , ftName = "lookupTarget"
+                                   , ftStatic = True
+                                   , ftArgs = [(False,constT $ ref $ NamedType [ClassName "std" []] "string" [] False)
+                                              ,(False,normalT $ ref $ NamedType [ClassName "std" []] "string" [] False)]
+                                   },"targetRegistryLookup_")]++
+                       (if version>=llvm3_2
+                        then [(memberFun { ftReturnType = constT $ ptr $ llvmType "Target"
+                                         , ftName = "lookupTarget"
+                                         , ftStatic = True
+                                         , ftArgs = [(False,constT $ ref $ NamedType [ClassName "std" []] "string" [] False)
+                                                    ,(False,normalT $ ref $ llvmType "Triple")
+                                                    ,(False,normalT $ ref $ NamedType [ClassName "std" []] "string" [] False)]
+                                         },"targetRegistryLookupTriple_")]
+                        else [])
+          }
+    ,Spec { specHeader = "llvm/ADT/Triple.h"
+          , specNS = llvmNS
+          , specName = "Triple"
+          , specTemplateArgs = []
+          , specType = classSpec $
+                       [(Constructor [],"newTripleEmpty")
+                       ,(Constructor [(False,if version>=llvm3_0
+                                             then constT $ ref $ llvmType "Twine"
+                                             else normalT $ llvmType "StringRef")],
+                         "newTripleFromString")
+                       ,(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" [],
+                                                                        ClassName "Triple" []] "ArchType"
+                                   , ftName = "getArch"
+                                   },"tripleGetArch_")
+                       ,(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" [],
+                                                                        ClassName "Triple" []] "VendorType"
+                                   , ftName = "getVendor"
+                                   },"tripleGetVendor_")
+                       ,(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" [],
+                                                                        ClassName "Triple" []] "OSType"
+                                   , ftName = "getOS"
+                                   },"tripleGetOS_")
+                       ,(memberFun { ftReturnType = normalT bool
+                                   , ftName = "hasEnvironment"
+                                   },"tripleHasEnvironment")]++
+                       (if version>=llvm2_9
+                        then [(memberFun { ftReturnType = normalT $
+                                                          EnumType [ClassName "llvm" [],
+                                                                    ClassName "Triple" []] "EnvironmentType"
+                                         , ftName = "getEnvironment"
+                                         },"tripleGetEnvironment_")]
+                        else [])++
+                       (if version>=llvm3_0
+                        then [(memberFun { ftName = "getOSVersion"
+                                         , ftArgs = [(False,normalT $ ref unsigned)
+                                                    ,(False,normalT $ ref unsigned)
+                                                    ,(False,normalT $ ref unsigned)]
+                                         },"tripleGetOSVersion_")]
+                        else [])++
+                       (if version>=llvm3_1
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "getMacOSXVersion"
+                                         , ftArgs = [(False,normalT $ ref unsigned)
+                                                    ,(False,normalT $ ref unsigned)
+                                                    ,(False,normalT $ ref unsigned)]
+                                         },"tripleGetMacOSXVersion_")]
+                        else [])++
+                       (if version>=llvm3_2
+                        then [(memberFun { ftName = "getiOSVersion"
+                                         , ftArgs = [(False,normalT $ ref unsigned)
+                                                    ,(False,normalT $ ref unsigned)
+                                                    ,(False,normalT $ ref unsigned)]
+                                         },"tripleGetiOSVersion_")]
+                        else [])++
+                       [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                   , ftName = "getArchName"
+                                   },"tripleGetArchName")
+                       ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                   , ftName = "getVendorName"
+                                   },"tripleGetVendorName")
+                       ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                   , ftName = "getOSName"
+                                   },"tripleGetOSName")
+                       ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                   , ftName = "getEnvironmentName"
+                                   },"tripleGetEnvironmentName")]++
+                       (if version>=llvm3_1
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isArch16Bit"
+                                         },"tripleIsArch16Bit")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isArch32Bit"
+                                         },"tripleIsArch32Bit")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isArch64Bit"
+                                         },"tripleIsArch64Bit")]
+                        else [])++
+                       (if version>=llvm3_0
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isMacOSX"
+                                         },"tripleIsMacOSX")]
+                        else [])++
+                       (if version>=llvm3_3
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isiOS"
+                                         },"tripleIsiOS")]
+                        else [])++
+                       (if version>=llvm3_0
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isOSDarwin"
+                                         },"tripleIsOSDarwin")]
+                        else [])++
+                       (if version>llvm3_4
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isOSFreeBSD"
+                                         },"tripleIsOSFreeBSD")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isWindowsMSVCEnvironment"
+                                         },"tripleIsWindowsMSVCEnvironment")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isKnownWindowsMSVCEnvironment"
+                                         },"tripleIsKnownWindowsMSVCEnvironment")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isWindowsCygwinEnvironment"
+                                         },"tripleIsWindowsCygwinEnvironment")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isWindowsGNUEnvironment"
+                                         },"tripleIsWindowsGNUEnvironment")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isOSCygMing"
+                                         },"tripleIsOSCygMing")
+                             ,(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isOSMSVCRT"
+                                         },"tripleIsOSMSVCRT")]
+                        else [])++
+                       (if version>=llvm3_0
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isOSWindows"
+                                         },"tripleIsOSWindows")]
+                        else [])++
+                       (if version>=llvm3_3
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isOSNaCl"
+                                         },"tripleIsOSNaCl")]
+                        else [])++
+                       (if version>llvm3_4
+                        then [(memberFun { ftReturnType = normalT bool
+                                         , ftName = "isOSLinux"
+                                         },"tripleIsOSLinux")]
+                        else [])++
+                       [(memberFun { ftName = "setArch"
+                                   , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],
+                                                                          ClassName "Triple" []] "ArchType")]
+                                   },"tripleSetArch_")
+                       ,(memberFun { ftName = "setVendor"
+                                   , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],
+                                                                          ClassName "Triple" []] "VendorType")]
+                                   },"tripleSetVendor_")
+                       ,(memberFun { ftName = "setOS"
+                                   , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],
+                                                                          ClassName "Triple" []] "OSType")]
+                                   },"tripleSetOS_")]++
+                       (if version>=llvm2_9
+                        then [(memberFun { ftName = "setEnvironment"
+                                         , ftArgs = [(False,normalT $
+                                                            EnumType [ClassName "llvm" [],
+                                                                      ClassName "Triple" []] "EnvironmentType")]
+                                         },"tripleSetEnvironment_")]
+                        else [])
+          }
+    ,Spec { specHeader = "llvm/ADT/Triple.h"
+          , specNS = [ClassName "llvm" [],ClassName "Triple" []]
+          , specName = "ArchType"
+          , specTemplateArgs = []
+          , specType = EnumSpec $
+                       EnumNode "ArchType"
+                       [Right $ EnumLeaf name ("Arch_"++name)
+                       | name <- ["UnknownArch"
+                                 ,"arm"]++
+                                 (if version>llvm3_4
+                                  then ["armeb","arm64","arm64_be"]
+                                  else [])++
+                                 (if version<=llvm3_1
+                                  then ["cellspu"]
+                                  else [])++
+                                 (if version>=llvm3_3
+                                  then ["aarch64"]
+                                  else [])++
+                                 (if version>llvm3_4
+                                  then ["aarch64_be"]
+                                  else [])++
+                                 (if version>=llvm3_1
+                                  then ["hexagon"]
+                                  else [])++
+                                 ["mips","mipsel"]++
+                                 (if version>=llvm3_0
+                                  then ["mips64","mips64el"]
+                                  else [])++
+                                 ["msp430"
+                                 ,"ppc","ppc64"]++
+                                 (if version>=llvm3_4
+                                  then ["ppc64le"]
+                                  else [])++
+                                 (if version>=llvm3_1
+                                  then ["r600"]
+                                  else [])++
+                                 ["sparc","sparcv9"]++
+                                 (if version>=llvm3_3
+                                  then ["systemz"]
+                                  else [])++
+                                 ["tce","thumb"]++
+                                 (if version>llvm3_4
+                                  then ["thumbeb"]
+                                  else [])++
+                                 ["x86","x86_64","xcore"]++
+                                 (if version<=llvm3_2
+                                  then ["mblaze"]
+                                  else [])++
+                                 (if version<=llvm3_1
+                                  then (if version>=llvm3_0
+                                        then ["ptx32","ptx64"]
+                                        else [])
+                                  else ["nvptx","nvptx64"])++
+                                 (if version>=llvm3_0
+                                  then ["le32"]
+                                  else [])++
+                                 (if version>=llvm3_0
+                                  then ["amdil"]
+                                  else [])++
+                                 (if version>=llvm3_2
+                                  then ["spir","spir64"]
+                                  else []) ]
+          }
+    ,Spec { specHeader = "llvm/ADT/Triple.h"
+          , specNS = [ClassName "llvm" [],ClassName "Triple" []]
+          , specName = "VendorType"
+          , specTemplateArgs = []
+          , specType = EnumSpec $
+                       EnumNode "VendorType"
+                       [Right $ EnumLeaf name ("Vendor_"++name)
+                       | name <- ["UnknownVendor"
+                                 ,"Apple","PC"]++
+                                 (if version>=llvm3_0
+                                  then ["SCEI"]
+                                  else [])++
+                                 (if version>=llvm3_1
+                                  then ["BGP","BGQ"]
+                                  else [])++
+                                 (if version>=llvm3_2
+                                  then ["Freescale","IBM"]
+                                  else [])++
+                                 (if version>=llvm3_4
+                                  then ["NVIDIA"]
+                                  else [])]
+          }
+    ,Spec { specHeader = "llvm/ADT/Triple.h"
+          , specNS = [ClassName "llvm" [],ClassName "Triple" []]
+          , specName = "OSType"
+          , specTemplateArgs = []
+          , specType = EnumSpec $
+                       EnumNode "OSType"
+                       [Right $ EnumLeaf name ("OS_"++name)
+                       | name <- ["UnknownOS"
+                                 ,"AuroraUX","Cygwin","Darwin","DragonFly","FreeBSD"]++
+                                 (if version>=llvm3_0
+                                  then ["IOS","KFreeBSD"]
+                                  else [])++
+                                 ["Linux","Lv2"]++
+                                 (if version>=llvm3_0
+                                  then ["MacOSX"]
+                                  else [])++
+                                 ["MinGW32"
+                                 ,"NetBSD","OpenBSD","Solaris","Win32"
+                                 ,"Haiku","Minix"]++
+                                 (if version>=llvm3_0
+                                  then ["RTEMS"]
+                                  else [])++
+                                 (if version>=llvm3_3
+                                  then ["NaCl"]
+                                  else [])++
+                                 (if version>=llvm3_1
+                                  then ["CNK"]
+                                  else [])++
+                                 (if version>=llvm3_2
+                                  then ["Bitrig","AIX"]
+                                  else [])++
+                                 (if version>=llvm3_4
+                                  then ["CUDA","NVCL"]
+                                  else [])]
           }]++
+    (if version>=llvm2_9
+     then [Spec { specHeader = "llvm/ADT/Triple.h"
+                , specNS = [ClassName "llvm" [],ClassName "Triple" []]
+                , specName = "EnvironmentType"
+                , specTemplateArgs = []
+                , specType = EnumSpec $
+                             EnumNode "EnvironmentType"
+                             [Right $ EnumLeaf name ("Env_"++name)
+                             | name <- ["UnknownEnvironment"
+                                       ,"GNU","GNUEABI"]++
+                                       (if version>=llvm3_1
+                                        then ["GNUEABIHF"]
+                                        else [])++
+                                       (if version>=llvm3_3
+                                        then ["GNUX32"]
+                                        else [])++
+                                       (if version>llvm3_4
+                                        then ["CODE16"]
+                                        else [])++
+                                       ["EABI","MachO"]++
+                                       (if version>llvm3_4
+                                        then ["EABIHF"]
+                                        else [])++
+                                       (if version>=llvm3_2
+                                        then ["Android","ELF"]
+                                        else [])++
+                                       (if version>llvm3_4
+                                        then ["MSVC","Itanium","Cygnus"]
+                                        else [])]
+                }]
+     else [])++
+    (if version>llvm3_4
+     then [Spec { specHeader = "llvm/ADT/Triple.h"
+                , specNS = [ClassName "llvm" [],ClassName "Triple" []]
+                , specName = "ObjectFormatType"
+                , specTemplateArgs = []
+                , specType = EnumSpec $
+                             EnumNode "ObjectFormatType"
+                             [Right $ EnumLeaf name ("ObjectFormat_"++name)
+                             | name <- ["UnknownObjectFormat"
+                                       ,"COFF","ELF","MachO"]]
+                }]
+     else [])++
     (if version>=llvm2_9
      then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
                 , specNS = [ClassName "llvm" [],ClassName "LibFunc" []]
