@@ -4,6 +4,11 @@ import Data.Version
 import Generator
 import CPPType
 
+llvm3_5 :: Version
+llvm3_5 = Version { versionBranch = [3,5]
+                  , versionTags = []
+                  }
+
 llvm3_4 :: Version
 llvm3_4 = Version { versionBranch = [3,4]
                   , versionTags = []
@@ -3447,7 +3452,7 @@ llvm version
                                          , ftName = "isOSDarwin"
                                          },"tripleIsOSDarwin")]
                         else [])++
-                       (if version>llvm3_4
+                       (if version>=llvm3_5
                         then [(memberFun { ftReturnType = normalT bool
                                          , ftName = "isOSFreeBSD"
                                          },"tripleIsOSFreeBSD")
@@ -3480,7 +3485,7 @@ llvm version
                                          , ftName = "isOSNaCl"
                                          },"tripleIsOSNaCl")]
                         else [])++
-                       (if version>llvm3_4
+                       (if version>=llvm3_5
                         then [(memberFun { ftReturnType = normalT bool
                                          , ftName = "isOSLinux"
                                          },"tripleIsOSLinux")]
@@ -3514,7 +3519,7 @@ llvm version
                        [Right $ EnumLeaf name ("Arch_"++name)
                        | name <- ["UnknownArch"
                                  ,"arm"]++
-                                 (if version>llvm3_4
+                                 (if version>=llvm3_5
                                   then ["armeb","arm64","arm64_be"]
                                   else [])++
                                  (if version<=llvm3_1
@@ -3523,7 +3528,7 @@ llvm version
                                  (if version>=llvm3_3
                                   then ["aarch64"]
                                   else [])++
-                                 (if version>llvm3_4
+                                 (if version>=llvm3_5
                                   then ["aarch64_be"]
                                   else [])++
                                  (if version>=llvm3_1
@@ -3546,7 +3551,7 @@ llvm version
                                   then ["systemz"]
                                   else [])++
                                  ["tce","thumb"]++
-                                 (if version>llvm3_4
+                                 (if version>=llvm3_5
                                   then ["thumbeb"]
                                   else [])++
                                  ["x86","x86_64","xcore"]++
@@ -3641,22 +3646,22 @@ llvm version
                                        (if version>=llvm3_3
                                         then ["GNUX32"]
                                         else [])++
-                                       (if version>llvm3_4
+                                       (if version>=llvm3_5
                                         then ["CODE16"]
                                         else [])++
                                        ["EABI","MachO"]++
-                                       (if version>llvm3_4
+                                       (if version>=llvm3_5
                                         then ["EABIHF"]
                                         else [])++
                                        (if version>=llvm3_2
                                         then ["Android","ELF"]
                                         else [])++
-                                       (if version>llvm3_4
+                                       (if version>=llvm3_5
                                         then ["MSVC","Itanium","Cygnus"]
                                         else [])]
                 }]
      else [])++
-    (if version>llvm3_4
+    (if version>=llvm3_5
      then [Spec { specHeader = "llvm/ADT/Triple.h"
                 , specNS = [ClassName "llvm" [],ClassName "Triple" []]
                 , specName = "ObjectFormatType"
