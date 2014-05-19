@@ -6,7 +6,7 @@ module LLVM.FFI.Triple
 #if HS_LLVM_VERSION>=209
        ,EnvironmentType(..)
 #endif
-#if HS_LLVM_VERSION>304
+#if HS_LLVM_VERSION>=305
        ,ObjectFormatType(..)
 #endif
        ,newTripleEmpty
@@ -45,7 +45,7 @@ module LLVM.FFI.Triple
 #if HS_LLVM_VERSION>=300
        ,tripleIsOSDarwin
 #endif
-#if HS_LLVM_VERSION>304
+#if HS_LLVM_VERSION>=305
        ,tripleIsOSFreeBSD
        ,tripleIsWindowsMSVCEnvironment
        ,tripleIsWindowsCygwinEnvironment
@@ -59,7 +59,7 @@ module LLVM.FFI.Triple
 #if HS_LLVM_VERSION>=303
        ,tripleIsOSNaCl
 #endif
-#if HS_LLVM_VERSION>304
+#if HS_LLVM_VERSION>=305
        ,tripleIsOSLinux
 #endif
        ,tripleSetArch
