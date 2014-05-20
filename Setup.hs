@@ -137,8 +137,6 @@ getLLVMIncludedir db = do
 versionToDefine :: Version -> String
 versionToDefine v = branch (versionBranch v)
   where
-    branch (x:xs) = show x ++ (concat $ 
-                               fmap (\x' -> if x'<10
-                                            then "0"++show x'
-                                            else show x'
-                                    ) xs)
+    branch (major:minor:_) = show major ++ (if minor < 10
+                                            then "0"++show minor
+                                            else show minor)
