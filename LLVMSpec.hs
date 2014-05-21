@@ -4072,4 +4072,173 @@ llvm version
                                               else [])++
                                              [(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)]
                                   },"linkerLinkInModule")]
-         }]
+         }
+   ,if version>=llvm3_3
+    then Spec { specHeader = irInclude version "Attributes.h"
+              , specNS = llvmNS
+              , specName = "AttributeSet"
+              , specTemplateArgs = []
+              , specType = classSpec
+                           [(Constructor [],"newAttributeSet")
+                           ,(Destructor False,"deleteAttributeSet")
+                           ,(memberFun { ftReturnType = normalT $ llvmType "AttributeSet"
+                                       , ftName = "addAttribute"
+                                       , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                  ,(False,normalT unsigned)
+                                                  ,(False,normalT $ EnumType [ClassName "llvm" []
+                                                                             ,ClassName "Attribute" []] "AttrKind")
+                                                  ]
+                                       },"attributeSetAddAttribute")]
+              }
+    else Spec { specHeader = irInclude version "Attributes.h"
+              , specNS = llvmNS
+              , specName = "Attributes"
+              , specTemplateArgs = []
+              , specType = classSpec $
+                           [(Constructor [],"newAttributes")
+                           ,(Destructor False,"deleteAttributes")]++
+                           (if version<=llvm3_1
+                            then (if version==llvm3_1
+                                  then [(Constructor [(False,normalT uint64_t)],"newAttributesFromAttr_")
+                                       ,(memberFun { ftReturnType = normalT $ llvmType "Attributes"
+                                                   , ftName = "operator|"
+                                                   , ftArgs = [(False,normalT $ ref $ llvmType "Attributes")]
+                                                   },"attributesUnion")
+                                       ,(memberFun { ftReturnType = normalT $ llvmType "Attributes"
+                                                   , ftName = "operator&"
+                                                   , ftArgs = [(False,normalT $ ref $ llvmType "Attributes")]
+                                                   },"attributesIntersection")]
+                                  else [])
+                            else [(memberFun { ftReturnType = normalT $ llvmType "Attributes"
+                                             , ftName = "get"
+                                             , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                        ,(False,normalT $ ref $ llvmType "AttrBuilder")]
+                                             , ftStatic = True
+                                             },"attributesGet")])
+              }]++
+   (if version>=llvm3_2
+    then [Spec { specHeader = irInclude version "Attributes.h"
+               , specNS = llvmNS
+               , specName = "AttrBuilder"
+               , specTemplateArgs = []
+               , specType = classSpec $
+                            [(Constructor [],"newAttrBuilder")
+                            ,(memberFun { ftReturnType = normalT $ ref $ llvmType "AttrBuilder"
+                                        , ftName = "addAttribute"
+                                        , ftArgs = [(False,normalT $ EnumType
+                                                           [ClassName "llvm" []
+                                                           ,ClassName (if version>=llvm3_3
+                                                                       then "Attribute"
+                                                                       else "Attributes") []]
+                                                           (if version>=llvm3_3
+                                                            then "AttrKind"
+                                                            else "AttrVal"))]
+                                       },"attrBuilderAdd")
+                            ]
+               }
+         ,Spec { specHeader = irInclude version "Attributes.h"
+               , specNS = [ClassName "llvm" []
+                          ,ClassName (if version>=llvm3_3
+                                      then "Attribute"
+                                      else "Attributes") []]
+               , specName = (if version>=llvm3_3
+                             then "AttrKind"
+                             else "AttrVal")
+               , specTemplateArgs = []
+               , specType = EnumSpec $
+                            EnumNode (if version>=llvm3_3
+                                      then "AttrKind"
+                                      else "AttrVal") $
+                            [ Right $ EnumLeaf name ("Attr"++name)
+                            | name <- ["None"               -- No attributes have been set.
+                                      ]++
+                                      (if version<=llvm3_2
+                                       then ["AddressSafety" -- Address safety checking is on.
+                                            ]
+                                       else [])++
+                                      ["Alignment"          -- Alignment of parameter (5 bits) stored as log2 of alignment with +1 bias 0 means unaligned (different from align(1))
+                                      ,"AlwaysInline"       -- inline=always
+                                      ]++
+                                      (if version>=llvm3_4
+                                       then ["Builtin"            -- Callee is recognized as a builtin, despite nobuiltin attribute on its declaration.
+                                            ]
+                                       else [])++
+                                      ["ByVal"              -- Pass structure by value.
+                                      ]++
+                                      (if version>=llvm3_5
+                                       then ["InAlloca"           -- Pass structure in an alloca.
+                                            ]
+                                       else [])++
+                                      (if version>=llvm3_4
+                                       then ["Cold"               -- Marks function as being in a cold path.
+                                            ]
+                                       else [])++
+                                      ["InlineHint"         -- Source said inlining was desirable.
+                                      ,"InReg"              -- Force argument to be passed in register.
+                                      ,"MinSize"            -- Function must be optimized for size first.
+                                      ,"Naked"              -- Naked function.
+                                      ,"Nest"               -- Nested function static chain.
+                                      ,"NoAlias"            -- Considered to not alias after call.
+                                      ]++
+                                      (if version>=llvm3_3
+                                       then ["NoBuiltin"          -- Callee isn't recognized as a builtin.
+                                            ]
+                                       else [])++
+                                      ["NoCapture"          -- Function creates no aliases of pointer.
+                                      ]++
+                                      (if version>=llvm3_3
+                                       then ["NoDuplicate"        -- Call cannot be duplicated.
+                                            ]
+                                       else [])++
+                                      ["NoImplicitFloat"    -- Disable implicit floating point insts.
+                                      ,"NoInline"           -- inline=never
+                                      ,"NonLazyBind"        -- Function is called early and/or often, so lazy binding isn't worthwhile
+                                      ]++
+                                      (if version>=llvm3_5
+                                       then ["NonNull"            -- Pointer is known to be not null.
+                                            ]
+                                       else [])++
+                                      ["NoRedZone"          -- Disable redzone.
+                                      ,"NoReturn"           -- Mark the function as not returning.
+                                      ,"NoUnwind"           -- Function doesn't unwind stack.
+                                      ,"OptimizeForSize"    -- opt_size
+                                      ]++
+                                      (if version>=llvm3_4
+                                       then ["OptimizeNone"       -- Function must not be optimized.
+                                            ]
+                                       else [])++
+                                      ["ReadNone"           -- Function does not access memory.
+                                      ,"ReadOnly"           -- Function only reads from memory.
+                                      ]++
+                                      (if version>=llvm3_3
+                                       then ["Returned"           -- Return value is always equal to this argument.
+                                            ]
+                                       else [])++
+                                      ["ReturnsTwice"       -- Function can return twice.
+                                      ,"SExt"               -- Sign extended before/after call.
+                                      ,"StackAlignment"     -- Alignment of stack for function (3 bits) stored as log2 of alignment with +1 bias 0 means unaligned (different from alignstack=(1))
+                                      ,"StackProtect"       -- Stack protection.
+                                      ,"StackProtectReq"    -- Stack protection required.
+                                      ]++
+                                      (if version>=llvm3_3
+                                       then ["StackProtectStrong" -- Strong Stack protection.
+                                            ]
+                                       else [])++
+                                      ["StructRet"          -- Hidden pointer to structure to return.
+                                      ]++
+                                      (if version>=llvm3_3
+                                       then ["SanitizeAddress"    -- AddressSanitizer is on.
+                                            ,"SanitizeThread"     -- ThreadSanitizer is on.
+                                            ,"SanitizeMemory"     -- MemorySanitizer is on.
+                                            ]
+                                       else [])++
+                                      ["UWTable"            -- Function must be in a unwind table.
+                                      ,"ZExt"               -- Zero extended before/after call.
+                                      ]++
+                                      (if version>=llvm3_3
+                                       then ["EndAttrKinds"       -- Sentinal value useful for loops.
+                                            ]
+                                       else [])
+                            ]
+               }]
+    else [])

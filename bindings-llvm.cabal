@@ -73,5 +73,6 @@ library
     LLVM.FFI.Linker
     LLVM.FFI.CPP.String
     LLVM.FFI.Triple
+    LLVM.FFI.Attributes
   other-modules:
     LLVM.FFI.Interface
