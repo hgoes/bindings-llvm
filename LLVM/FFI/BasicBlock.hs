@@ -1,5 +1,7 @@
 module LLVM.FFI.BasicBlock
        (BasicBlock()
+       ,createBasicBlock
+       ,deleteBasicBlock
        ,basicBlockGetParent
        ,getInstList
        ,getTerminator

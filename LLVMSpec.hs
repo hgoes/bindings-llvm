@@ -575,6 +575,15 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "TerminatorInst"
                                       , ftName = "getTerminator"
                                       },"getTerminator")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
+                                      , ftName = "Create"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                 ,(False,normalT $ ref $ llvmType "Twine")
+                                                 ,(False,normalT $ ptr $ llvmType "Function")
+                                                 ,(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                      , ftStatic = True
+                                      },"createBasicBlock")
+                          ,(Destructor False,"deleteBasicBlock")
                           ]
              }
        ,Spec { specHeader = irInclude version "InlineAsm.h"
