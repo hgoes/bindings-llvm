@@ -788,7 +788,13 @@ llvm version
                                       },"constantIntGetType")
                           ,(memberFun { ftReturnType = constT $ ref $ llvmType "APInt"
                                       , ftName = "getValue"
-                                      },"constantIntGetValue")]
+                                      },"constantIntGetValue")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
+                                      , ftName = "get"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                 ,(False,constT $ ref $ llvmType "APInt")]
+                                      , ftStatic = False
+                                      },"createConstantInt")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
