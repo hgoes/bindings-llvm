@@ -813,6 +813,27 @@ llvm version
                                       },"globalValueIsDeclaration_")]
              }
        ,Spec { specHeader = irInclude version "GlobalValue.h"
+             , specNS = [ClassName "llvm" []
+                        ,ClassName "GlobalValue" []]
+             , specName = "LinkageTypes"
+             , specTemplateArgs = []
+             , specType = EnumSpec $
+                          EnumNode "LinkageTypes"
+                          [Right $ EnumLeaf name name
+                          | name <- ["ExternalLinkage"             -- Externally visible function.
+                                    ,"AvailableExternallyLinkage"  -- Available for inspection, not emission.
+                                    ,"LinkOnceAnyLinkage"          -- Keep one copy of function when linking (inline)
+                                    ,"LinkOnceODRLinkage"          -- Same, but only replaced by something equivalent.
+                                    ,"WeakAnyLinkage"              -- Keep one copy of named function when linking (weak)
+                                    ,"WeakODRLinkage"              -- Same, but only replaced by something equivalent.
+                                    ,"AppendingLinkage"            -- Special purpose, only applies to global arrays.
+                                    ,"InternalLinkage"             -- Rename collisions when linking (static functions).
+                                    ,"PrivateLinkage"              -- Like Internal, but omit from symbol table.
+                                    ,"ExternalWeakLinkage"         -- ExternalWeak linkage description.
+                                    ,"CommonLinkage"               -- Tentative definitions.
+                                    ]]
+             }
+       ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = llvmNS
              , specName = "GlobalAlias"
              , specTemplateArgs = []
@@ -858,6 +879,19 @@ llvm version
                                                        False
                                       , ftName = "getArgumentList"
                                       },"functionGetArgumentList")
+                          ,(Destructor False,"deleteFunction")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
+                                      , ftName = "Create"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "FunctionType")
+                                                 ,(False,normalT $ EnumType
+                                                         [ClassName "llvm" []
+                                                         ,ClassName "GlobalValue" []]
+                                                         "LinkageTypes")
+                                                 ,(False,constT $ ref $ llvmType "Twine")
+                                                 ,(False,normalT $ ptr $ llvmType "Module")
+                                                 ]
+                                      , ftStatic = True
+                                      },"createFunction_")
                           ]
              }
        ,Spec { specHeader = irInclude version "Constants.h"

@@ -35,6 +35,7 @@ module LLVM.FFI.Constant
         ConstantVector(),
         GlobalValue(),
         GlobalValueC(),
+        LinkageTypes(..),
         globalValueIsDeclaration,
         GlobalAlias(),
         GlobalVariable(),
