@@ -43,7 +43,9 @@ instance IPListC name where {\
   ipListBegin = list##name##Begin ;\
   ipListEnd = list##name##End ;\
   ipListInsert = list##name##Insert ;\
-  ipListRemove = list##name##Remove\
+  ipListRemove = list##name##Remove ;\
+  ipListPushBack = list##name##PushBack ;\
+  ipListPushFront = list##name##PushFront\
 } ;\
 \
 instance IListIteratorC name where {\

@@ -132,6 +132,12 @@ llvm version
                                            , ftArgs = [(False,normalT $ ref $
                                                               NamedType llvmNS "ilist_iterator" [rtp] False)]
                                            },"list"++tp++"Remove")
+                               ,(memberFun { ftName = "push_front"
+                                           , ftArgs = [(False,toPtr rtp)]
+                                           },"list"++tp++"PushFront")
+                               ,(memberFun { ftName = "push_back"
+                                           , ftArgs = [(False,toPtr rtp)]
+                                           },"list"++tp++"PushBack")
                                ]
                   }
             ,Spec { specHeader = "llvm/ADT/ilist.h"
