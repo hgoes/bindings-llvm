@@ -793,7 +793,7 @@ llvm version
                                       , ftName = "get"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
                                                  ,(False,constT $ ref $ llvmType "APInt")]
-                                      , ftStatic = False
+                                      , ftStatic = True
                                       },"createConstantInt")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
