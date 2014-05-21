@@ -2,6 +2,7 @@
 module LLVM.FFI.Value
        (Value(),ValueC(),
         Argument(),
+        createArgument,
         argumentGetParent,
         argumentGetArgNo,
         InlineAsm(),
@@ -31,6 +32,9 @@ import LLVM.FFI.SmallVector
 
 import Foreign
 import Foreign.C
+
+createArgument :: TypeC tp => Ptr tp -> Ptr Twine -> Ptr Function -> IO (Ptr Argument)
+createArgument = createArgument_
 
 argumentGetArgNo :: Ptr Argument -> IO Integer
 argumentGetArgNo ptr = fmap toInteger (argumentGetArgNo_ ptr)

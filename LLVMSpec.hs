@@ -567,6 +567,10 @@ llvm version
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getArgNo"
                                       },"argumentGetArgNo_")
+                          ,(Constructor [(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,constT $ ref $ llvmType "Twine")
+                                        ,(False,normalT $ ptr $ llvmType "Function")
+                                        ],"createArgument_")
                           ]
              }
        ,Spec { specHeader = irInclude version "BasicBlock.h"
