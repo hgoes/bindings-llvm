@@ -122,6 +122,16 @@ llvm version
                                ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "ilist_iterator" [rtp] False
                                            , ftName = "end"
                                            },"list"++tp++"End")
+                               ,(memberFun { ftReturnType = normalT $ NamedType llvmNS "ilist_iterator" [rtp] False
+                                           , ftName = "insert"
+                                           , ftArgs = [(False,normalT $ NamedType llvmNS "ilist_iterator" [rtp] False)
+                                                      ,(False,normalT $ ptr $ llvmType tp)]
+                                           },"list"++tp++"Insert")
+                               ,(memberFun { ftReturnType = normalT $ ptr $ llvmType tp
+                                           , ftName = "remove"
+                                           , ftArgs = [(False,normalT $ ref $
+                                                              NamedType llvmNS "ilist_iterator" [rtp] False)]
+                                           },"list"++tp++"Remove")
                                ]
                   }
             ,Spec { specHeader = "llvm/ADT/ilist.h"

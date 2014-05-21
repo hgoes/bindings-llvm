@@ -16,6 +16,8 @@ class IPListC a where
   ipListSize' :: Ptr (Iplist a) -> IO CSize
   ipListBegin :: Ptr (Iplist a) -> IO (Ptr (Ilist_iterator a))
   ipListEnd :: Ptr (Iplist a) -> IO (Ptr (Ilist_iterator a))
+  ipListInsert :: Ptr (Iplist a) -> Ptr (Ilist_iterator a) -> Ptr a -> IO (Ptr (Ilist_iterator a))
+  ipListRemove :: Ptr (Iplist a) -> Ptr (Ilist_iterator a) -> IO (Ptr a)
 
 ipListSize :: IPListC a => Ptr (Iplist a) -> IO Integer
 ipListSize ptr = fmap fromIntegral $ ipListSize' ptr

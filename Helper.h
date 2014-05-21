@@ -41,7 +41,9 @@ SUBTYPE(super5,sub)
 instance IPListC name where {\
   ipListSize' = list##name##Size ;\
   ipListBegin = list##name##Begin ;\
-  ipListEnd = list##name##End\
+  ipListEnd = list##name##End ;\
+  ipListInsert = list##name##Insert ;\
+  ipListRemove = list##name##Remove\
 } ;\
 \
 instance IListIteratorC name where {\
