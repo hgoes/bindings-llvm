@@ -21,3 +21,7 @@ script:
   - ghc --make Setup.hs -o ./setup
   - ./setup configure --user --with-llvm-config=llvm-config-${LLVM_VERSION}
   - ./setup build
+  - ./setup install
+  - cd test
+  - ghc --make Main.hs -o tests
+  - ./tests
