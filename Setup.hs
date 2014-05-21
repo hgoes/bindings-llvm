@@ -80,6 +80,11 @@ adaptPackageDescription pkg vers cflags ldflags libs libdir incdir
                                               vers cflags 
                                               ldflags libs libdir incdir
                              }
+             , testSuites = fmap (\ts -> ts { testBuildInfo = adaptBuildInfo
+                                                              (testBuildInfo ts)
+                                                              vers cflags
+                                                              ldflags libs libdir incdir
+                                            }) (testSuites pkg)
              , description = (description pkg) ++ "\n%LLVM_VERSION="++show vers++"%"
              }
 

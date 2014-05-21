@@ -16,7 +16,11 @@ createExampleModule ctx = do
   i32 <- getIntegerType ctx 32
   argArr <- mallocArray 1
   poke argArr (castUp i32)
+#if HS_LLVM_VERSION>=300
   argArrRef <- newArrayRef' argArr 1
+#else
+  argArrRef <- newVector argArr (advancePtr argArr 1)
+#endif
   funTp <- newFunctionType i32 argArrRef False
   fun <- createFunction funTp CommonLinkage fname mod
   blk <- createBasicBlock ctx blkName fun nullPtr

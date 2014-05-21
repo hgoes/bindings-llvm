@@ -19,6 +19,7 @@ class VectorC c where
   vectorIteratorDeref :: Ptr (Const_iterator c) -> IO c
   vectorIteratorNext :: Ptr (Const_iterator c) -> IO (Ptr (Const_iterator c))
   vectorIteratorEq :: Ptr (Const_iterator c) -> Ptr (Const_iterator c) -> IO Bool
+  newVector :: Ptr c -> Ptr c -> IO (Ptr (Vector c))
 
 vectorToList :: VectorC c => Ptr (Vector c) -> IO [c]
 vectorToList vec = do

@@ -201,7 +201,8 @@ llvm version
                                ,(memberFun { ftReturnType = constT $ NamedType [ClassName "std" [],ClassName "vector" [rtp]] "const_iterator" [] False
                                            , ftName = "end"
                                            , ftOverloaded = True
-                                           },"vector"++tp++"End")]
+                                           },"vector"++tp++"End")
+                               ,(Constructor [(False,toPtr rtp),(False,toPtr rtp)],"newVector"++tp)]
                   }
             ,Spec { specHeader = "vector"
                   , specNS = [ClassName "std" [],ClassName "vector" [rtp]]

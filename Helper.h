@@ -92,7 +92,8 @@ instance VectorC (Ptr name) where {\
   vectorEnd = vector##name##End ;\
   vectorIteratorDeref = vectorIterator##name##Deref ;\
   vectorIteratorNext = vectorIterator##name##Next ;\
-  vectorIteratorEq = vectorIterator##name##Eq\
+  vectorIteratorEq = vectorIterator##name##Eq ;\
+  newVector = newVector##name\
 }
 
 #define SPECIALIZE_SMALLVECTOR(name)\
