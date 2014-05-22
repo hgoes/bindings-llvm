@@ -25,15 +25,14 @@ createExampleModule ctx = do
   fun <- createFunction funTp CommonLinkage fname mod
   blk <- createBasicBlock ctx blkName fun nullPtr
   instrs <- getInstList blk
-  it <- ipListBegin instrs
   ap11 <- newAPIntLimited 32 11 False
   c11 <- createConstantInt ctx ap11
   deleteAPInt ap11
   arg1 <- createArgument i32 argName fun
   add <- newBinaryOperator Add c11 arg1 binName
-  it' <- ipListInsert instrs it (castUp add)
+  ipListPushBack instrs (castUp add)
   ret <- newReturnInst ctx add
-  ipListInsert instrs it' (castUp ret)
+  ipListPushBack instrs (castUp ret)
   return mod
 
 testExampleModule :: IO ()
