@@ -69,8 +69,14 @@ mallocAPInt (APInt bw val)
   | otherwise = allocaArray numW $
                 \arr -> do
                   writeData numW arr val
+#if HS_LLVM_VERSION>=300
                   ref <- newArrayRef' arr (fromIntegral numW)
-                  newAPInt (fromIntegral bw) ref
+                  res <- newAPInt (fromIntegral bw) ref
+                  deleteArrayRef ref
+                  return res
+#else
+                  newAPInt (fromIntegral bw) (fromIntegral numW) arr
+#endif
   where
     (numW',rest) = bw `divMod` 64
     numW = if rest==0

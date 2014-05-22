@@ -79,7 +79,11 @@ extern "C" {
   size_t alignof_APInt = __alignof__(llvm::APInt);
 
   void move_APInt(void* trg,unsigned bw,unsigned wcount,uint64_t* arr) {
+#if HS_LLVM_VERSION>=300
     *((llvm::APInt*)trg) = llvm::APInt(bw,llvm::ArrayRef<uint64_t>(arr,wcount));
+#else
+    *((llvm::APInt*)trg) = llvm::APInt(bw,wcount,arr);
+#endif
   }
 
   void move_APIntSimple(void* trg,unsigned bw,uint64_t val) {

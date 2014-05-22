@@ -293,7 +293,7 @@ llvm version
              , specNS = llvmNS
              , specName = "APInt"
              , specTemplateArgs = []
-             , specType = classSpecCustom "data APInt = APInt Int Integer deriving Typeable"
+             , specType = classSpecCustom "data APInt = APInt Int Integer deriving (Typeable,Show,Eq,Ord)"
                           [(Constructor [(False,normalT unsigned)
                                         ,(False,normalT uint64_t)
                                         ,(False,normalT bool)]
