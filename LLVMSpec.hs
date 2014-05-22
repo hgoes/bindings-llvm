@@ -1854,7 +1854,10 @@ llvm version
                            else [(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
                                             , ftName = "getCaseValue"
                                             , ftArgs = [(False,normalT unsigned)]
-                                            },"switchInstGetCaseValue")])++
+                                            },"switchInstGetCaseValue")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getNumCases"
+                                            },"switchInstGetNumCases")])++
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "SwitchInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")

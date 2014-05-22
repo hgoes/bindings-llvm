@@ -193,8 +193,6 @@ module LLVM.FFI.Instruction
          switchInstGetDefaultDest,
 #if HS_LLVM_VERSION>=301
          CaseIt(),
-#endif
-#if HS_LLVM_VERSION>=301
          switchInstCaseBegin,
          switchInstCaseEnd,
          switchInstCaseDefault,
@@ -204,6 +202,7 @@ module LLVM.FFI.Instruction
          caseItGetCaseValue,
          caseItGetCaseSuccessor,
 #else
+         switchInstGetNumCases,
          switchInstGetCaseValue,
 #endif
          -- *** Unreachable Instruction
