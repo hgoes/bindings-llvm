@@ -22,6 +22,7 @@
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/LoopInfo.h>
 #include <llvm/Analysis/FindUsedTypes.h>
+#include <llvm/ADT/APInt.h>
 
 #include <string>
 
@@ -72,5 +73,16 @@ extern "C" {
     llvm::raw_string_ostream stream(outp);
     ((llvm::Value*)val)->print(stream);
     return strdup(stream.str().c_str());
+  }
+
+  size_t sizeof_APInt = sizeof(llvm::APInt);
+  size_t alignof_APInt = __alignof__(llvm::APInt);
+
+  void move_APInt(void* trg,unsigned bw,unsigned wcount,uint64_t* arr) {
+    *((llvm::APInt*)trg) = llvm::APInt(bw,llvm::ArrayRef<uint64_t>(arr,wcount));
+  }
+
+  void move_APIntSimple(void* trg,unsigned bw,uint64_t val) {
+    *((llvm::APInt*)trg) = llvm::APInt(bw,val,false);
   }
 }

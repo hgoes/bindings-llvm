@@ -103,7 +103,8 @@ llvm version
                              ]
                 }
            | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
-                        ,("CChar",constT $ ptr char)]
+                        ,("CChar",constT $ ptr char)
+                        ,("Word64",normalT uint64_t)]
           ]
      else [])++
     concat [[Spec { specHeader = "llvm/ADT/ilist.h"
@@ -292,7 +293,7 @@ llvm version
              , specNS = llvmNS
              , specName = "APInt"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom "data APInt = APInt Int Integer deriving Typeable"
                           [(Constructor [(False,normalT unsigned)
                                         ,(False,normalT uint64_t)
                                         ,(False,normalT bool)]
@@ -319,7 +320,13 @@ llvm version
                                       },"apIntGetZExtValue")
                           ,(memberFun { ftReturnType = normalT int64_t
                                       , ftName = "getSExtValue"
-                                      },"apIntGetSExtValue")]
+                                      },"apIntGetSExtValue")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getNumWords"
+                                      },"apIntGetNumWords")
+                          ,(memberFun { ftReturnType = constT $ ptr uint64_t
+                                      , ftName = "getRawData"
+                                      },"apIntGetRawData")]
              }
        ,Spec { specHeader = "llvm/Support/DebugLoc.h"
              , specNS = llvmNS

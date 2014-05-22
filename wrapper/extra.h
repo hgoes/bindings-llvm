@@ -1,6 +1,9 @@
 #ifndef __HS_LLVM_EXTRA_H__
 #define __HS_LLVM_EXTRA_H__
 
+#include <stddef.h>
+#include <stdint.h>
+
 extern char* passId_LoopInfo();
 extern char* passId_FindUsedTypes();
 #if HS_LLVM_VERSION >= 209
@@ -21,4 +24,10 @@ extern void std_string_delete(void* str);
 extern const char* std_string_to_string(void* str);
 
 extern char* value_to_string(void* val);
+
+extern size_t sizeof_APInt;
+extern size_t alignof_APInt;
+
+extern void move_APInt(void* trg,unsigned bw,unsigned wcount,uint64_t* arr);
+extern void move_APIntSimple(void* trg,unsigned bw,uint64_t val);
 #endif

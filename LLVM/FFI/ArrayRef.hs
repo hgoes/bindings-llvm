@@ -30,6 +30,23 @@ arrayRefSize :: ArrayRefC a => Ptr (ArrayRef a) -> IO Integer
 arrayRefSize ptr = fmap fromIntegral (arrayRefSize' ptr)
 
 SPECIALIZE_ARRAYREF(CChar)
+#if HS_LLVM_VERSION>=300
+instance ArrayRefC Word64 where
+  newArrayRef' = newArrayRefWord64
+  newArrayRefEmpty = newArrayRefEmptyWord64
+  arrayRefSize' = arrayRefSizeWord64
+  arrayRefEquals = arrayRefEqualsWord64
+  arrayRefIndex' = arrayRefIndexWord64
+  deleteArrayRef = deleteArrayRefWord64
+#else
+instance ArrayRefC Word64 where
+  newArrayRef' = newArrayRefWord64
+  newArrayRefEmpty = newArrayRefEmptyWord64
+  arrayRefSize' = arrayRefSizeWord64
+  arrayRefIndex' = arrayRefIndexWord64
+  deleteArrayRef = deleteArrayRefWord64
+#endif
+
 #else
 module LLVM.FFI.ArrayRef () where
 #endif

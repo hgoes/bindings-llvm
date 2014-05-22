@@ -18,7 +18,8 @@ data Spec
 
 data SpecType
   = ClassSpec { cspecFuns :: [(FunSpec,String)]
-              , isInterface :: Bool }
+              , isInterface :: Bool
+              , customDecl :: Maybe String }
   | GlobalFunSpec { gfunReturnType :: Type
                   , gfunArgs :: [(Bool,Type)]
                   , gfunHSName :: String
@@ -39,10 +40,13 @@ allCEnums nd = concat [ allCEnums' el
     allCEnums' (Right leaf) = [enumLeafCName leaf]
 
 classSpec :: [(FunSpec,String)] -> SpecType
-classSpec funs = ClassSpec funs False
+classSpec funs = ClassSpec funs False Nothing
 
 interfaceSpec :: [(FunSpec,String)] -> SpecType
-interfaceSpec funs = ClassSpec funs True
+interfaceSpec funs = ClassSpec funs True Nothing
+
+classSpecCustom :: String -> [(FunSpec,String)] -> SpecType
+classSpecCustom decl funs = ClassSpec funs False (Just decl)
 
 specFullName :: Spec -> String
 specFullName cs = renderNS (specNS cs) ++
@@ -275,7 +279,7 @@ generateWrapper :: String -> [Spec] -> (String,String)
 generateWrapper inc_sym spec
   = let includes = ["#include <"++cs++">" | cs <- nub $ fmap specHeader spec]
         all_cont = concat [ case specType cs of
-                               ClassSpec funs _ -> fmap (generateWrapperFunction cs) funs
+                               ClassSpec funs _ _ -> fmap (generateWrapperFunction cs) funs
                                GlobalFunSpec rtp args hsname -> [generateGlobalWrapper cs rtp args hsname]
                                EnumSpec nd -> [generateEnum cs (allCEnums nd)]
                           | cs <- spec ]
@@ -394,9 +398,12 @@ generateFFI mname header specs
              ,"import LLVM.FFI.CPP.String"
              ,""]++dts++fns++conv)
   where
-    dts = [ "data "++hsName (specName cs) ++
-            concat (fmap (\(_,i) -> " a"++show i) (zip (specCollectTemplateArgs cs) [0..]))++
-            " = "++hsName (specName cs)++" deriving (Typeable)"
+    dts = [ case customDecl (specType cs) of
+               Nothing -> "data "++hsName (specName cs) ++
+                          concat (fmap (\(_,i) -> " a"++show i)
+                                  (zip (specCollectTemplateArgs cs) [0..]))++
+                          " = "++hsName (specName cs)++" deriving (Typeable)"
+               Just decl -> decl
           | cs@Spec { specType = ClassSpec { isInterface = False } } <- nubBy (\x y -> specName x == specName y) specs
           ] ++
           concat [ declareEnumNode node
