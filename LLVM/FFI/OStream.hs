@@ -1,8 +1,11 @@
 module LLVM.FFI.OStream 
-    (Raw_ostream(),
+    (OStreamC(),
+     Raw_ostream(),
      deleteOStream,
      Raw_fd_ostream(),
-     newFDOStream
+     newFDOStream,
+     Raw_string_ostream(),
+     newStringOStream
     ) where
 
 import LLVM.FFI.Interface
@@ -13,6 +16,7 @@ class OStreamC t
 
 instance OStreamC Raw_ostream
 instance OStreamC Raw_fd_ostream
+instance OStreamC Raw_string_ostream
 
 deleteOStream :: OStreamC t => Ptr t -> IO ()
 deleteOStream = deleteOStream_

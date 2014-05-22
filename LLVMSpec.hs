@@ -2739,6 +2739,13 @@ llvm version
                           [(Constructor [(False,normalT int),(False,normalT bool),(False,normalT bool)],"newFDOStream_")
                           ,(Destructor False,"deleteFDOStream")]
              }
+       ,Spec { specHeader = "llvm/Support/raw_ostream.h"
+             , specNS = llvmNS
+             , specName = "raw_string_ostream"
+             , specTemplateArgs = []
+             , specType = classSpec
+                           [(Constructor [(False,normalT $ ref $ NamedType [ClassName "std" []] "string" [] False)],"newStringOStream")]
+             }
        ,Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
              , specNS = llvmNS
              , specName = "AliasAnalysis"
