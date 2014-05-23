@@ -209,7 +209,22 @@ llvm version
                                            , ftName = "end"
                                            , ftOverloaded = True
                                            },"vector"++tp++"End")
-                               ,(Constructor [(False,toPtr rtp),(False,toPtr rtp)],"newVector"++tp)]
+                               ,(Constructor [(False,toPtr rtp),(False,toPtr rtp)],"newVector"++tp)
+                               ,(memberFun { ftName = "clear"
+                                           },"vector"++tp++"Clear")
+                               ,(memberFun { ftName = "push_back"
+                                           , ftArgs = [(False,toRef rtp)]
+                                           },"vector"++tp++"PushBack")
+                               ,(memberFun { ftName = "resize"
+                                           , ftArgs = [(False,normalT unsigned)]
+                                           },"vector"++tp++"Resize")
+                               ,(memberFun { ftReturnType = toRef rtp
+                                           , ftName = "operator[]"
+                                           , ftArgs = [(False,normalT size_t)]
+                                           },"vector"++tp++"Index")
+                               ,(memberFun { ftReturnType = normalT size_t
+                                           , ftName = "size"
+                                           },"vector"++tp++"Size")]
                   }
             ,Spec { specHeader = "vector"
                   , specNS = [ClassName "std" [],ClassName "vector" [rtp]]

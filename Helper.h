@@ -95,7 +95,12 @@ instance VectorC (Ptr name) where {\
   vectorIteratorDeref = vectorIterator##name##Deref ;\
   vectorIteratorNext = vectorIterator##name##Next ;\
   vectorIteratorEq = vectorIterator##name##Eq ;\
-  newVector = newVector##name\
+  newVector = newVector##name ;\
+  vectorClear = vector##name##Clear ;\
+  vectorPushBack = vector##name##PushBack ; \
+  vectorResize = vector##name##Resize ;\
+  vectorIndex = vector##name##Index ;\
+  vectorSize = vector##name##Size\
 }
 
 #define SPECIALIZE_SMALLVECTOR(name)\

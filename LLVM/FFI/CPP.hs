@@ -20,6 +20,11 @@ class VectorC c where
   vectorIteratorNext :: Ptr (Const_iterator c) -> IO (Ptr (Const_iterator c))
   vectorIteratorEq :: Ptr (Const_iterator c) -> Ptr (Const_iterator c) -> IO Bool
   newVector :: Ptr c -> Ptr c -> IO (Ptr (Vector c))
+  vectorClear :: Ptr (Vector c) -> IO ()
+  vectorPushBack :: Ptr (Vector c) -> Ptr c -> IO ()
+  vectorResize :: Ptr (Vector c) -> CUInt -> IO ()
+  vectorIndex :: Ptr (Vector c) -> CSize -> IO (Ptr c)
+  vectorSize :: Ptr (Vector c) -> IO CSize
 
 vectorToList :: VectorC c => Ptr (Vector c) -> IO [c]
 vectorToList vec = do

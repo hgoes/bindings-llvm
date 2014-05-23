@@ -181,6 +181,8 @@ toConstRef (Type _ tp) = Type [QConst] (RefType tp)
 toConstPtr :: Type -> Type
 toConstPtr (Type _ tp) = Type [QConst] (PtrType tp)
 
+toRef :: Type -> Type
+toRef (Type qual tp) = Type qual (ref tp)
 
 cstring = PtrType char
 
