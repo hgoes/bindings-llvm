@@ -28,6 +28,12 @@ extern char* value_to_string(void* val);
 extern size_t sizeof_APInt;
 extern size_t alignof_APInt;
 
+extern size_t sizeof_GenericValue;
+extern size_t alignof_GenericValue;
+
 extern void move_APInt(void* trg,unsigned bw,unsigned wcount,uint64_t* arr);
 extern void move_APIntSimple(void* trg,unsigned bw,uint64_t val);
+
+extern void genericValueSetIntPair(void* val,unsigned i1,unsigned i2);
+extern void genericValueGetIntPair(void* val,unsigned* i1,unsigned* i2);
 #endif

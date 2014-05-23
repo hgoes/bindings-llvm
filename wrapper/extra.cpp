@@ -22,6 +22,7 @@
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/LoopInfo.h>
 #include <llvm/Analysis/FindUsedTypes.h>
+#include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ADT/APInt.h>
 
 #include <string>
@@ -78,6 +79,9 @@ extern "C" {
   size_t sizeof_APInt = sizeof(llvm::APInt);
   size_t alignof_APInt = __alignof__(llvm::APInt);
 
+  size_t sizeof_GenericValue = sizeof(llvm::GenericValue);
+  size_t alignof_GenericValue = __alignof__(llvm::GenericValue);
+
   void move_APInt(void* trg,unsigned bw,unsigned wcount,uint64_t* arr) {
 #if HS_LLVM_VERSION>=300
     *((llvm::APInt*)trg) = llvm::APInt(bw,llvm::ArrayRef<uint64_t>(arr,wcount));
@@ -89,4 +93,17 @@ extern "C" {
   void move_APIntSimple(void* trg,unsigned bw,uint64_t val) {
     *((llvm::APInt*)trg) = llvm::APInt(bw,val,false);
   }
+
+  void genericValueSetIntPair(void* val,unsigned i1,unsigned i2) {
+    llvm::GenericValue* res = (llvm::GenericValue*)val;
+    res->UIntPairVal.first = i1;
+    res->UIntPairVal.second = i2;
+  }
+
+  void genericValueGetIntPair(void* val,unsigned* i1,unsigned* i2) {
+    llvm::GenericValue* res = (llvm::GenericValue*)val;
+    *i1 = res->UIntPairVal.first;
+    *i2 = res->UIntPairVal.second;
+  }
+
 }

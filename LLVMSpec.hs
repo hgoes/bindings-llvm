@@ -253,7 +253,8 @@ llvm version
             | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
                          ,("Loop",normalT $ ptr $ llvmType "Loop")
                          ,("BasicBlock",normalT $ ptr $ llvmType "BasicBlock")
-                         ,("DominatorTree",normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"] False)]
+                         ,("DominatorTree",normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"] False)
+                         ,("GenericValue",normalT $ llvmType "GenericValue")]
            ]++
     [Spec { specHeader = "llvm/ADT/SmallVector.h"
           , specNS = llvmNS
@@ -2995,7 +2996,10 @@ llvm version
           , specNS = llvmNS
           , specName = "GenericValue"
           , specTemplateArgs = []
-          , specType = classSpec $
+          , specType = classSpecCustom ("data GenericValue = GDouble CDouble | GFloat CFloat | GPointer (Ptr ()) | GIntPair CUInt CUInt | GInt APInt "++
+                                        (if version>=llvm3_3
+                                         then "| GAggregate [GenericValue]"
+                                         else "")++"deriving (Show,Typeable,Eq,Ord)") $
                        [(Constructor [],"newGenericValue")
                        ,(Getter { ftGetVar = "DoubleVal"
                                 , ftGetType = normalT double
