@@ -3,6 +3,7 @@ module LLVM.FFI
        ,module LLVM.FFI.APInt
        ,module LLVM.FFI.AliasAnalysis
        ,module LLVM.FFI.ArrayRef
+       ,module LLVM.FFI.Attributes
        ,module LLVM.FFI.BasicBlock
        ,module LLVM.FFI.CPP
        ,module LLVM.FFI.CPP.String
@@ -36,6 +37,7 @@ module LLVM.FFI
        ,module LLVM.FFI.StringRef
        ,module LLVM.FFI.Target
        ,module LLVM.FFI.TargetMachine
+       ,module LLVM.FFI.Targets
        ,module LLVM.FFI.Transforms.IPO
        ,module LLVM.FFI.Transforms.Scalar
        ,module LLVM.FFI.Transforms.Misc
@@ -49,6 +51,7 @@ import LLVM.FFI.APFloat
 import LLVM.FFI.APInt
 import LLVM.FFI.AliasAnalysis
 import LLVM.FFI.ArrayRef
+import LLVM.FFI.Attributes
 import LLVM.FFI.BasicBlock
 import LLVM.FFI.CPP
 import LLVM.FFI.CPP.String
@@ -82,6 +85,7 @@ import LLVM.FFI.SmallVector
 import LLVM.FFI.StringRef
 import LLVM.FFI.Target
 import LLVM.FFI.TargetMachine
+import LLVM.FFI.Targets
 import LLVM.FFI.Transforms.IPO
 import LLVM.FFI.Transforms.Scalar
 import LLVM.FFI.Transforms.Misc
