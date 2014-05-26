@@ -33,11 +33,13 @@ import Foreign.Ptr
 import Foreign.Marshal.Alloc
 import Data.List (genericLength)
 
-foreign import ccall unsafe "sizeof_GenericValue"
-  sizeof_GenericValue :: CSize
+import System.IO.Unsafe
 
-foreign import ccall unsafe "alignof_GenericValue"
-  alignof_GenericValue :: CSize
+foreign import ccall "&sizeof_GenericValue"
+  sizeof_GenericValue :: Ptr CSize
+
+foreign import ccall "&alignof_GenericValue"
+  alignof_GenericValue :: Ptr CSize
 
 foreign import capi "extra.h genericValueSetIntPair"
   genericValueSetIntPair :: Ptr GenericValue -> CUInt -> CUInt -> IO ()
@@ -46,8 +48,8 @@ foreign import capi "extra.h genericValueGetIntPair"
   genericValueGetIntPair :: Ptr GenericValue -> Ptr CUInt -> Ptr CUInt -> IO ()
 
 instance Storable GenericValue where
-  sizeOf _ = fromIntegral sizeof_GenericValue
-  alignment _ = fromIntegral alignof_GenericValue
+  sizeOf _ = fromIntegral (unsafePerformIO $ peek sizeof_GenericValue)
+  alignment _ = fromIntegral (unsafePerformIO $ peek alignof_GenericValue)
   poke addr (GDouble d) = genericValueSetDouble addr d
   poke addr (GFloat f) = genericValueSetFloat addr f
   poke addr (GPointer p) = genericValueSetPointer addr p
