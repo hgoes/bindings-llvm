@@ -3229,7 +3229,7 @@ llvm version
                                    , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                          ,ClassName "EngineKind" []
                                                                          ] "Kind")]
-                                   },"engineBuilderSetKind")
+                                   },"engineBuilderSetKind_")
                        ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
                                    , ftName = "create"
                                    },"engineBuilderCreate")
@@ -3238,20 +3238,24 @@ llvm version
                                    , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                          ,ClassName "CodeGenOpt" []
                                                                          ] "Level")]
-                                   },"engineBuilderSetOptLevel")
+                                   },"engineBuilderSetOptLevel_")
                        ,(memberFun { ftIgnoreReturn = True
                                    , ftName = "setCodeModel"
                                    , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                          ,ClassName "CodeModel" []
                                                                          ] "Model")]
-                                   },"engineBuilderSetCodeModel")]++
+                                   },"engineBuilderSetCodeModel_")
+                       ,(memberFun { ftIgnoreReturn = True
+                                   , ftName = "setErrorStr"
+                                   , ftArgs = [(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)]
+                                   },"engineBuilderSetErrorStr")]++
             (if version>=llvm3_0
              then [(memberFun { ftIgnoreReturn = True
                               , ftName = "setRelocationModel"
                               , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" []
                                                                     ,ClassName "Reloc" []
                                                                     ] "Model")]
-                              },"engineBuilderSetRelocationModel")]
+                              },"engineBuilderSetRelocationModel_")]
              else [])
           }
     ,Spec { specHeader = "llvm/ExecutionEngine/ExecutionEngine.h"
