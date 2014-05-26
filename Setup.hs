@@ -32,8 +32,10 @@ adaptHooks hooks
             createDirectoryIfMissing True (buildDir lbi </> "wrapper")
             createDirectoryIfMissing True (buildDir lbi </> "LLVM" </> "FFI")
             version <- getLLVMVersion (configPrograms $ configFlags lbi)
+            modTime <- getModificationTime "LLVMSpec.hs"
             writeWrapper "HS_LLVM_PROXY" (llvm version)
               (buildDir lbi)
+              modTime
               proxy_h
               wrap_c
               iface_m

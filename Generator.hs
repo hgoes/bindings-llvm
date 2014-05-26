@@ -6,6 +6,8 @@ import Language.Haskell.Syntax
 import Language.Haskell.Pretty
 import Data.Char
 import System.FilePath
+import System.Directory
+import Data.Time.Clock
 import Data.Ord
 
 data Spec
@@ -269,13 +271,22 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
     toHSType isP (EnumType ns name)
       = HsTyCon $ UnQual $ HsIdent "CInt"
 
-writeWrapper :: String -> [Spec] -> String -> String -> String -> [String] -> IO ()
-writeWrapper inc_sym spec build_path header_f wrapper_f ffi_f = do
+writeWrapper :: String -> [Spec] -> String -> UTCTime -> String -> String -> [String] -> IO ()
+writeWrapper inc_sym spec build_path modTime header_f wrapper_f ffi_f = do
   let (hcont,wcont) = generateWrapper inc_sym spec
-  writeFile (build_path </> header_f) hcont
-  writeFile (build_path </> wrapper_f) wcont
-  writeFile (build_path </> joinPath ffi_f <.> "hs") 
-    (generateFFI ffi_f header_f spec)
+  modTimeHeader <- getModificationTime (build_path </> header_f)
+  if modTimeHeader < modTime
+    then writeFile (build_path </> header_f) hcont
+    else return ()
+  modTimeWrapper <- getModificationTime (build_path </> wrapper_f)
+  if modTimeWrapper < modTime
+    then writeFile (build_path </> wrapper_f) wcont
+    else return ()
+  modTimeFFI <- getModificationTime (build_path </> joinPath ffi_f <.> "hs")
+  if modTimeFFI < modTime
+    then writeFile (build_path </> joinPath ffi_f <.> "hs")
+         (generateFFI ffi_f header_f spec)
+    else return ()
 
 generateWrapper :: String -> [Spec] -> (String,String)
 generateWrapper inc_sym spec
