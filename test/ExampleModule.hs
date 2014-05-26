@@ -5,10 +5,11 @@ import Foreign.Ptr
 import Foreign.Marshal
 import Foreign.Storable
 
-createExampleModule :: Ptr LLVMContext -> IO (Ptr Module)
+createExampleModule :: Ptr LLVMContext -> IO (Ptr Module,Ptr Function)
 createExampleModule ctx = do
   name <- newStringRef "example-module"
-  fname <- newTwineString "add11"
+  --fname <- newTwineString "add11"
+  fname <- newStringRef "add11"
   blkName <- newTwineString "start"
   argName <- newTwineString "arg1"
   binName <- newTwineString "res"
@@ -22,21 +23,25 @@ createExampleModule ctx = do
   argArrRef <- newVector argArr (advancePtr argArr 1)
 #endif
   funTp <- newFunctionType i32 argArrRef False
-  fun <- createFunction funTp CommonLinkage fname mod
+  attrs <- newAttributeSet
+  --fun <- createFunction funTp CommonLinkage fname mod
+  fun' <- moduleGetOrInsertFunction mod fname funTp attrs
+  let Just fun = castDown fun'
   blk <- createBasicBlock ctx blkName fun nullPtr
   instrs <- getInstList blk
   ap11 <- newAPIntLimited 32 11 False
   c11 <- createConstantInt ctx ap11
   deleteAPInt ap11
-  arg1 <- createArgument i32 argName fun
+  argList <- functionGetArgumentList fun
+  [arg1] <- ipListToList argList
   add <- newBinaryOperator Add c11 arg1 binName
   ipListPushBack instrs (castUp add)
   ret <- newReturnInst ctx add
   ipListPushBack instrs (castUp ret)
-  return mod
+  return (mod,fun)
 
 testExampleModule :: IO ()
 testExampleModule
   = withContext $ \ctx -> do
-    mod <- createExampleModule ctx
+    (mod,_) <- createExampleModule ctx
     moduleDump mod

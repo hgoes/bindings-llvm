@@ -1,6 +1,10 @@
 module Main where
 
-import ExampleModule
+import LLVM.FFI
 
-main = do
-  testExampleModule
+import ExampleModule
+import ExampleExecution
+
+main = withContext $ \ctx -> do
+  (mod,fun) <- createExampleModule ctx
+  executeExampleFunction False mod fun 32 >>= print
