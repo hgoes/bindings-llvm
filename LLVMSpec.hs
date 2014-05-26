@@ -4255,7 +4255,10 @@ llvm version
                             [(Constructor [],"newAttrListPtr")
                             ,(memberFun { ftReturnType = normalT $ llvmType "AttrListPtr"
                                         , ftName = "addAttr"
-                                        , ftArgs = [(False,normalT unsigned)
+                                        , ftArgs = (if version>=llvm3_2
+                                                    then [(False,normalT $ ref $ llvmType "LLVMContext")]
+                                                    else [])++
+                                                   [(False,normalT unsigned)
                                                    ,(False,normalT $ llvmType "Attributes")]
                                         },"attrListPtrAddAttr")]
                }])++
