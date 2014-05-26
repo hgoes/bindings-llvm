@@ -271,22 +271,26 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
     toHSType isP (EnumType ns name)
       = HsTyCon $ UnQual $ HsIdent "CInt"
 
+whenOlder :: (FilePath -> IO ()) -> FilePath -> UTCTime -> IO ()
+whenOlder act fp modTime = do
+  exists <- doesFileExist fp
+  if exists
+    then (do
+             modTime' <- getModificationTime fp
+             if modTime' < modTime
+               then act fp
+               else return ())
+    else act fp
+
 writeWrapper :: String -> [Spec] -> String -> UTCTime -> String -> String -> [String] -> IO ()
 writeWrapper inc_sym spec build_path modTime header_f wrapper_f ffi_f = do
   let (hcont,wcont) = generateWrapper inc_sym spec
-  modTimeHeader <- getModificationTime (build_path </> header_f)
-  if modTimeHeader < modTime
-    then writeFile (build_path </> header_f) hcont
-    else return ()
-  modTimeWrapper <- getModificationTime (build_path </> wrapper_f)
-  if modTimeWrapper < modTime
-    then writeFile (build_path </> wrapper_f) wcont
-    else return ()
-  modTimeFFI <- getModificationTime (build_path </> joinPath ffi_f <.> "hs")
-  if modTimeFFI < modTime
-    then writeFile (build_path </> joinPath ffi_f <.> "hs")
-         (generateFFI ffi_f header_f spec)
-    else return ()
+  whenOlder (\path ->writeFile path hcont)
+    (build_path </> header_f) modTime
+  whenOlder (\path -> writeFile path wcont)
+    (build_path </> wrapper_f) modTime
+  whenOlder (\path -> writeFile path (generateFFI ffi_f header_f spec))
+    (build_path </> joinPath ffi_f <.> "hs") modTime
 
 generateWrapper :: String -> [Spec] -> (String,String)
 generateWrapper inc_sym spec
