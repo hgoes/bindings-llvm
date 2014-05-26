@@ -1088,6 +1088,12 @@ llvm version
                                       , ftName = "getFunction"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")]
                                       },"moduleGetFunction")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                      , ftName = "getOrInsertFunction"
+                                      , ftArgs = [(False,normalT $ llvmType "StringRef")
+                                                 ,(False,normalT $ ptr $ llvmType "FunctionType")
+                                                 ,(False,normalT $ llvmType "AttributeSet")]
+                                      },"moduleGetOrInsertFunction")
                           ]
              }
        ,Spec { specHeader = if version>=llvm3_3

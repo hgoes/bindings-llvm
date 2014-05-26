@@ -9,6 +9,7 @@ module LLVM.FFI.Module
         -- ** Function Accessors
        ,moduleGetFunction
        ,moduleGetFunctionString
+       ,moduleGetOrInsertFunction
         -- ** Utility functions for printing and dumping Module objects
        ,moduleDump
         -- * Generic Value Accessors
