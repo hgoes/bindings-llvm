@@ -107,3 +107,9 @@ targets = mp3
 #define LLVM_DISASSEMBLER(name) {- -},(#name,initialize##name##Disassembler)
 #include <llvm/Config/Disassemblers.def>
                   ])
+
+foreign import capi "LLVMLinkInInterpreter"
+  linkInInterpreter :: IO ()
+
+foreign import capi "LLVMLinkInJIT"
+  linkInJIT :: IO ()
