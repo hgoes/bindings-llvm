@@ -23,7 +23,11 @@ createExampleModule ctx = do
   argArrRef <- newVector argArr (advancePtr argArr 1)
 #endif
   funTp <- newFunctionType i32 argArrRef False
+#if HS_LLVM_VERSION>=303
   attrs <- newAttributeSet
+#else
+  attrs <- newAttrListPtr
+#endif
   --fun <- createFunction funTp CommonLinkage fname mod
   fun' <- moduleGetOrInsertFunction mod fname funTp attrs
   let Just fun = castDown fun'

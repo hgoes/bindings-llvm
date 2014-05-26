@@ -1092,7 +1092,9 @@ llvm version
                                       , ftName = "getOrInsertFunction"
                                       , ftArgs = [(False,normalT $ llvmType "StringRef")
                                                  ,(False,normalT $ ptr $ llvmType "FunctionType")
-                                                 ,(False,normalT $ llvmType "AttributeSet")]
+                                                 ,if version>=llvm3_3
+                                                  then (False,normalT $ llvmType "AttributeSet")
+                                                  else (False,normalT $ llvmType "AttrListPtr")]
                                       },"moduleGetOrInsertFunction")
                           ]
              }
@@ -4243,6 +4245,20 @@ llvm version
                                              , ftStatic = True
                                              },"attributesGet")])
               }]++
+   (if version>=llvm3_3
+    then []
+    else [Spec { specHeader = irInclude version "Attributes.h"
+               , specNS = llvmNS
+               , specName = "AttrListPtr"
+               , specTemplateArgs = []
+               , specType = classSpec $
+                            [(Constructor [],"newAttrListPtr")
+                            ,(memberFun { ftReturnType = normalT $ llvmType "AttrListPtr"
+                                        , ftName = "addAttr"
+                                        , ftArgs = [(False,normalT unsigned)
+                                                   ,(False,normalT $ llvmType "Attributes")]
+                                        },"attrListPtrAddAttr")]
+               }])++
    (if version>=llvm3_2
     then [Spec { specHeader = irInclude version "Attributes.h"
                , specNS = llvmNS

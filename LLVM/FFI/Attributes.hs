@@ -8,6 +8,9 @@ module LLVM.FFI.Attributes
 #else
        (Attributes()
        ,newAttributes
+       ,AttrListPtr()
+       ,newAttrListPtr
+       ,attrListPtrAddAttr
 #if HS_LLVM_VERSION==301
        ,newAttributesFromAttr
        ,attributesUnion

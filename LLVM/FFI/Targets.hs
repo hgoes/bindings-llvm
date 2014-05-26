@@ -27,11 +27,13 @@ data TargetInitialization
 
 #include <llvm/Config/Targets.def>
 
+#if HS_LLVM_VERSION>=300
 #define LLVM_TARGET(name)\
   foreign import ccall "LLVMInitialize##name##TargetMC"\
     initialize##name##TargetMC :: IO () ;
 
 #include <llvm/Config/Targets.def>
+#endif
 
 #define LLVM_ASM_PRINTER(name)\
   foreign import ccall "LLVMInitialize##name##AsmPrinter"\
@@ -56,7 +58,11 @@ nativeTarget :: Maybe TargetInitialization
 #define _INIT(arch,name) initialize##arch##name
 nativeTarget = Just $ TargetInitialization { initializeTargetInfo = _INIT(LLVM_NATIVE_ARCH,TargetInfo)
                                            , initializeTarget = _INIT(LLVM_NATIVE_ARCH,Target)
+#if HS_LLVM_VERSION>=300
                                            , initializeTargetMC = _INIT(LLVM_NATIVE_ARCH,TargetMC)
+#else
+                                           , initializeTargetMC = return ()
+#endif
 #ifdef LLVM_NATIVE_ASMPRINTER
                                            , initializeAsmPrinter = Just _INIT(LLVM_NATIVE_ARCH,AsmPrinter)
 #else
@@ -81,12 +87,21 @@ targets :: Map String TargetInitialization
 targets = mp3
   where
     mp0 = Map.fromList (tail [undefined
+#if HS_LLVM_VERSION>=300
 #define LLVM_TARGET(name) {- -},(#name,TargetInitialization { initializeTargetInfo = initialize##name##TargetInfo\
 {-                                                        -}, initializeTarget = initialize##name##Target\
 {-                                                        -}, initializeTargetMC = initialize##name##TargetMC\
 {-                                                        -}, initializeAsmPrinter = Nothing\
 {-                                                        -}, initializeAsmParser = Nothing\
 {-                                                        -}, initializeDisassembler = Nothing })
+#else
+#define LLVM_TARGET(name) {- -},(#name,TargetInitialization { initializeTargetInfo = initialize##name##TargetInfo\
+{-                                                        -}, initializeTarget = initialize##name##Target\
+{-                                                        -}, initializeTargetMC = return ()\
+{-                                                        -}, initializeAsmPrinter = Nothing\
+{-                                                        -}, initializeAsmParser = Nothing\
+{-                                                        -}, initializeDisassembler = Nothing })
+#endif
 #include <llvm/Config/Targets.def>
                              ])
     mp1 = foldl (\mp (name,fun) -> Map.adjust (\ti -> ti { initializeAsmPrinter = Just fun }
