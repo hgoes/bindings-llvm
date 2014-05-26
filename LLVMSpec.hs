@@ -3172,6 +3172,17 @@ llvm version
                         , ftArgs = [(False,constT $ ptr $ llvmType "GlobalVariable")]
                         , ftOverloaded = True
                         },"executionEngineGetOrEmitGlobalVariable_")
+            ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
+                        , ftName = "create"
+                        , ftArgs = [(False,normalT $ ptr $ llvmType "Module")
+                                   ,(False,normalT bool)
+                                   ,(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)
+                                   ,(False,normalT $ EnumType [ClassName "llvm" []
+                                                              ,ClassName "CodeGenOpt" []
+                                                              ] "Level")
+                                   ,(False,normalT bool)]
+                        , ftStatic = True
+                        },"newExecutionEngine_")
             ]
           }
     ,Spec { specHeader = if version>=llvm3_0

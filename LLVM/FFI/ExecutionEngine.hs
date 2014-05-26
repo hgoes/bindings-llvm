@@ -2,6 +2,7 @@ module LLVM.FFI.ExecutionEngine
        (ExecutionEngine()
        ,ExecutionEngineC()
        ,deleteExecutionEngine
+       ,newExecutionEngine
        ,executionEngineAddModule
        ,executionEngineRemoveModule
 #if HS_LLVM_VERSION >= 302
@@ -36,6 +37,7 @@ module LLVM.FFI.ExecutionEngine
 import LLVM.FFI.Interface
 import LLVM.FFI.Constant
 import LLVM.FFI.Type
+import LLVM.FFI.CPP.String
 import Foreign.Ptr
 import Foreign.C
 import Data.Word
@@ -43,6 +45,9 @@ import Data.Word
 class ExecutionEngineC t
 
 instance ExecutionEngineC ExecutionEngine
+
+newExecutionEngine :: Ptr Module -> Bool -> Ptr CPPString -> CodeGenOptLevel -> Bool -> IO (Ptr ExecutionEngine)
+newExecutionEngine mod forceInterp errs lvl arg = newExecutionEngine_ mod forceInterp errs (fromCodeGenOptLevel lvl) arg
 
 deleteExecutionEngine :: ExecutionEngineC t => Ptr t -> IO ()
 deleteExecutionEngine = deleteExecutionEngine_
