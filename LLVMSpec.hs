@@ -50,7 +50,7 @@ llvm version
           , specNS = llvmNS
           , specName = "StringRef"
           , specTemplateArgs = []
-          , specType = classSpec
+          , specType = classSpecCustom "data StringRef = StringRef String deriving (Typeable,Show,Eq,Ord)"
                        [(Constructor { ftConArgs = [] },"newStringRefEmpty")
                        ,(Constructor { ftConArgs = [(False,constT cstring)] },"newStringRef_")
                        ,(Destructor False,"deleteStringRef")

@@ -42,4 +42,10 @@ extern void move_APIntSimple(void* trg,unsigned bw,uint64_t val);
 
 extern void genericValueSetIntPair(void* val,unsigned i1,unsigned i2);
 extern void genericValueGetIntPair(void* val,unsigned* i1,unsigned* i2);
+
+extern size_t sizeof_StringRef;
+extern size_t alignof_StringRef;
+
+void move_StringRef(void* trg,const char* str);
+
 #endif

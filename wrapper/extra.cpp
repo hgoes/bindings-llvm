@@ -120,4 +120,11 @@ extern "C" {
     *i2 = res->UIntPairVal.second;
   }
 
+  size_t sizeof_StringRef = sizeof(llvm::StringRef);
+  size_t alignof_StringRef = __alignof__(llvm::StringRef);
+
+  void move_StringRef(void* trg,const char* str) {
+    *((llvm::StringRef*)trg) = llvm::StringRef(str);
+  }
+
 }
