@@ -34,7 +34,12 @@ module LLVM.FFI.Instruction
          AtomicCmpXchgInst(),
          newAtomicCmpXchgInst,
          atomicCmpXchgInstIsVolatile,
+#if HS_LLVM_VERSION<305
          atomicCmpXchgInstGetOrdering,
+#else
+         atomicCmpXchgInstGetSuccessOrdering,
+         atomicCmpXchgInstGetFailureOrdering,
+#endif
          atomicCmpXchgInstGetPointerOperand,
          atomicCmpXchgInstGetCompareOperand,
          atomicCmpXchgInstGetNewValOperand,
@@ -424,12 +429,24 @@ newAtomicRMWInst op ptr val ord sync
   = newAtomicRMWInst_ (fromRMWBinOp op) ptr val
     (fromAtomicOrdering ord) (fromSynchronizationScope sync)
 
+#if HS_LLVM_VERSION<305
 newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
                         => Ptr ptr -> Ptr cmp -> Ptr newVal
                         -> AtomicOrdering -> SynchronizationScope
                         -> IO (Ptr AtomicCmpXchgInst)
 newAtomicCmpXchgInst ptr cmp newVal ord sync
   = newAtomicCmpXchgInst_ ptr cmp newVal (fromAtomicOrdering ord) (fromSynchronizationScope sync)
+#else
+newAtomicCmpXchgInst :: (ValueC ptr,ValueC cmp,ValueC newVal)
+                        => Ptr ptr -> Ptr cmp -> Ptr newVal
+                        -> AtomicOrdering -> AtomicOrdering -> SynchronizationScope
+                        -> IO (Ptr AtomicCmpXchgInst)
+newAtomicCmpXchgInst ptr cmp newVal ordSucc ordFail sync
+  = newAtomicCmpXchgInst_ ptr cmp newVal
+    (fromAtomicOrdering ordSucc)
+    (fromAtomicOrdering ordFail)
+    (fromSynchronizationScope sync)
+#endif
 #endif
 
 #if HS_LLVM_VERSION >= 302
@@ -461,8 +478,16 @@ atomicRMWInstGetOperation = fmap toRMWBinOp . atomicRMWInstGetOperation_
 atomicRMWInstGetOrdering :: Ptr AtomicRMWInst -> IO AtomicOrdering
 atomicRMWInstGetOrdering = fmap toAtomicOrdering . atomicRMWInstGetOrdering_
 
+#if HS_LLVM_VERSION < 305
 atomicCmpXchgInstGetOrdering :: Ptr AtomicCmpXchgInst -> IO AtomicOrdering
 atomicCmpXchgInstGetOrdering = fmap toAtomicOrdering . atomicCmpXchgInstGetOrdering_
+#else
+atomicCmpXchgInstGetSuccessOrdering :: Ptr AtomicCmpXchgInst -> IO AtomicOrdering
+atomicCmpXchgInstGetSuccessOrdering = fmap toAtomicOrdering . atomicCmpXchgInstGetSuccessOrdering_
+
+atomicCmpXchgInstGetFailureOrdering :: Ptr AtomicCmpXchgInst -> IO AtomicOrdering
+atomicCmpXchgInstGetFailureOrdering = fmap toAtomicOrdering . atomicCmpXchgInstGetFailureOrdering_
+#endif
 
 fenceInstGetOrdering :: Ptr FenceInst -> IO AtomicOrdering
 fenceInstGetOrdering = fmap toAtomicOrdering . fenceInstGetOrdering_

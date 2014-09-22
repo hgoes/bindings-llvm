@@ -15,6 +15,7 @@
 #include <llvm/Target/TargetData.h>
 #endif
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/FileSystem.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #if HS_LLVM_VERSION >= 209
 #include <llvm/Target/TargetLibraryInfo.h>
@@ -24,6 +25,9 @@
 #include <llvm/Analysis/FindUsedTypes.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ADT/APInt.h>
+#if HS_LLVM_VERSION>=305
+#include <llvm/IR/Dominators.h>
+#endif
 
 #include <string>
 
@@ -33,19 +37,27 @@ extern "C" {
 #if HS_LLVM_VERSION >= 209
   char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }
 #endif
-#if HS_LLVM_VERSION >= 302
+#if HS_LLVM_VERSION < 302
+  char* passId_TargetData() { return &llvm::TargetData::ID; }
+#elif HS_LLVM_VERSION < 305
   char* passId_DataLayout() { return &llvm::DataLayout::ID; }
 #else
-  char* passId_TargetData() { return &llvm::TargetData::ID; }
+  char* passId_DataLayoutPass() { return &llvm::DataLayoutPass::ID; }
 #endif
+#if HS_LLVM_VERSION < 305
   char* passId_DominatorTree() { return &llvm::DominatorTree::ID; }
+#else
+  char* passId_DominatorTreeWrapperPass() { return &llvm::DominatorTreeWrapperPass::ID; }
+#endif
 
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;
 #if HS_LLVM_VERSION <= 303
     llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::raw_fd_ostream::F_Binary);
-#else
+#elif HS_LLVM_VERSION < 305
     llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::sys::fs::F_None);
+#else
+    llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::sys::fs::OpenFlags::F_None);
 #endif
     if (!ErrorInfo.empty())
       return -1;

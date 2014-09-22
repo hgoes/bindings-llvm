@@ -11,7 +11,7 @@ library
     wrapper/extra.h
     wrapper/HaskellPass.h
   include-dirs:         wrapper .
-  extra-libraries:      stdc++
+  extra-libraries:      stdc++,tinfo
   c-sources:
     wrapper/extra.cpp
     wrapper/HaskellPass.cpp
@@ -74,6 +74,7 @@ library
     LLVM.FFI.CPP.String
     LLVM.FFI.Triple
     LLVM.FFI.Attributes
+    LLVM.FFI.CPP.UniquePtr
   other-modules:
     LLVM.FFI.Interface
 

@@ -141,4 +141,20 @@ instance OwningPtrC name where {\
   deleteOwningPtr = deleteOwningPtr##name ;\
   takeOwningPtr = takeOwningPtr##name\
 }
+
+#define SPECIALIZE_UNIQUEPTR(name,cconv)\
+instance UniquePtrC name where {\
+  newUniquePtr = newUniquePtr##name ;\
+  deleteUniquePtr = deleteUniquePtr##name ;\
+  getUniquePtr = getUniquePtr##name ;\
+  releaseUniquePtr = releaseUniquePtr##name\
+}
+
+#define SPECIALIZE_ERROROR(name,cls,cconv)\
+instance ErrorOrC (cls) where {\
+  errorOrIsError = errorOrIsError##name ;\
+  errorOrGetError = errorOrGetError##name ;\
+  errorOrGet = errorOrGet##name\
+}
+
 #define PRESERVE(x) x

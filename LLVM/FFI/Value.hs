@@ -18,9 +18,17 @@ module LLVM.FFI.Value
         getNameString,
         valueUseBegin,
         valueUseEnd,
+#if HS_LLVM_VERSION<305
         Value_use_iterator(),
-        ValueUseIteratorC(..))
-        where
+        ValueUseIteratorC(..)
+#else
+        Use_iterator(),
+        valueUseIteratorDeref,
+        valueUseIteratorEq,
+        valueUseIteratorNEq,
+        valueUseIteratorNext
+#endif
+       ) where
 
 import LLVM.FFI.Interface
 import LLVM.FFI.Type
@@ -48,9 +56,14 @@ SPECIALIZE_IPLIST(Argument,capi)
 TYPE_LEAF(InlineAsm)
 SUBTYPE(Value,InlineAsm)
 TYPE(PseudoSourceValue)
+#if HS_LLVM_VERSION<305
 SUBTYPE(Value,PseudoSourceValue)
 TYPE_LEAF(FixedStackPseudoSourceValue)
 SUBTYPE2(Value,PseudoSourceValue,FixedStackPseudoSourceValue)
+#else
+SUBTYPE(PseudoSourceValue,FixedStackPseudoSourceValue)
+TYPE_LEAF(FixedStackPseudoSourceValue)
+#endif
 
 class GetType value where
   type TypeOfValue value
@@ -59,8 +72,10 @@ class GetType value where
 GETTYPE(Value)
 GETTYPE(Argument)
 GETTYPE(InlineAsm)
+#if HS_LLVM_VERSION<305
 GETTYPE(PseudoSourceValue)
 GETTYPE(FixedStackPseudoSourceValue)
+#endif
 
 deleteValue :: ValueC t => Ptr t -> IO ()
 deleteValue = deleteValue_
@@ -84,10 +99,18 @@ getNameString ptr = do
   deleteStringRef str
   return res
 
+#if HS_LLVM_VERSION<305
 valueUseBegin :: ValueC t => Ptr t -> IO (Ptr (Value_use_iterator User))
+#else
+valueUseBegin :: ValueC t => Ptr t -> IO (Ptr Use_iterator)
+#endif
 valueUseBegin = valueUseBegin_
 
+#if HS_LLVM_VERSION<305
 valueUseEnd :: ValueC t => Ptr t -> IO (Ptr (Value_use_iterator User))
+#else
+valueUseEnd :: ValueC t => Ptr t -> IO (Ptr Use_iterator)
+#endif
 valueUseEnd = valueUseEnd_
 
 foreign import capi "wrapper/extra.h value_to_string"
@@ -111,11 +134,11 @@ instance SmallVectorC (Pair CUInt (Ptr MDNode)) where
   smallVectorSize = smallVectorSizeMDNodePair
   smallVectorData = smallVectorDataMDNodePair
 
+#if HS_LLVM_VERSION<305
 class ValueUseIteratorC t where
   valueUseIteratorDeref :: Ptr (Value_use_iterator t) -> IO (Ptr t)
   valueUseIteratorEq :: Ptr (Value_use_iterator t) -> Ptr (Value_use_iterator t) -> IO Bool
   valueUseIteratorNEq :: Ptr (Value_use_iterator t) -> Ptr (Value_use_iterator t) -> IO Bool
-  valueUseIteratorAtEnd :: Ptr (Value_use_iterator t) -> IO Bool
   valueUseIteratorNext :: Ptr (Value_use_iterator t) -> IO (Ptr (Value_use_iterator t))
   valueUseIteratorGetUse :: Ptr (Value_use_iterator t) -> IO (Ptr Use)
   valueUseIteratorGetOperandNo :: Ptr (Value_use_iterator t) -> IO CUInt
@@ -124,7 +147,22 @@ instance ValueUseIteratorC User where
   valueUseIteratorDeref = valueUseIteratorUserDeref
   valueUseIteratorEq = valueUseIteratorUserEq
   valueUseIteratorNEq = valueUseIteratorUserNEq
-  valueUseIteratorAtEnd = valueUseIteratorUserAtEnd
   valueUseIteratorNext = valueUseIteratorUserNext
   valueUseIteratorGetUse = valueUseIteratorUserGetUse
   valueUseIteratorGetOperandNo = valueUseIteratorUserGetOperandNo
+#else
+
+valueUseIteratorDeref :: Ptr Use_iterator -> IO (Ptr User)
+valueUseIteratorDeref = valueUseIteratorUserDeref
+
+valueUseIteratorEq :: Ptr Use_iterator -> Ptr Use_iterator -> IO Bool
+valueUseIteratorEq = valueUseIteratorUserEq
+
+valueUseIteratorNEq :: Ptr Use_iterator -> Ptr Use_iterator -> IO Bool
+valueUseIteratorNEq = valueUseIteratorUserNEq
+
+valueUseIteratorNext :: Ptr Use_iterator -> IO (Ptr Use_iterator)
+valueUseIteratorNext = valueUseIteratorUserNext
+
+#endif
+

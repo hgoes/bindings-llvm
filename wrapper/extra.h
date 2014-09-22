@@ -9,12 +9,18 @@ extern char* passId_FindUsedTypes();
 #if HS_LLVM_VERSION >= 209
 extern char* passId_TargetLibraryInfo();
 #endif
-#if HS_LLVM_VERSION >= 302
+#if HS_LLVM_VERSION < 302
+extern char* passId_TargetData();
+#elif HS_LLVM_VERSION < 305
 extern char* passId_DataLayout();
 #else
-extern char* passId_TargetData();
+extern char* passId_DataLayoutPass();
 #endif
+#if HS_LLVM_VERSION < 305
 extern char* passId_DominatorTree();
+#else
+extern char* passId_DominatorTreeWrapperPass();
+#endif
 
 extern int writeBitCodeToFile(void* m,const char* path);
 

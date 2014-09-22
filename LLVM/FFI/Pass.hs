@@ -47,6 +47,10 @@ module LLVM.FFI.Pass
 #endif
 #if HS_LLVM_VERSION >= 302
        ,DataLayout()
+#if HS_LLVM_VERSION >= 305
+       ,DataLayoutPass()
+       ,dataLayoutPassGetDataLayout
+#endif
        ,newDataLayoutFromString
        ,newDataLayoutFromModule
        ,dataLayoutIsLittleEndian
@@ -62,7 +66,9 @@ module LLVM.FFI.Pass
        ,dataLayoutTypeAllocSize
        ,dataLayoutABITypeAlignment
        ,dataLayoutABIIntegerTypeAlignment
+#if HS_LLVM_VERSION<305
        ,dataLayoutCallFrameTypeAlignment
+#endif
        ,dataLayoutPrefTypeAlignment
        ,dataLayoutIntPtrType
        ,dataLayoutIntPtrTypeForType
@@ -113,6 +119,10 @@ module LLVM.FFI.Pass
        ,dominatorTreeDominates
        ,dominatorTreeFindNearestCommonDominator
        ,dominatorTreeGetNode
+#if HS_LLVM_VERSION>=305
+       ,DominatorTreeWrapperPass()
+       ,dominatorTreeWrapperPassGetDomTree
+#endif
        ) where
 
 import LLVM.FFI.Interface
@@ -178,7 +188,15 @@ class FunctionPassC t
 instance FunctionPassC FunctionPass
 instance FunctionPassC LoopInfo
 
-#if HS_LLVM_VERSION >= 302
+#if HS_LLVM_VERSION < 302
+instance PassC TargetData
+instance ModulePassC TargetData
+instance ImmutablePassC TargetData
+instance PassId TargetData where
+  passId _ = passId_TargetData
+foreign import capi _TO_STRING(extra.h passId_TargetData)
+  passId_TargetData :: Ptr CChar
+#elif HS_LLVM_VERSION < 305
 instance PassC DataLayout
 instance ModulePassC DataLayout
 instance ImmutablePassC DataLayout
@@ -187,13 +205,13 @@ instance PassId DataLayout where
 foreign import capi _TO_STRING(extra.h passId_DataLayout)
   passId_DataLayout :: Ptr CChar
 #else
-instance PassC TargetData
-instance ModulePassC TargetData
-instance ImmutablePassC TargetData
-instance PassId TargetData where
-  passId _ = passId_TargetData
-foreign import capi _TO_STRING(extra.h passId_TargetData)
-  passId_TargetData :: Ptr CChar
+instance PassC DataLayoutPass
+instance ModulePassC DataLayoutPass
+instance ImmutablePassC DataLayoutPass
+instance PassId DataLayoutPass where
+  passId _ = passId_DataLayoutPass
+foreign import capi _TO_STRING(extra.h passId_DataLayoutPass)
+  passId_DataLayoutPass :: Ptr CChar
 #endif
 
 deletePass :: PassC t => Ptr t -> IO ()
@@ -260,6 +278,7 @@ foreign import capi _TO_STRING(extra.h passId_LoopInfo)
 foreign import capi _TO_STRING(extra.h passId_FindUsedTypes)
   passId_FindUsedTypes :: Ptr CChar
 
+#if HS_LLVM_VERSION<305
 foreign import capi _TO_STRING(extra.h passId_DominatorTree)
   passId_DominatorTree :: Ptr CChar
 
@@ -267,6 +286,15 @@ instance PassC DominatorTree
 instance FunctionPassC DominatorTree
 instance PassId DominatorTree where
   passId _ = passId_DominatorTree
+#else
+foreign import capi _TO_STRING(extra.h passId_DominatorTreeWrapperPass)
+  passId_DominatorTreeWrapperPass :: Ptr CChar
+
+instance PassC DominatorTreeWrapperPass
+instance FunctionPassC DominatorTreeWrapperPass
+instance PassId DominatorTreeWrapperPass where
+  passId _ = passId_DominatorTreeWrapperPass
+#endif
 
 class DomTreeNodeBaseC tp where
   domTreeNodeBaseGetBlock :: Ptr (DomTreeNodeBase tp) -> IO (Ptr tp)
@@ -304,8 +332,10 @@ dataLayoutTypeAllocSize = dataLayoutTypeAllocSize_
 dataLayoutABITypeAlignment :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO CUInt
 dataLayoutABITypeAlignment = dataLayoutABITypeAlignment_
 
+#if HS_LLVM_VERSION<305
 dataLayoutCallFrameTypeAlignment :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO CUInt
 dataLayoutCallFrameTypeAlignment = dataLayoutCallFrameTypeAlignment_
+#endif
 
 dataLayoutPrefTypeAlignment :: TypeC tp => Ptr DataLayout -> Ptr tp -> IO CUInt
 dataLayoutPrefTypeAlignment = dataLayoutPrefTypeAlignment_
