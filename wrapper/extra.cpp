@@ -15,7 +15,9 @@
 #include <llvm/Target/TargetData.h>
 #endif
 #include <llvm/Support/raw_ostream.h>
+#if HS_LLVM_VERSION >= 209
 #include <llvm/Support/FileSystem.h>
+#endif
 #include <llvm/Bitcode/ReaderWriter.h>
 #if HS_LLVM_VERSION >= 209
 #include <llvm/Target/TargetLibraryInfo.h>
