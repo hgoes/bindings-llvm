@@ -288,10 +288,12 @@ llvm version
                                    },"smallVectorData"++tp)]
           }
      | (tp,rtp) <- [("Loop",normalT $ ptr $ llvmType "Loop")
-                  ,("Edge",normalT $ NamedType [ClassName "std" []] "pair" [normalT $ ptr $ llvmType "BasicBlock"
-                                                                           ,normalT $ ptr $ llvmType "BasicBlock"] False)
-                  ,("MDNodePair",normalT $ NamedType [ClassName "std" []] "pair" [normalT unsigned
-                                                                                 ,normalT $ ptr $ llvmType "MDNode"] False)]
+                   ,("Edge",normalT $ NamedType [ClassName "std" []] "pair" [normalT $ ptr $ llvmType "BasicBlock"
+                                                                            ,normalT $ ptr $ llvmType "BasicBlock"] False)
+                   ,("MDNodePair",normalT $ NamedType [ClassName "std" []] "pair" [normalT unsigned
+                                                                                  ,normalT $ ptr $ llvmType "MDNode"] False)
+                   ,("StringRef",normalT $ llvmType "StringRef")
+                   ]
     ]++
     [Spec { specHeader = "utility"
           , specNS = [ClassName "std" []]

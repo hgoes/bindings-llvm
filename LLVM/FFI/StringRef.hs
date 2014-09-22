@@ -8,6 +8,7 @@ module LLVM.FFI.StringRef
        ,withStringRef) where
 
 import LLVM.FFI.Interface
+import LLVM.FFI.SmallVector
 
 import Foreign
 import Foreign.C
@@ -46,3 +47,9 @@ instance Storable StringRef where
   poke ptr (StringRef str)
     = withCString str $
       \cstr -> stringRefMove ptr cstr
+
+instance SmallVectorC StringRef where
+  newSmallVector = newSmallVectorStringRef
+  deleteSmallVector = deleteSmallVectorStringRef
+  smallVectorSize = smallVectorSizeStringRef
+  smallVectorData = smallVectorDataStringRef
