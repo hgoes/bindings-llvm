@@ -3,6 +3,8 @@ module LLVM.FFI.Context
        ,newLLVMContext
        ,deleteLLVMContext
        ,getGlobalContext
+       ,llvmContextGetMDKindID
+       ,llvmContextGetMDKindNames
        ,withContext)
        where
 

@@ -1086,7 +1086,18 @@ llvm version
              , specName = "LLVMContext"
              , specTemplateArgs = []
              , specType = classSpec [(Constructor [],"newLLVMContext")
-                                    ,(Destructor False,"deleteLLVMContext")]
+                                    ,(Destructor False,"deleteLLVMContext")
+                                    ,(memberFun { ftName = "getMDKindNames"
+                                                , ftArgs = [(False,normalT $ NamedType llvmNS 
+                                                                   "SmallVector"
+                                                                   [normalT $ llvmType "StringRef"
+                                                                   ,TypeInt 16]
+                                                                   False)]
+                                                },"llvmContextGetMDKindNames")
+                                    ,(memberFun { ftReturnType = normalT unsigned
+                                                , ftName = "getMDKindID"
+                                                , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                                },"llvmContextGetMDKindID")]
              }
        ,Spec { specHeader = irInclude version "LLVMContext.h"
              , specNS = llvmNS
