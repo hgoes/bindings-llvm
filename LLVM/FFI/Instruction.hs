@@ -196,6 +196,7 @@ module LLVM.FFI.Instruction
          newSwitchInst,
          switchInstGetCondition,
          switchInstGetDefaultDest,
+         switchInstGetCases,
 #if HS_LLVM_VERSION>=301
          CaseIt(),
          switchInstCaseBegin,
@@ -537,6 +538,33 @@ newReturnInst = newReturnInst_
 
 newSwitchInst :: ValueC cond => Ptr cond -> Ptr BasicBlock -> CUInt -> IO (Ptr SwitchInst)
 newSwitchInst = newSwitchInst_
+
+switchInstGetCases :: Ptr SwitchInst -> IO [(Ptr ConstantInt,Ptr BasicBlock)]
+#if HS_LLVM_VERSION>=301
+switchInstGetCases sw = do
+  begin <- switchInstCaseBegin sw
+  end <- switchInstCaseEnd sw
+  mkCases begin end
+  where
+    mkCases cur end = do
+      isEnd <- caseItEq cur end
+      if isEnd
+        then return []
+        else (do
+                 val <- caseItGetCaseValue cur
+                 suc <- caseItGetCaseSuccessor cur
+                 nxt <- caseItNext cur
+                 rest <- mkCases nxt end
+                 return ((val,suc):rest))
+#else
+switchInstGetCases sw = do
+  no <- switchInstGetNumCases sw
+  mapM (\i -> do
+           val <- switchInstGetCaseValue sw i
+           suc <- terminatorInstGetSuccessor sw i
+           return (val,suc)
+       ) [0..(no-1)]
+#endif
 
 getElementPtrInstGetNumIndices :: Ptr GetElementPtrInst -> IO Integer
 getElementPtrInstGetNumIndices ptr = fmap toInteger (getElementPtrInstGetNumIndices_ ptr)
