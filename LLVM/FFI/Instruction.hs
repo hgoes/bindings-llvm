@@ -561,7 +561,7 @@ switchInstGetCases sw = do
   no <- switchInstGetNumCases sw
   mapM (\i -> do
            val <- switchInstGetCaseValue sw i
-           suc <- terminatorInstGetSuccessor sw i
+           suc <- terminatorInstGetSuccessor sw (fromIntegral i)
            return (val,suc)
        ) [0..(no-1)]
 #endif
