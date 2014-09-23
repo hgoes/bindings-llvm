@@ -123,17 +123,6 @@ valueToString val = do
   free cstr
   return hstr
 
-instance PairC CUInt (Ptr MDNode) where
-  pairSize _ = sizeofPairUnsigned_MDNode
-  pairFirst = pairFirstUnsigned_MDNode
-  pairSecond = pairSecondUnsigned_MDNode
-
-instance SmallVectorC (Pair CUInt (Ptr MDNode)) where
-  newSmallVector = newSmallVectorMDNodePair
-  deleteSmallVector = deleteSmallVectorMDNodePair
-  smallVectorSize = smallVectorSizeMDNodePair
-  smallVectorData = smallVectorDataMDNodePair
-
 #if HS_LLVM_VERSION<305
 class ValueUseIteratorC t where
   valueUseIteratorDeref :: Ptr (Value_use_iterator t) -> IO (Ptr t)

@@ -4,7 +4,7 @@ module LLVM.FFI.CPP
        ,Const_iterator()
        ,vectorToList
        ,vectorIteratorToList
-       ,Pair()
+       ,Pair(..)
        ,PairC(..)
        ,pairToTuple
        ) where
@@ -47,6 +47,8 @@ class PairC a b where
   pairSize :: Pair a b -> CSize
   pairFirst :: Ptr (Pair a b) -> IO a
   pairSecond :: Ptr (Pair a b) -> IO b
+  pairSetFirst :: Ptr (Pair a b) -> a -> IO ()
+  pairSetSecond :: Ptr (Pair a b) -> b -> IO ()
 
 pairToTuple :: PairC a b => Ptr (Pair a b) -> IO (a,b)
 pairToTuple pair = do

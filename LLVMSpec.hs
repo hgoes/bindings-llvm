@@ -299,7 +299,7 @@ llvm version
           , specNS = [ClassName "std" []]
           , specName = "pair"
           , specTemplateArgs = [rtp1,rtp2]
-          , specType = classSpec
+          , specType = classSpecCustom "data Pair a b = Pair a b deriving (Typeable,Show,Eq,Ord)"
                        [(Getter { ftGetType = rtp1
                                 , ftGetVar = "first"
                                 , ftGetStatic = False
@@ -308,7 +308,14 @@ llvm version
                                 , ftGetVar = "second"
                                 , ftGetStatic = False
                                 },"pairSecond"++tp1++"_"++tp2)
+                       ,(Setter { ftSetVar = "first"
+                                , ftSetType = rtp1
+                                },"pairSetFirst"++tp1++"_"++tp2)
+                       ,(Setter { ftSetVar = "second"
+                                , ftSetType = rtp2
+                                },"pairSetSecond"++tp1++"_"++tp2)
                        ,(SizeOf,"sizeofPair"++tp1++"_"++tp2)
+                       ,(AlignOf,"alignofPair"++tp1++"_"++tp2)
                        ]
           }
      | (tp1,rtp1,tp2,rtp2) <- [("BasicBlock",normalT $ ptr $ llvmType "BasicBlock","BasicBlock",normalT $ ptr $ llvmType "BasicBlock")

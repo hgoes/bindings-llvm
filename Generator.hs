@@ -85,6 +85,7 @@ data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                       , ftGetStatic :: Bool
                       }
              | SizeOf
+             | AlignOf
 
 type OutConverter = String -> ([String],String)
 type InConverter = String -> ([String],String)
@@ -350,6 +351,7 @@ generateWrapper inc_sym spec
                                                then []
                                                else [(self_ptr,"self")]
               SizeOf -> []
+              AlignOf -> []
             self_ptr = toPtr (specFullType cls)
             rt = case fun of
               Constructor _ -> normalT $ ptr void
@@ -362,6 +364,7 @@ generateWrapper inc_sym spec
                               then tp
                               else toPtr tp
               SizeOf -> normalT size_t
+              AlignOf -> normalT size_t
             body = case fun of
               Constructor _ -> \args' -> ([],"new "++specFullName cls++"("++argList args'++")")
               Destructor _ -> \[(_,n)] -> (["delete "++n++";"],"")
@@ -394,6 +397,7 @@ generateWrapper inc_sym spec
                      , ftSetType = tp
                      } -> \[(_,self),(_,val)] -> (["("++self++")->"++name++" = "++val++";"],"")
               SizeOf -> \[] -> ([],"sizeof("++specFullName cls++")")
+              AlignOf -> \[] -> ([],"__alignof__("++specFullName cls++")")
             ignore = case fun of
               MemberFun { ftIgnoreReturn = i } -> i
               _ -> False
@@ -520,6 +524,7 @@ generateFFI mname header specs
                                       toHaskellType True Nothing tp,
                                       cname)
                                 SizeOf -> ([],toHaskellType True Nothing (normalT size_t),cname)
+                                AlignOf -> ([],toHaskellType True Nothing (normalT size_t),cname)
                              ) funs
                    GlobalFunSpec { gfunReturnType = rtp
                                  , gfunArgs = args

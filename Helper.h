@@ -115,7 +115,15 @@ instance SmallVectorC (Ptr name) where {\
 instance PairC (Ptr name1) (Ptr name2) where {\
   pairSize _ = sizeofPair##name1##_##name2 ;\
   pairFirst = pairFirst##name1##_##name2 ;\
-  pairSecond = pairSecond##name1##_##name2\
+  pairSecond = pairSecond##name1##_##name2 ;\
+  pairSetFirst = pairSetFirst##name1##_##name2 ;\
+  pairSetSecond = pairSetSecond##name1##_##name2\
+} ;\
+instance Storable (Pair (Ptr name1) (Ptr name2)) where {\
+  sizeOf _ = fromIntegral $ sizeofPair##name1##_##name2 ;\
+  alignment _ = fromIntegral $ alignofPair##name1##_##name2 ;\
+  peek ptr = do { s1 <- pairFirst##name1##_##name2 ptr ; s2 <- pairSecond##name1##_##name2 ptr ; return (Pair s1 s2) } ;\
+  poke ptr (Pair s1 s2) = do { pairSetFirst##name1##_##name2 ptr s1 ; pairSetSecond##name1##_##name2 ptr s2 }\
 }
 
 #define FUN(cls,name,sig)\
