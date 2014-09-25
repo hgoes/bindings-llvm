@@ -563,7 +563,7 @@ switchInstGetCases sw = do
            val <- switchInstGetCaseValue sw i
            suc <- terminatorInstGetSuccessor sw (fromIntegral i)
            return (val,suc)
-       ) [0..(no-1)]
+       ) [0..(no-2)]
 #endif
 
 getElementPtrInstGetNumIndices :: Ptr GetElementPtrInst -> IO Integer
