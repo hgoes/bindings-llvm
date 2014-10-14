@@ -90,7 +90,6 @@ import LLVM.FFI.Targets
 import LLVM.FFI.Transforms.Analysis
 import LLVM.FFI.Transforms.IPO
 import LLVM.FFI.Transforms.Scalar
-import LLVM.FFI.Transforms.Misc
 import LLVM.FFI.Twine
 import LLVM.FFI.Type
 import LLVM.FFI.Use
