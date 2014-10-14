@@ -1,30 +1,66 @@
 module LLVM.FFI.Transforms.Scalar 
-       (createCFGSimplificationPass
-       ,createConstantPropagationPass
-       ,createDemoteRegisterToMemoryPass
-       ,createGVNPass
-       ,createInstructionCombiningPass
-       ,createPromoteMemoryToRegisterPass
-       ,createReassociatePass
-       ,createAggressiveDCEPass
-       ,createDeadStoreEliminationPass
-       ,createIndVarSimplifyPass
-       ,createJumpThreadingPass
-       ,createLICMPass
-       ,createLoopDeletionPass
-       ,createLoopRotatePass
-       ,createLoopSimplifyPass
-       ,createLoopStrengthReducePass
-       ,createLoopUnrollPass
-       ,createLoopUnswitchPass
-       ,createMemCpyOptPass
+       (createConstantPropagationPass
        ,createSCCPPass
+       ,createDeadInstEliminationPass
+       ,createDeadCodeEliminationPass
+       ,createDeadStoreEliminationPass
+       ,createAggressiveDCEPass
+       ,createSROAPass
        ,createScalarReplAggregatesPass
+       ,createIndVarSimplifyPass
+       ,createInstructionCombiningPass
+       ,createLICMPass
+       ,createLoopStrengthReducePass
+       ,createGlobalMergePass
+       ,createLoopUnswitchPass
+       ,createLoopInstSimplifyPass
+       ,createLoopUnrollPass
+#if HS_LLVM_VERSION>=305
+       ,createSimpleLoopUnrollPass
+#endif
+       ,createLoopRerollPass
+       ,createLoopRotatePass
+       ,createLoopIdiomPass
+       ,createPromoteMemoryToRegisterPass
+       ,createDemoteRegisterToMemoryPass
+       ,createReassociatePass
+       ,createJumpThreadingPass
+       ,createCFGSimplificationPass
+       ,createFlattenCFGPass
+       ,createStructurizeCFGPass
+       ,createBreakCriticalEdgesPass
+       ,createLoopSimplifyPass
+       ,createTailCallEliminationPass
+       ,createLowerSwitchPass
+       ,createLowerInvokePass
+       ,createLCSSAPass
+       ,createEarlyCSEPass
+#if HS_LLVM_VERSION>=305
+       ,createMergedLoadStoreMotionPass
+#endif
+       ,createGVNPass
+       ,createMemCpyOptPass
+       ,createLoopDeletionPass
+#if HS_LLVM_VERSION>=305
+       ,createConstantHoistingPass
+#endif
+       ,createInstructionNamerPass
+       ,createSinkingPass
+       ,createLowerAtomicPass
+       ,createCorrelatedValuePropagationPass
+       ,createInstructionSimplifierPass
+       ,createLowerExpectIntrinsicPass
+       ,createPartiallyInlineLibCallsPass
+       ,createSampleProfileLoaderPass
+#if HS_LLVM_VERSION>=305
+       ,createScalarizerPass
+       ,createAddDiscriminatorsPass
+       ,createSeparateConstOffsetFromGEPPass
+       ,createLoadCombinePass
+#endif
 #if HS_LLVM_VERSION<=302
        ,createSimplifyLibCallsPass
 #endif
-       ,createTailCallEliminationPass
-       ,createVerifierPass
        ) where
 
 import LLVM.FFI.Interface

@@ -38,6 +38,7 @@ module LLVM.FFI
        ,module LLVM.FFI.Target
        ,module LLVM.FFI.TargetMachine
        ,module LLVM.FFI.Targets
+       ,module LLVM.FFI.Transforms.Analysis
        ,module LLVM.FFI.Transforms.IPO
        ,module LLVM.FFI.Transforms.Scalar
        ,module LLVM.FFI.Transforms.Misc
@@ -86,6 +87,7 @@ import LLVM.FFI.StringRef
 import LLVM.FFI.Target
 import LLVM.FFI.TargetMachine
 import LLVM.FFI.Targets
+import LLVM.FFI.Transforms.Analysis
 import LLVM.FFI.Transforms.IPO
 import LLVM.FFI.Transforms.Scalar
 import LLVM.FFI.Transforms.Misc

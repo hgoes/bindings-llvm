@@ -163,6 +163,7 @@ void = NamedType [] "void" [] False
 size_t = NamedType [] "size_t" [] False
 bool = NamedType [] "bool" [] False
 unsigned = NamedType [] "unsigned" [] False
+signed = NamedType [] "signed" [] False
 int = NamedType [] "int" [] False
 uint64_t = NamedType [] "uint64_t" [] False
 uint8_t = NamedType [] "uint8_t" [] False
@@ -200,6 +201,7 @@ isCType (NamedType [] name [] _) = case name of
   "uint8_t" -> True
   "bool" -> True
   "unsigned" -> True
+  "signed" -> True
   "double" -> True
   "float" -> True
   _ -> False
@@ -249,6 +251,7 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
       "uint8_t" -> HsTyCon $ UnQual $ HsIdent "Word8"
       "bool" -> HsTyCon $ UnQual $ HsIdent "Bool"
       "unsigned" -> HsTyCon $ UnQual $ HsIdent "CUInt"
+      "signed" -> HsTyCon $ UnQual $ HsIdent "CInt"
       "double" -> HsTyCon $ UnQual $ HsIdent "CDouble"
       "float" -> HsTyCon $ UnQual $ HsIdent "CFloat"
       _ -> (if isP

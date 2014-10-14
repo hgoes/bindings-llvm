@@ -18,6 +18,7 @@ module LLVM.FFI.Pass
        ,modulePassRunOnModule
        ,ImmutablePass()
        ,ImmutablePassC()
+       ,BasicBlockPass()
        ,AnalysisUsage()
        ,newAnalysisUsage
        ,analysisUsageAddRequired
@@ -158,6 +159,7 @@ instance PassC Pass
 instance PassC FunctionPass
 instance PassC ModulePass
 instance PassC ImmutablePass
+instance PassC BasicBlockPass
 instance PassC FindUsedTypes
 instance PassId FindUsedTypes where
   passId _ = passId_FindUsedTypes

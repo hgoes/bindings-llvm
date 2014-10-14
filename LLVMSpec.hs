@@ -1195,10 +1195,6 @@ llvm version
                                                  ,(False,normalT (ref $ llvmType "LLVMContext"))]
                                       , ftStatic = True
                                       },"parseIR")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionPass"
-                                      , ftName = "createInstructionNamerPass"
-                                      , ftStatic = True
-                                      },"createInstructionNamerPass")
                           ]++
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isa"
@@ -2470,6 +2466,12 @@ llvm version
              , specTemplateArgs = []
              , specType = classSpec []
              }
+       ,Spec { specHeader = "llvm/Pass.h"
+             , specNS = llvmNS
+             , specName = "BasicBlockPass"
+             , specTemplateArgs = []
+             , specType = classSpec []
+             }
        ,Spec { specHeader = "llvm/Analysis/FindUsedTypes.h"
              , specNS = llvmNS
              , specName = "FindUsedTypes"
@@ -2799,35 +2801,81 @@ llvm version
              , specNS = llvmNS
              , specName = f
              , specTemplateArgs = []
-             , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Pass"
-                                        , gfunArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType p
+                                        , gfunArgs = fmap (\x -> (False,x)) a
                                         , gfunHSName = f
                                         }
-             } | f <- ["createCFGSimplificationPass"
-                     ,"createConstantPropagationPass"
-                     ,"createDemoteRegisterToMemoryPass"
-                     ,"createGVNPass"
-                     ,"createInstructionCombiningPass"
-                     ,"createPromoteMemoryToRegisterPass"
-                     ,"createReassociatePass"
-                     ,"createAggressiveDCEPass"
-                     ,"createDeadStoreEliminationPass"
-                     ,"createIndVarSimplifyPass"
-                     ,"createJumpThreadingPass"
-                     ,"createLICMPass"
-                     ,"createLoopDeletionPass"
-                     ,"createLoopRotatePass"
-                     ,"createLoopSimplifyPass"
-                     ,"createLoopStrengthReducePass"
-                     ,"createLoopUnrollPass"
-                     ,"createLoopUnswitchPass"
-                     ,"createMemCpyOptPass"
-                     ,"createSCCPPass"
-                     ,"createScalarReplAggregatesPass"]++
-                     (if version<=llvm3_2
-                      then ["createSimplifyLibCallsPass"]
-                      else [])++
-                     ["createTailCallEliminationPass"]
+             } | (f,p,a) <- [("createConstantPropagationPass","FunctionPass",[])
+                            ,("createSCCPPass","FunctionPass",[])
+                            ,("createDeadInstEliminationPass","Pass",[])
+                            ,("createDeadCodeEliminationPass","FunctionPass",[])
+                            ,("createDeadStoreEliminationPass","FunctionPass",[])
+                            ,("createAggressiveDCEPass","FunctionPass",[])
+                            ,("createSROAPass","FunctionPass",[normalT bool])
+                            ,("createScalarReplAggregatesPass","FunctionPass",
+                              [normalT signed
+                              ,normalT bool
+                              ,normalT signed
+                              ,normalT signed
+                              ,normalT signed])
+                            ,("createIndVarSimplifyPass","Pass",[])
+                            ,("createInstructionCombiningPass","FunctionPass",[])
+                            ,("createLICMPass","Pass",[])
+                            ,("createLoopStrengthReducePass","Pass",[])
+                            ,("createGlobalMergePass","Pass",[])
+                            ,("createLoopUnswitchPass","Pass",[normalT bool])
+                            ,("createLoopInstSimplifyPass","Pass",[])
+                            ,("createLoopUnrollPass","Pass",
+                              [normalT int
+                              ,normalT int
+                              ,normalT int
+                              ,normalT int])]++
+                            (if version>=llvm3_5
+                             then [("createSimpleLoopUnrollPass","Pass",[])]
+                             else [])++
+                            [("createLoopRerollPass","Pass",[])
+                            ,("createLoopRotatePass","Pass",[])
+                            ,("createLoopIdiomPass","Pass",[])
+                            ,("createPromoteMemoryToRegisterPass","FunctionPass",[])
+                            ,("createDemoteRegisterToMemoryPass","FunctionPass",[])
+                            ,("createReassociatePass","FunctionPass",[])
+                            ,("createJumpThreadingPass","FunctionPass",[])
+                            ,("createCFGSimplificationPass","FunctionPass",[])
+                            ,("createFlattenCFGPass","FunctionPass",[])
+                            ,("createStructurizeCFGPass","Pass",[])
+                            ,("createBreakCriticalEdgesPass","FunctionPass",[])
+                            ,("createLoopSimplifyPass","Pass",[])
+                            ,("createTailCallEliminationPass","FunctionPass",[])
+                            ,("createLowerSwitchPass","FunctionPass",[])
+                            ,("createLowerInvokePass","FunctionPass",[])
+                            ,("createLCSSAPass","Pass",[])
+                            ,("createEarlyCSEPass","FunctionPass",[])]++
+                            (if version>=llvm3_5
+                             then [("createMergedLoadStoreMotionPass","FunctionPass",[])]
+                             else [])++
+                            [("createGVNPass","FunctionPass",[normalT bool])
+                            ,("createMemCpyOptPass","FunctionPass",[])
+                            ,("createLoopDeletionPass","Pass",[])]++
+                            (if version>=llvm3_5
+                             then [("createConstantHoistingPass","FunctionPass",[])]
+                             else [])++
+                            [("createInstructionNamerPass","FunctionPass",[])
+                            ,("createSinkingPass","FunctionPass",[])
+                            ,("createLowerAtomicPass","Pass",[])
+                            ,("createCorrelatedValuePropagationPass","FunctionPass",[])
+                            ,("createInstructionSimplifierPass","FunctionPass",[])
+                            ,("createLowerExpectIntrinsicPass","FunctionPass",[])
+                            ,("createPartiallyInlineLibCallsPass","FunctionPass",[])
+                            ,("createSampleProfileLoaderPass","FunctionPass",[])]++
+                            (if version>=llvm3_5
+                             then [("createScalarizerPass","FunctionPass",[])
+                                  ,("createAddDiscriminatorsPass","FunctionPass",[])
+                                  ,("createSeparateConstOffsetFromGEPPass","FunctionPass",[])
+                                  ,("createLoadCombinePass","BasicBlockPass",[])]
+                             else [])++
+        (if version<=llvm3_2
+         then [("createSimplifyLibCallsPass","FunctionPass",[])]
+         else [])
        ]++
        [Spec { specHeader = "llvm/Transforms/IPO.h"
              , specNS = llvmNS
