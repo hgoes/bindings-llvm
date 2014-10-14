@@ -2879,8 +2879,39 @@ llvm version
                                         , gfunArgs = []
                                         , gfunHSName = "createVerifierPass"
                                         }
-             }
-       ,Spec { specHeader = "llvm/Support/raw_ostream.h"
+             }]++
+       [Spec { specHeader = "llvm/Analysis/Passes.h"
+             , specNS = llvmNS
+             , specName = f
+             , specTemplateArgs = []
+             , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType p
+                                        , gfunArgs = fmap (\x -> (False,x)) a
+                                        , gfunHSName = f
+                                        }
+             } | (p,f,a) <- [("Pass","createGlobalsModRefPass",[])
+                            ,("Pass","createAliasDebugger",[])
+                            ,("ModulePass","createAliasAnalysisCounterPass",[])
+                            ,("FunctionPass","createAAEvalPass",[])
+                            ,("ImmutablePass","createNoAAPass",[])
+                            ,("ImmutablePass","createBasicAliasAnalysisPass",[])
+                            {-,("FunctionPass","createLibCallAliasAnalysisPass",
+                              [normalT $ ptr $ llvmType "LibCallInfo"])-}
+                            ,("FunctionPass","createScalarEvolutionAliasAnalysisPass",[])
+                            ,("ImmutablePass","createTypeBasedAliasAnalysisPass",[])
+                            ,("ImmutablePass","createObjCARCAliasAnalysisPass",[])
+                            ,("FunctionPass","createLazyValueInfoPass",[])
+                            ,("FunctionPass","createDependenceAnalysisPass",[])
+                            ,("FunctionPass","createCostModelAnalysisPass",[])
+                            ,("FunctionPass","createDelinearizationPass",[])
+                            ,("FunctionPass","createInstCountPass",[])
+                            ,("FunctionPass","createRegionInfoPass",[])
+                            ,("ModulePass","createModuleDebugInfoPrinterPass",[])
+                            ,("FunctionPass","createMemDepPrinter",[])]++
+                            (if version>=llvm3_5
+                             then [("ImmutablePass","createJumpInstrTableInfoPass",[])]
+                             else [])
+       ]++
+       [Spec { specHeader = "llvm/Support/raw_ostream.h"
              , specNS = llvmNS
              , specName = "raw_ostream"
              , specTemplateArgs = []
