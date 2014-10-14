@@ -41,7 +41,6 @@ module LLVM.FFI
        ,module LLVM.FFI.Transforms.Analysis
        ,module LLVM.FFI.Transforms.IPO
        ,module LLVM.FFI.Transforms.Scalar
-       ,module LLVM.FFI.Transforms.Misc
        ,module LLVM.FFI.Twine
        ,module LLVM.FFI.Type
        ,module LLVM.FFI.Use
