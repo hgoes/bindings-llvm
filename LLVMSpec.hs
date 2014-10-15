@@ -2810,46 +2810,64 @@ llvm version
                             ,("createDeadInstEliminationPass","Pass",[])
                             ,("createDeadCodeEliminationPass","FunctionPass",[])
                             ,("createDeadStoreEliminationPass","FunctionPass",[])
-                            ,("createAggressiveDCEPass","FunctionPass",[])
-                            ,("createSROAPass","FunctionPass",[normalT bool])
-                            ,("createScalarReplAggregatesPass","FunctionPass",
+                            ,("createAggressiveDCEPass","FunctionPass",[])]++
+                            (if version>=llvm3_2
+                             then [("createSROAPass","FunctionPass",[normalT bool])]
+                             else [])++
+                            [("createScalarReplAggregatesPass","FunctionPass",
                               [normalT signed
-                              ,normalT bool
-                              ,normalT signed
-                              ,normalT signed
-                              ,normalT signed])
+                              ,normalT bool]++
+                               (if version>=llvm3_2
+                                then [normalT signed
+                                     ,normalT signed
+                                     ,normalT signed]
+                                else []))
                             ,("createIndVarSimplifyPass","Pass",[])
                             ,("createInstructionCombiningPass","FunctionPass",[])
                             ,("createLICMPass","Pass",[])
-                            ,("createLoopStrengthReducePass","Pass",[])
-                            ,("createGlobalMergePass","Pass",[])
-                            ,("createLoopUnswitchPass","Pass",[normalT bool])
-                            ,("createLoopInstSimplifyPass","Pass",[])
-                            ,("createLoopUnrollPass","Pass",
-                              [normalT int
-                              ,normalT int
-                              ,normalT int
-                              ,normalT int])]++
+                            ,("createLoopStrengthReducePass","Pass",[])]++
+                            (if version>=llvm3_1
+                             then [("createGlobalMergePass","Pass",[])]
+                             else [])++
+                            [("createLoopUnswitchPass","Pass",[normalT bool])]++
+                            (if version>=llvm2_9
+                             then [("createLoopInstSimplifyPass","Pass",[])]
+                             else [])++
+                            [("createLoopUnrollPass","Pass",
+                              if version>=llvm3_4
+                              then [normalT int
+                                   ,normalT int
+                                   ,normalT int
+                                   ,normalT int]
+                              else [])]++
                             (if version>=llvm3_5
                              then [("createSimpleLoopUnrollPass","Pass",[])]
                              else [])++
-                            [("createLoopRerollPass","Pass",[])
-                            ,("createLoopRotatePass","Pass",[])
-                            ,("createLoopIdiomPass","Pass",[])
-                            ,("createPromoteMemoryToRegisterPass","FunctionPass",[])
+                            (if version>=llvm3_4
+                             then [("createLoopRerollPass","Pass",[])]
+                             else [])++
+                            [("createLoopRotatePass","Pass",[])]++
+                            (if version>=llvm2_9
+                             then [("createLoopIdiomPass","Pass",[])]
+                             else [])++
+                            [("createPromoteMemoryToRegisterPass","FunctionPass",[])
                             ,("createDemoteRegisterToMemoryPass","FunctionPass",[])
                             ,("createReassociatePass","FunctionPass",[])
                             ,("createJumpThreadingPass","FunctionPass",[])
-                            ,("createCFGSimplificationPass","FunctionPass",[])
-                            ,("createFlattenCFGPass","FunctionPass",[])
-                            ,("createStructurizeCFGPass","Pass",[])
-                            ,("createBreakCriticalEdgesPass","FunctionPass",[])
+                            ,("createCFGSimplificationPass","FunctionPass",[])]++
+                            (if version>=llvm3_4
+                             then [("createFlattenCFGPass","FunctionPass",[])
+                                  ,("createStructurizeCFGPass","Pass",[])]
+                             else [])++
+                            [("createBreakCriticalEdgesPass","FunctionPass",[])
                             ,("createLoopSimplifyPass","Pass",[])
                             ,("createTailCallEliminationPass","FunctionPass",[])
                             ,("createLowerSwitchPass","FunctionPass",[])
                             ,("createLowerInvokePass","FunctionPass",[])
-                            ,("createLCSSAPass","Pass",[])
-                            ,("createEarlyCSEPass","FunctionPass",[])]++
+                            ,("createLCSSAPass","Pass",[])]++
+                            (if version>=llvm2_9
+                             then [("createEarlyCSEPass","FunctionPass",[])]
+                             else [])++
                             (if version>=llvm3_5
                              then [("createMergedLoadStoreMotionPass","FunctionPass",[])]
                              else [])++
@@ -2862,11 +2880,17 @@ llvm version
                             [("createInstructionNamerPass","FunctionPass",[])
                             ,("createSinkingPass","FunctionPass",[])
                             ,("createLowerAtomicPass","Pass",[])
-                            ,("createCorrelatedValuePropagationPass","FunctionPass",[])
-                            ,("createInstructionSimplifierPass","FunctionPass",[])
-                            ,("createLowerExpectIntrinsicPass","FunctionPass",[])
-                            ,("createPartiallyInlineLibCallsPass","FunctionPass",[])
-                            ,("createSampleProfileLoaderPass","FunctionPass",[])]++
+                            ,("createCorrelatedValuePropagationPass","FunctionPass",[])]++
+                            (if version>=llvm2_9
+                             then [("createInstructionSimplifierPass","FunctionPass",[])]
+                             else [])++
+                            (if version>=llvm3_0
+                             then [("createLowerExpectIntrinsicPass","FunctionPass",[])]
+                             else [])++
+                            (if version>=llvm3_4
+                             then [("createPartiallyInlineLibCallsPass","FunctionPass",[])
+                                  ,("createSampleProfileLoaderPass","FunctionPass",[])]
+                             else [])++
                             (if version>=llvm3_5
                              then [("createScalarizerPass","FunctionPass",[])
                                   ,("createAddDiscriminatorsPass","FunctionPass",[])
@@ -2945,16 +2969,24 @@ llvm version
                             {-,("FunctionPass","createLibCallAliasAnalysisPass",
                               [normalT $ ptr $ llvmType "LibCallInfo"])-}
                             ,("FunctionPass","createScalarEvolutionAliasAnalysisPass",[])
-                            ,("ImmutablePass","createTypeBasedAliasAnalysisPass",[])
-                            ,("ImmutablePass","createObjCARCAliasAnalysisPass",[])
-                            ,("FunctionPass","createLazyValueInfoPass",[])
-                            ,("FunctionPass","createDependenceAnalysisPass",[])
-                            ,("FunctionPass","createCostModelAnalysisPass",[])
-                            ,("FunctionPass","createDelinearizationPass",[])
-                            ,("FunctionPass","createInstCountPass",[])
+                            ,("ImmutablePass","createTypeBasedAliasAnalysisPass",[])]++
+                            (if version>=llvm3_0
+                             then [("ImmutablePass","createObjCARCAliasAnalysisPass",[])]
+                             else [])++
+                            [("FunctionPass","createLazyValueInfoPass",[])]++
+                            (if version>=llvm3_2
+                             then [("FunctionPass","createDependenceAnalysisPass",[])
+                                  ,("FunctionPass","createCostModelAnalysisPass",[])]
+                             else [])++
+                            (if version>=llvm3_4
+                             then [("FunctionPass","createDelinearizationPass",[])]
+                             else [])++
+                            [("FunctionPass","createInstCountPass",[])
                             ,("FunctionPass","createRegionInfoPass",[])
-                            ,("ModulePass","createModuleDebugInfoPrinterPass",[])
-                            ,("FunctionPass","createMemDepPrinter",[])]++
+                            ,("ModulePass","createModuleDebugInfoPrinterPass",[])]++
+                            (if version>=llvm2_9
+                             then [("FunctionPass","createMemDepPrinter",[])]
+                             else [])++
                             (if version>=llvm3_5
                              then [("ImmutablePass","createJumpInstrTableInfoPass",[])]
                              else [])
