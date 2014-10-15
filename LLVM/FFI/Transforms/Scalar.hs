@@ -36,8 +36,10 @@ module LLVM.FFI.Transforms.Scalar
        ,createReassociatePass
        ,createJumpThreadingPass
        ,createCFGSimplificationPass
+#if HS_LLVM_VERSION>=304
        ,createFlattenCFGPass
        ,createStructurizeCFGPass
+#endif
        ,createBreakCriticalEdgesPass
        ,createLoopSimplifyPass
        ,createTailCallEliminationPass

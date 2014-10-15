@@ -22,7 +22,9 @@ module LLVM.FFI.Transforms.Analysis
        ,createInstCountPass
        ,createRegionInfoPass
        ,createModuleDebugInfoPrinterPass
+#if HS_LLVM_VERSION>=209
        ,createMemDepPrinter
+#endif
 #if HS_LLVM_VERSION>=305
        ,createJumpInstrTableInfoPass
 #endif
