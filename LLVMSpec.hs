@@ -2815,13 +2815,15 @@ llvm version
                              then [("createSROAPass","FunctionPass",[normalT bool])]
                              else [])++
                             [("createScalarReplAggregatesPass","FunctionPass",
-                              [normalT signed
-                              ,normalT bool]++
-                               (if version>=llvm3_2
-                                then [normalT signed
-                                     ,normalT signed
-                                     ,normalT signed]
-                                else []))
+                              if version>=llvm2_9
+                              then [normalT signed
+                                   ,normalT bool]++
+                                   (if version>=llvm3_2
+                                    then [normalT signed
+                                         ,normalT signed
+                                         ,normalT signed]
+                                    else [])
+                              else [normalT int])
                             ,("createIndVarSimplifyPass","Pass",[])
                             ,("createInstructionCombiningPass","FunctionPass",[])
                             ,("createLICMPass","Pass",[])
