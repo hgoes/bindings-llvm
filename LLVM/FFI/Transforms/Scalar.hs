@@ -49,9 +49,9 @@ module LLVM.FFI.Transforms.Scalar
 #if HS_LLVM_VERSION>=209
        ,createEarlyCSEPass
 #endif
-#if HS_LLVM_VERSION>=305
+{- #if HS_LLVM_VERSION>=305
        ,createMergedLoadStoreMotionPass
-#endif
+ #endif -}
        ,createGVNPass
        ,createMemCpyOptPass
        ,createLoopDeletionPass

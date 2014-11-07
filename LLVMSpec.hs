@@ -2870,9 +2870,9 @@ llvm version
                             (if version>=llvm2_9
                              then [("createEarlyCSEPass","FunctionPass",[])]
                              else [])++
-                            (if version>=llvm3_5
+                            {-(if version>=llvm3_5
                              then [("createMergedLoadStoreMotionPass","FunctionPass",[])]
-                             else [])++
+                             else [])++-}
                             [("createGVNPass","FunctionPass",[normalT bool])
                             ,("createMemCpyOptPass","FunctionPass",[])
                             ,("createLoopDeletionPass","Pass",[])]++
