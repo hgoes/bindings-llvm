@@ -27,6 +27,7 @@ library
     LLVM.FFI
     LLVM.FFI.StringRef
     LLVM.FFI.ErrorCode
+    LLVM.FFI.ErrorOr
     LLVM.FFI.OOP
     LLVM.FFI.Type
     LLVM.FFI.Context
