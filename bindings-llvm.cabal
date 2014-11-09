@@ -11,7 +11,7 @@ library
     wrapper/extra.h
     wrapper/HaskellPass.h
   include-dirs:         wrapper .
-  extra-libraries:      stdc++,tinfo
+  extra-libraries:      stdc++,tinfo,z
   c-sources:
     wrapper/extra.cpp
     wrapper/HaskellPass.cpp
