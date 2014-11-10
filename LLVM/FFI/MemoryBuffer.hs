@@ -27,14 +27,14 @@ SPECIALIZE_UNIQUEPTR(MemoryBuffer,capi)
 SPECIALIZE_ERROROR(MemoryBuffer,Unique_ptr MemoryBuffer,capi)
 #endif
 
-getFileMemoryBufferSimple :: String -> IO (Maybe (Ptr MemoryBuffer))
+getFileMemoryBufferSimple :: String -> IO (Either String (Ptr MemoryBuffer))
 getFileMemoryBufferSimple name = do
   str <- newStringRef name
 #if HS_LLVM_VERSION<209
   res' <- getFileMemoryBuffer str
   let res = if res'==nullPtr
-            then Nothing
-            else Just res'
+            then Left "Unknown error"
+            else Right res'
 #elif HS_LLVM_VERSION<305
   ptr <- newOwningPtr nullPtr
 #if HS_LLVM_VERSION>=300
@@ -46,19 +46,23 @@ getFileMemoryBufferSimple name = do
   res <- if err_val == 0
          then (do
                   buf <- takeOwningPtr ptr
-                  return $ Just buf)
-         else return Nothing
+                  return $ Right buf)
+         else (do
+                  msg <- errorCodeMessage errc
+                  return $ Left msg)
   deleteErrorCode errc
   deleteOwningPtr ptr
 #else
   errc <- getFileMemoryBuffer str (-1) True
-  isErr <- errorOrIsError errc
-  res <- if isErr
-         then return Nothing
+  isSucc <- errorOrIsSuccess errc
+  res <- if not isSucc
+         then (do
+                  msg <- errorOrGetError errc >>= errorCodeMessage
+                  return $ Left msg)
          else (do
                   uniq <- errorOrGet errc
                   buf <- releaseUniquePtr uniq
-                  return (Just buf))
+                  return $ Right buf)
 #endif    
   deleteStringRef str
   return res

@@ -994,7 +994,7 @@ llvm version
                 , specType = classSpec
                              [(memberFun { ftReturnType = normalT bool
                                          , ftName = "operator bool"
-                                         },"errorOrIsError"++tp)
+                                         },"errorOrIsSuccess"++tp)
                              ,(memberFun { ftReturnType = normalT $ NamedType
                                                           [ClassName "std" []]
                                                           "error_code" []
@@ -1025,7 +1025,10 @@ llvm version
                              [(Destructor False,"deleteErrorCode")
                              ,(memberFun { ftReturnType = normalT int
                                          , ftName = "value"
-                                         },"errorCodeValue_")]
+                                         },"errorCodeValue")
+                             ,(memberFun { ftReturnType = normalT $ NamedType [ClassName "std" []] "string" [] False
+                                         , ftName = "message"
+                                         },"errorCodeMessage_")]
                 }]
      else [])++
        [Spec { specHeader = "llvm/Support/MemoryBuffer.h"

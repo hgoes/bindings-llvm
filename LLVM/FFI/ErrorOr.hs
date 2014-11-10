@@ -5,7 +5,7 @@ import Foreign
 import LLVM.FFI.Interface
 
 class ErrorOrC a where
-  errorOrIsError :: Ptr (ErrorOr a) -> IO Bool
+  errorOrIsSuccess :: Ptr (ErrorOr a) -> IO Bool
   errorOrGetError :: Ptr (ErrorOr a) -> IO (Ptr Error_code)
   errorOrGet :: Ptr (ErrorOr a) -> IO (Ptr a)
 

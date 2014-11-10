@@ -160,7 +160,7 @@ instance UniquePtrC name where {\
 
 #define SPECIALIZE_ERROROR(name,cls,cconv)\
 instance ErrorOrC (cls) where {\
-  errorOrIsError = errorOrIsError##name ;\
+  errorOrIsSuccess = errorOrIsSuccess##name ;\
   errorOrGetError = errorOrGetError##name ;\
   errorOrGet = errorOrGet##name\
 }
