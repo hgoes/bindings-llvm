@@ -31,6 +31,7 @@ module LLVM.FFI
        ,module LLVM.FFI.PassInfo
        ,module LLVM.FFI.PassManager
        ,module LLVM.FFI.PassManagerBuilder
+       ,module LLVM.FFI.PassRegistry
        ,module LLVM.FFI.SMDiagnostic
        ,module LLVM.FFI.SetVector
        ,module LLVM.FFI.SmallVector
@@ -79,6 +80,7 @@ import LLVM.FFI.Pass.Haskell
 import LLVM.FFI.PassInfo
 import LLVM.FFI.PassManager
 import LLVM.FFI.PassManagerBuilder
+import LLVM.FFI.PassRegistry
 import LLVM.FFI.SMDiagnostic
 import LLVM.FFI.SetVector
 import LLVM.FFI.SmallVector

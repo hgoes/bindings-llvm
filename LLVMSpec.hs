@@ -4646,4 +4646,28 @@ llvm version
                                        else [])
                             ]
                }]
-    else [])
+    else [])++
+   [Spec { specHeader = "llvm/PassRegistry.h"
+         , specNS = llvmNS
+         , specName = "PassRegistry"
+         , specTemplateArgs = []
+         , specType = classSpec $
+                      [(Constructor [],"newPassRegistry")
+                      ,(Destructor False,"deletePassRegistry")
+                      ,(memberFun { ftReturnType = constT $ ptr $ llvmType "PassInfo"
+                                  , ftName = "getPassInfo"
+                                  , ftArgs = [(False,constT $ ptr void)]
+                                  },"passRegistryGetPassInfo_")
+                      ,(memberFun { ftReturnType = constT $ ptr $ llvmType "PassInfo"
+                                  , ftName = "getPassInfo"
+                                  , ftArgs = [(False,normalT $ llvmType "StringRef")]
+                                  },"passRegistryGetPassInfoByName")
+                      ,(memberFun { ftName = "registerPass"
+                                  , ftArgs = [(False,constT $ ref $ llvmType "PassInfo")
+                                             ,(False,normalT bool)]
+                                  },"passRegistryRegisterPass")
+                      ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "PassRegistry"
+                                  , ftName = "getPassRegistry"
+                                  , ftStatic = True
+                                  },"passRegistryGet")]
+         }]

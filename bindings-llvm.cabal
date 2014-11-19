@@ -76,6 +76,7 @@ library
     LLVM.FFI.Triple
     LLVM.FFI.Attributes
     LLVM.FFI.CPP.UniquePtr
+    LLVM.FFI.PassRegistry
   other-modules:
     LLVM.FFI.Interface
 
