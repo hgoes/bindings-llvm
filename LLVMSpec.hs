@@ -4663,8 +4663,10 @@ llvm version
                                   , ftArgs = [(False,normalT $ llvmType "StringRef")]
                                   },"passRegistryGetPassInfoByName")
                       ,(memberFun { ftName = "registerPass"
-                                  , ftArgs = [(False,constT $ ref $ llvmType "PassInfo")
-                                             ,(False,normalT bool)]
+                                  , ftArgs = [(False,constT $ ref $ llvmType "PassInfo")]++
+                                             (if version>=llvm2_9
+                                              then [(False,normalT bool)]
+                                              else [])
                                   },"passRegistryRegisterPass")
                       ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "PassRegistry"
                                   , ftName = "getPassRegistry"
