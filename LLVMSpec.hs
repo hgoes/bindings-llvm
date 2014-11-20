@@ -4378,8 +4378,9 @@ llvm version
          , specNS = llvmNS
          , specName = "DominatorTree"
          , specTemplateArgs = []
-         , specType = classSpec
+         , specType = classSpec $
                       [(Constructor [],"newDominatorTree")
+                      ,(Destructor False,"deleteDominatorTree")
                       ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"] False
                                   , ftName = "getRootNode"
                                   },"dominatorTreeGetRootNode")
@@ -4404,10 +4405,12 @@ llvm version
                       ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"] False
                                   , ftName = "getNode"
                                   , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
-                                  },"dominatorTreeGetNode")
-                      ,(memberFun { ftName = "recalculate"
-                                  , ftArgs = [(False,normalT $ ref $ llvmType "Function")]
-                                  },"dominatorTreeRecalculate")]
+                                  },"dominatorTreeGetNode")]++
+                      (if version>=llvm3_5
+                       then [(memberFun { ftName = "recalculate"
+                                        , ftArgs = [(False,normalT $ ref $ llvmType "Function")]
+                                        },"dominatorTreeRecalculate")]
+                       else [])
          }]++
    [Spec { specHeader = if version<llvm3_5
                         then "llvm/Analysis/Dominators.h"

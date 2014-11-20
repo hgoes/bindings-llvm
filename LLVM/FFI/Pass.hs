@@ -115,7 +115,10 @@ module LLVM.FFI.Pass
        ,DomTreeNodeBase()
        ,DomTreeNodeBaseC(..)
        ,newDominatorTree
+       ,deleteDominatorTree
+#if HS_LLVM_VERSION>=305
        ,dominatorTreeRecalculate
+#endif
        ,dominatorTreeGetRootNode
        ,dominatorTreeCompare
        ,dominatorTreeDominates
