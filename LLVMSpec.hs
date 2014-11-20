@@ -4404,7 +4404,10 @@ llvm version
                       ,(memberFun { ftReturnType = normalT $ ptr $ NamedType llvmNS "DomTreeNodeBase" [normalT $ llvmType "BasicBlock"] False
                                   , ftName = "getNode"
                                   , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
-                                  },"dominatorTreeGetNode")]
+                                  },"dominatorTreeGetNode")
+                      ,(memberFun { ftName = "recalculate"
+                                  , ftArgs = [(False,normalT $ ref $ llvmType "Function")]
+                                  },"dominatorTreeRecalculate")]
          }]++
    [Spec { specHeader = if version<llvm3_5
                         then "llvm/Analysis/Dominators.h"

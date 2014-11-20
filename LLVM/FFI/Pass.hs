@@ -115,6 +115,7 @@ module LLVM.FFI.Pass
        ,DomTreeNodeBase()
        ,DomTreeNodeBaseC(..)
        ,newDominatorTree
+       ,dominatorTreeRecalculate
        ,dominatorTreeGetRootNode
        ,dominatorTreeCompare
        ,dominatorTreeDominates
