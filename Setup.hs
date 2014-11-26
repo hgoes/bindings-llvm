@@ -8,6 +8,8 @@ import Distribution.Simple.Program
 import Distribution.Verbosity
 import qualified Distribution.ModuleName as M
 import System.Process
+import System.Exit
+import System.IO
 import Data.Version
 import Text.ParserCombinators.ReadP
 import Data.List (find,intersperse)
@@ -15,13 +17,14 @@ import System.FilePath
 import System.Directory
 import Generator
 import LLVMSpec
+import Data.Maybe (catMaybes)
 
 llvmConfigProgram :: Program
 llvmConfigProgram = simpleProgram "llvm-config"
 
 adaptHooks :: UserHooks -> UserHooks
 adaptHooks hooks
-  = hooks { hookedPrograms = llvmConfigProgram:hookedPrograms hooks
+  = hooks { hookedPrograms = llvmConfigProgram:cppProgram:hookedPrograms hooks
           , confHook = \pd flags -> do
             let db1 = userSpecifyPaths (configProgramPaths flags) (configPrograms flags)
                 db2 = userSpecifyArgss (configProgramArgs flags) db1
@@ -62,7 +65,7 @@ adaptLocalBuildInfo :: LocalBuildInfo -> IO LocalBuildInfo
 adaptLocalBuildInfo bi = do
   let db = configPrograms $ configFlags bi
   version <- getLLVMVersion db
-  cflags <- getLLVMCFlags db
+  cflags <- getLLVMCFlags db >>= filterCFlags db
   ldflags <- getLLVMLDFlags db
   libs <- getLLVMLibs db
   libdir <- getLLVMLibdir db
@@ -147,3 +150,25 @@ versionToDefine v = branch (versionBranch v)
     branch (major:minor:_) = show major ++ (if minor < 10
                                             then "0"++show minor
                                             else show minor)
+
+filterCFlags :: ProgramConfiguration -> [String] -> IO [String]
+filterCFlags db flags = do
+  (compiler,_) <- requireProgram normal cppProgram db
+  let cc = locationPath $ programLocation compiler
+  mapM (\flag -> do
+           let args = programDefaultArgs compiler ++ [flag,"-"] ++ programOverrideArgs compiler
+               defEnv = programOverrideEnv compiler
+               p = (proc cc args) { env = Just [ (name,val) | (name,Just val) <- defEnv ]
+                                  , std_in = CreatePipe
+                                  , std_out = CreatePipe
+                                  , std_err = CreatePipe
+                                  }
+           (Just hIn,Just hOut,Just hErr,hP) <- createProcess p
+           hClose hIn
+           code <- waitForProcess hP
+           hClose hOut
+           hClose hErr
+           return $ case code of
+             ExitSuccess -> Just flag
+             _ -> Nothing
+      ) flags >>= return.catMaybes
