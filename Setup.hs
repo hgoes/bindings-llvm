@@ -157,8 +157,7 @@ filterCFlags db flags = do
   let cc = locationPath $ programLocation compiler
   mapM (\flag -> do
            let args = programDefaultArgs compiler ++ [flag,"-"] ++ programOverrideArgs compiler
-               defEnv = programOverrideEnv compiler
-               p = (proc cc args) { env = Just [ (name,val) | (name,Just val) <- defEnv ]
+               p = (proc cc args) { env = Nothing
                                   , std_in = CreatePipe
                                   , std_out = CreatePipe
                                   , std_err = CreatePipe
