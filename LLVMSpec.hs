@@ -661,7 +661,39 @@ llvm version
              , specNS = llvmNS
              , specName = "InlineAsm"
              , specTemplateArgs = []
-             , specType = classSpec []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = normalT bool
+                                      , ftName = "hasSideEffects"
+                                      },"inlineAsmHasSideEffects")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "isAlignStack"
+                                      },"inlineAsmIsAlignStack")
+                          ,(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" []
+                                                                          ,ClassName "InlineAsm" []] "AsmDialect"
+                                      , ftName = "getDialect"
+                                      },"inlineAsmGetDialect_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "PointerType"
+                                      , ftName = "getType"
+                                      },"inlineAsmGetType")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "FunctionType"
+                                      , ftName = "getFunctionType"
+                                      },"inlineAsmGetFunctionType")
+                          ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "std" []] "string" [] False
+                                      , ftName = "getAsmString"
+                                      },"inlineAsmGetAsmString")
+                          ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "std" []] "string" [] False
+                                      , ftName = "getConstraintString"
+                                      },"inlineAsmGetConstraintString")]
+             }
+       ,Spec { specHeader = irInclude version "InlineAsm.h"
+             , specNS = [ClassName "llvm" []
+                        ,ClassName "InlineAsm" []]
+             , specName = "AsmDialect"
+             , specTemplateArgs = []
+             , specType = EnumSpec $
+                          EnumNode "AsmDialect"
+                          [Right $ EnumLeaf "AD_ATT" "AsmDialectATT"
+                          ,Right $ EnumLeaf "AD_Intel" "AsmDialectIntel"]
              }
        ,Spec { specHeader = irInclude version "Metadata.h"
              , specNS = llvmNS

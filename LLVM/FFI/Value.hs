@@ -6,6 +6,15 @@ module LLVM.FFI.Value
         argumentGetParent,
         argumentGetArgNo,
         InlineAsm(),
+        AsmDialect(),
+        toAsmDialect,
+        fromAsmDialect,
+        inlineAsmHasSideEffects,
+        inlineAsmIsAlignStack,
+        inlineAsmGetDialect,
+        inlineAsmGetFunctionType,
+        inlineAsmGetAsmString,
+        inlineAsmGetConstraintString,
         PseudoSourceValue(),
         FixedStackPseudoSourceValue(),
         GetType(..),
@@ -71,7 +80,9 @@ class GetType value where
 
 GETTYPE(Value)
 GETTYPE(Argument)
-GETTYPE(InlineAsm)
+instance GetType InlineAsm where
+  type TypeOfValue InlineAsm = PointerType
+  getType = inlineAsmGetType
 #if HS_LLVM_VERSION<305
 GETTYPE(PseudoSourceValue)
 GETTYPE(FixedStackPseudoSourceValue)
@@ -155,3 +166,5 @@ valueUseIteratorNext = valueUseIteratorUserNext
 
 #endif
 
+inlineAsmGetDialect :: Ptr InlineAsm -> IO AsmDialect
+inlineAsmGetDialect = fmap toAsmDialect . inlineAsmGetDialect_
