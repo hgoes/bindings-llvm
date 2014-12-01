@@ -10,6 +10,7 @@ module LLVM.FFI.Attributes
        ,AttrKind(..)
        ,toAttrKind
        ,fromAttrKind
+       ,allAttrKind
        ,AttrLoc(..)
 #else
        (Attributes()

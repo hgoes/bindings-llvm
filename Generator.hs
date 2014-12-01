@@ -41,6 +41,13 @@ allCEnums nd = concat [ allCEnums' el
     allCEnums' (Left (_,nd)) = allCEnums nd
     allCEnums' (Right leaf) = [enumLeafCName leaf]
 
+allHSEnums :: EnumNode -> [[String]]
+allHSEnums nd = concat [ allHSEnums' el
+                       | el <- enumNodeSubs nd ]
+  where
+    allHSEnums' (Left (name,sub)) = fmap (name:) $ allHSEnums sub
+    allHSEnums' (Right leaf) = [[enumLeafHSName leaf]]
+
 classSpec :: [(FunSpec,String)] -> SpecType
 classSpec funs = ClassSpec funs False Nothing
 
@@ -455,7 +462,23 @@ generateFFI mname header specs
                   | sub <- enumNodeSubs node ]++
         ["","from"++(enumNodeHSName node)++" :: "++(enumNodeHSName node)++" -> CInt"]++
         concat [ enumFromConv cname (enumNodeHSName node) [] sub
-               | sub <- enumNodeSubs node ]
+               | sub <- enumNodeSubs node ]++
+        ["","instance Enum "++enumNodeHSName node++" where"]++
+        (zipWith (\lhs rhs -> "  succ "++wrapCons lhs++" = "++wrapCons rhs
+                 ) (allHSEnums node) (tail $ allHSEnums node))++
+        (zipWith (\lhs rhs -> "  pred "++wrapCons lhs++" = "++wrapCons rhs
+                 ) (tail $ allHSEnums node) (allHSEnums node))++
+        ["  toEnum = to"++enumNodeHSName node++" . fromIntegral"
+        ,"  fromEnum = fromIntegral . from"++enumNodeHSName node]++
+        ["  enumFrom "++wrapCons c++" = ["++intercalate "," (fmap wrapCons cs)++"]"
+        | c:cs <- tails (allHSEnums node) ]++
+        ["  enumFromThen x y = x:enumFrom y"
+        ,"  enumFromTo start end = fromTo' (enumFrom start)"
+        ,"    where"
+        ,"      fromTo' (x:xs) = if x==end then [x] else x:fromTo' xs"
+        ,"  enumFromThenTo x y z = x:enumFromTo y z"
+        ,"","all"++enumNodeHSName node++" :: ["++enumNodeHSName node++"]"
+        ,"all"++enumNodeHSName node++" = ["++intercalate "," (fmap wrapCons $ allHSEnums node)++"]"]
     enumToConv cname prevs (Right leaf)
       = ["  | op == enum_"++cname++"_"++enumLeafCName leaf++
          " = "++concat (intersperse " $ " (prevs++[enumLeafHSName leaf]))]
