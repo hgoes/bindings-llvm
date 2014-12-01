@@ -4,18 +4,25 @@ module LLVM.FFI.Instruction
          InstructionC(),
          OpType(..),
          toOpCode,
+         fromOpCode,
          TermOpType(..),
          toTermOpCode,
+         fromTermOpCode,
          BinOpType(..),
          toBinOpCode,
+         fromBinOpCode,
          MemoryOpType(..),
          toMemoryOpCode,
+         fromMemoryOpCode,
          CastOpType(..),
          toCastOpCode,
+         fromCastOpCode,
          OtherOpType(..),
          toOtherOpCode,
+         fromOtherOpCode,
          CallingConv(..),
          toCallingConv,
+         fromCallingConv,
 #if HS_LLVM_VERSION>=300
          AtomicOrdering(..),
          RMWBinOp(..),
@@ -740,6 +747,14 @@ toTermOpCode :: Integral a => a -> Maybe TermOpType
 #endif
 toTermOpCode _ = Nothing
 
+fromTermOpCode :: Integral a => TermOpType -> a
+#define HANDLE_TERM_INST(N,OPC,CLASS) fromTermOpCode OPC = N
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
+#include <llvm/Instruction.def>
+#endif
+
 toBinOpCode :: Integral a => a -> Maybe BinOpType
 #define HANDLE_BINARY_INST(N,OPC,CLASS) toBinOpCode N = Just OPC
 #if HS_LLVM_VERSION>=303
@@ -749,7 +764,7 @@ toBinOpCode :: Integral a => a -> Maybe BinOpType
 #endif
 toBinOpCode _ = Nothing
 
-fromBinOpCode :: BinOpType -> CInt
+fromBinOpCode :: Integral a => BinOpType -> a
 #define HANDLE_BINARY_INST(N,OPC,CLASS) fromBinOpCode OPC = N
 #if HS_LLVM_VERSION>=303
 #include <llvm/IR/Instruction.def>
@@ -766,6 +781,14 @@ toMemoryOpCode :: Integral a => a -> Maybe MemoryOpType
 #endif
 toMemoryOpCode _ = Nothing
 
+fromMemoryOpCode :: Integral a => MemoryOpType -> a
+#define HANDLE_MEMORY_INST(N,OPC,CLASS) fromMemoryOpCode OPC = N
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
+#include <llvm/Instruction.def>
+#endif
+
 toCastOpCode :: Integral a => a -> Maybe CastOpType
 #define HANDLE_CAST_INST(N,OPC,CLASS) toCastOpCode N = Just OPC
 #if HS_LLVM_VERSION>=303
@@ -775,6 +798,14 @@ toCastOpCode :: Integral a => a -> Maybe CastOpType
 #endif
 toCastOpCode _ = Nothing
 
+fromCastOpCode :: Integral a => CastOpType -> a
+#define HANDLE_CAST_INST(N,OPC,CLASS) fromCastOpCode OPC = N
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
+#include <llvm/Instruction.def>
+#endif
+
 toOtherOpCode :: Integral a => a -> Maybe OtherOpType
 #define HANDLE_OTHER_INST(N,OPC,CLASS) toOtherOpCode N = Just OPC
 #if HS_LLVM_VERSION>=303
@@ -783,6 +814,14 @@ toOtherOpCode :: Integral a => a -> Maybe OtherOpType
 #include <llvm/Instruction.def>
 #endif
 toOtherOpCode _ = Nothing
+
+fromOtherOpCode :: Integral a => OtherOpType -> a
+#define HANDLE_OTHER_INST(N,OPC,CLASS) fromOtherOpCode OPC = N
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
+#include <llvm/Instruction.def>
+#endif
 
 toOpCode :: Integral a => a -> Maybe OpType
 #define HANDLE_TERM_INST(N,OPC,CLASS) toOpCode N = Just (TermOp OPC)
@@ -796,6 +835,18 @@ toOpCode :: Integral a => a -> Maybe OpType
 #include <llvm/Instruction.def>
 #endif
 toOpCode _ = Nothing
+
+fromOpCode :: Integral a => OpType -> a
+#define HANDLE_TERM_INST(N,OPC,CLASS) fromOpCode (TermOp OPC) = N
+#define HANDLE_BINARY_INST(N,OPC,CLASS) fromOpCode (BinOp OPC) = N
+#define HANDLE_MEMORY_INST(N,OPC,CLASS) fromOpCode (MemoryOp OPC) = N
+#define HANDLE_CAST_INST(N,OPC,CLASS) fromOpCode (CastOp OPC) = N
+#define HANDLE_OTHER_INST(N,OPC,CLASS) fromOpCode (OtherOp OPC) = N
+#if HS_LLVM_VERSION>=303
+#include <llvm/IR/Instruction.def>
+#else
+#include <llvm/Instruction.def>
+#endif
 
 binOpGetOpCode :: Ptr BinaryOperator -> IO BinOpType
 binOpGetOpCode op = do
