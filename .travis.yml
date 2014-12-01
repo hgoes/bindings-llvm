@@ -16,7 +16,8 @@ install:
   - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
   - sudo apt-get update
   - sudo apt-get install llvm-${LLVM_VERSION}-dev
-  - cabal install haskell-src filepath cpphs
+#  - cabal install haskell-src filepath cpphs
+  - sudo apt-get install libghc-haskell-src-dev libghc-system-filepath-dev cpphs libghc-tagged-dev
   - cabal install --only-dependencies
 script:
   - ghc --make Setup.hs -o ./setup
