@@ -128,8 +128,8 @@ extern "C" {
   }
 
 #if HS_LLVM_VERSION>=303
-  unsigned llvm_AttributeSet_ReturnIndex = llvm::AttributeSet::AttrIndex::ReturnIndex;
-  unsigned llvm_AttributeSet_FunctionIndex = llvm::AttributeSet::AttrIndex::FunctionIndex;
+  unsigned llvm_AttributeSet_ReturnIndex = llvm::AttributeSet::ReturnIndex;
+  unsigned llvm_AttributeSet_FunctionIndex = llvm::AttributeSet::FunctionIndex;
 #endif
   
 }

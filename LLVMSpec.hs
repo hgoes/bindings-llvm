@@ -1894,7 +1894,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                       , ftName = "getUnwindDest"
                                       },"invokeInstGetUnwindDest")
-                          ,(memberFun { ftReturnType = constT $ ref $ llvmType "AttributeSet"
+                          ,(memberFun { ftReturnType = constT $ ref $ llvmType $ if version>=llvm3_3
+                                                                                 then "AttributeSet"
+                                                                                 else "AttrListPtr"
                                       , ftName = "getAttributes"
                                       },"invokeInstGetAttributes")]++
                           (if version>=llvm3_0
