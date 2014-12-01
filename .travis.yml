@@ -1,6 +1,6 @@
 language: haskell
 ghc:
-  - 7.6
+  - 7.4
 env:
   - LLVM_VERSION=2.8
   - LLVM_VERSION=2.9
