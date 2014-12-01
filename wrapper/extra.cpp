@@ -127,4 +127,9 @@ extern "C" {
     *((llvm::StringRef*)trg) = llvm::StringRef(str);
   }
 
+#if HS_LLVM_VERSION>=303
+  unsigned llvm_AttributeSet_ReturnIndex = llvm::AttributeSet::AttrIndex::ReturnIndex;
+  unsigned llvm_AttributeSet_FunctionIndex = llvm::AttributeSet::AttrIndex::FunctionIndex;
+#endif
+  
 }

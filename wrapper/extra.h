@@ -48,4 +48,9 @@ extern size_t alignof_StringRef;
 
 void move_StringRef(void* trg,const char* str);
 
+#if HS_LLVM_VERSION>=303
+extern unsigned llvm_AttributeSet_ReturnIndex;
+extern unsigned llvm_AttributeSet_FunctionIndex;
+#endif
+
 #endif

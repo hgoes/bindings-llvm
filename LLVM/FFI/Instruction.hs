@@ -187,6 +187,7 @@ module LLVM.FFI.Instruction
          invokeInstGetCalledValue,
          invokeInstGetNormalDest,
          invokeInstGetUnwindDest,
+         invokeInstGetAttributes,
 #if HS_LLVM_VERSION>=300
          invokeInstGetLandingPadInst,
          -- *** Resume Instruction

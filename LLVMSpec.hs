@@ -1893,7 +1893,10 @@ llvm version
                                       },"invokeInstGetNormalDest")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "BasicBlock"
                                       , ftName = "getUnwindDest"
-                                      },"invokeInstGetUnwindDest")]++
+                                      },"invokeInstGetUnwindDest")
+                          ,(memberFun { ftReturnType = constT $ ref $ llvmType "AttributeSet"
+                                      , ftName = "getAttributes"
+                                      },"invokeInstGetAttributes")]++
                           (if version>=llvm3_0
                            then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
                                             , ftName = "getLandingPadInst"
@@ -4482,7 +4485,21 @@ llvm version
                                                   ,(False,normalT $ EnumType [ClassName "llvm" []
                                                                              ,ClassName "Attribute" []] "AttrKind")
                                                   ]
-                                       },"attributeSetAddAttribute")]
+                                       },"attributeSetAddAttribute_")
+                           ,(memberFun { ftReturnType = normalT bool
+                                       , ftName = "hasAttribute"
+                                       , ftArgs = [(False,normalT unsigned)
+                                                  ,(False,normalT $ EnumType [ClassName "llvm" []
+                                                                             ,ClassName "Attribute" []] "AttrKind")]
+                                       },"attributeSetHasAttribute_")
+                           ,(memberFun { ftReturnType = normalT unsigned
+                                       , ftName = "getParamAlignment"
+                                       , ftArgs = [(False,normalT unsigned)]
+                                       },"attributeSetGetParamAlignment_")
+                           ,(memberFun { ftReturnType = normalT unsigned
+                                       , ftName = "getStackAlignment"
+                                       , ftArgs = [(False,normalT unsigned)]
+                                       },"attributeSetGetStackAlignment_")]
               }
     else Spec { specHeader = irInclude version "Attributes.h"
               , specNS = llvmNS

@@ -4,7 +4,13 @@ module LLVM.FFI.Attributes
        ,newAttributeSet
        ,deleteAttributeSet
        ,attributeSetAddAttribute
+       ,attributeSetHasAttribute
+       ,attributeSetGetParamAlignment
+       ,attributeSetGetStackAlignment
        ,AttrKind(..)
+       ,toAttrKind
+       ,fromAttrKind
+       ,AttrLoc(..)
 #else
        (Attributes()
        ,newAttributes
@@ -30,10 +36,47 @@ module LLVM.FFI.Attributes
 import LLVM.FFI.Interface
 import Data.Typeable
 import Data.Bits (shiftL)
+import Foreign.C
+import Foreign.Ptr
+
+#if HS_LLVM_VERSION>=303
+
+data AttrLoc = AttrFunction
+             | AttrReturn
+             | AttrParameter CUInt
+             deriving (Eq,Ord,Show,Typeable)
+
+attributeSetAddAttribute :: Ptr AttributeSet -> Ptr LLVMContext -> AttrLoc -> AttrKind -> IO (Ptr AttributeSet)
+attributeSetAddAttribute set ctx idx kind
+  = attributeSetAddAttribute_ set ctx (getAttrIndex idx) (fromAttrKind kind)
+
+foreign import ccall unsafe "llvm_AttributeSet_ReturnIndex"
+  attrReturnIndex :: CUInt
+
+foreign import ccall unsafe "llvm_AttributeSet_FunctionIndex"
+  attrFunctionIndex :: CUInt
+
+getAttrIndex :: AttrLoc -> CUInt
+getAttrIndex AttrFunction = attrFunctionIndex
+getAttrIndex AttrReturn = attrReturnIndex
+getAttrIndex (AttrParameter p) = p+1
+
+attributeSetHasAttribute :: Ptr AttributeSet -> AttrLoc -> AttrKind -> IO Bool
+attributeSetHasAttribute set idx kind
+  = attributeSetHasAttribute_ set (getAttrIndex idx) (fromAttrKind kind)
+
+attributeSetGetParamAlignment :: Ptr AttributeSet -> AttrLoc -> IO CUInt
+attributeSetGetParamAlignment set idx
+  = attributeSetGetParamAlignment_ set (getAttrIndex idx)
+
+attributeSetGetStackAlignment :: Ptr AttributeSet -> AttrLoc -> IO CUInt
+attributeSetGetStackAlignment set idx
+  = attributeSetGetStackAlignment_ set (getAttrIndex idx)
+
+#endif
 
 #if HS_LLVM_VERSION<=301
 
-import Foreign.Ptr
 import Data.Word
     
 #include "Helper.h"
