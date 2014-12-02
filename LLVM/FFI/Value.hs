@@ -6,12 +6,14 @@ module LLVM.FFI.Value
         argumentGetParent,
         argumentGetArgNo,
         InlineAsm(),
+#if HS_LLVM_VERSION >= 302
         AsmDialect(),
         toAsmDialect,
         fromAsmDialect,
+        inlineAsmGetDialect,
+#endif
         inlineAsmHasSideEffects,
         inlineAsmIsAlignStack,
-        inlineAsmGetDialect,
         inlineAsmGetFunctionType,
         inlineAsmGetAsmString,
         inlineAsmGetConstraintString,
@@ -166,5 +168,7 @@ valueUseIteratorNext = valueUseIteratorUserNext
 
 #endif
 
+#if HS_LLVM_VERSION >= 302
 inlineAsmGetDialect :: Ptr InlineAsm -> IO AsmDialect
 inlineAsmGetDialect = fmap toAsmDialect . inlineAsmGetDialect_
+#endif
