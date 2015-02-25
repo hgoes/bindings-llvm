@@ -13,9 +13,10 @@ module LLVM.FFI.Constant
         ConstantDataArray(),
         ConstantDataVector(),
 #endif
-        ConstantExpr(),
+        ConstantExpr(),ConstantExprC(),
         constantExprGetOpcode,
         constantExprGetPredicate,
+        constantExprAsInstruction,
         --constantExprGetAsInstruction,
         {-BinaryConstantExpr(),
         CompareConstantExpr(),
@@ -68,14 +69,17 @@ import Foreign.C
 globalValueIsDeclaration :: GlobalValueC v => Ptr v -> IO Bool
 globalValueIsDeclaration = globalValueIsDeclaration_
 
-constantExprGetOpcode :: Ptr ConstantExpr -> IO OpType
+constantExprGetOpcode :: ConstantExprC expr => Ptr expr -> IO OpType
 constantExprGetOpcode ptr = do
   opc <- constantExprGetOpcode_ ptr
   let Just res = toOpCode opc
   return res
 
-constantExprGetPredicate :: Ptr ConstantExpr -> IO Predicate
+constantExprGetPredicate :: ConstantExprC expr => Ptr expr -> IO Predicate
 constantExprGetPredicate = fmap (toPredicate . fromIntegral) . constantExprGetPredicate_
+
+constantExprAsInstruction :: ConstantExprC expr => Ptr expr -> IO (Ptr Instruction)
+constantExprAsInstruction = constantExprAsInstruction_
 
 #if HS_LLVM_VERSION>=301
 constantGetAggregateElement :: ConstantC t => Ptr t -> Integer -> IO (Ptr Constant)

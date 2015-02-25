@@ -861,10 +861,16 @@ llvm version
              , specType = classSpec 
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getOpcode"
+                                      , ftOverloaded = True
                                       },"constantExprGetOpcode_")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getPredicate"
-                                      },"constantExprGetPredicate_")]
+                                      , ftOverloaded = True
+                                      },"constantExprGetPredicate_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Instruction"
+                                      , ftName = "getAsInstruction"
+                                      , ftOverloaded = True
+                                      },"constantExprAsInstruction_")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
