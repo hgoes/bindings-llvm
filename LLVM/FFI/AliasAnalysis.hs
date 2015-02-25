@@ -19,10 +19,12 @@ module LLVM.FFI.AliasAnalysis
        ,aliasAnalysisAlias
        ,AliasResult(..)
 #if HS_LLVM_VERSION>=209
-       ,Location()
+       ,Location(..)
        ,newLocation
 #endif
        ) where
+
+import LLVM.FFI.Metadata()
 
 import LLVM.FFI.Interface
 import LLVM.FFI.Value
@@ -37,6 +39,8 @@ import LLVM.FFI.Instruction (LoadInst,StoreInst,VAArgInst)
 #endif
 import Foreign.C
 import Foreign.Ptr
+import Foreign.Storable
+import Foreign.Marshal.Alloc
 import Data.Word
 
 #include "Helper.h"
@@ -79,6 +83,30 @@ aliasAnalysisAlias ptr l1 l2 = fmap toAliasResult $ aliasAnalysisAlias_ ptr l1 l
 
 newLocation :: ValueC v => Ptr v -> Word64 -> Ptr MDNode -> IO (Ptr Location)
 newLocation ptr size tbaa = newLocation_ ptr size tbaa
+
+instance Storable Location where
+  sizeOf _ = fromIntegral locationSizeOf
+  alignment _ = fromIntegral locationAlignOf
+  peek loc = do
+    ptr <- locationGetPtr loc
+    size <- locationGetSize loc
+#if HS_LLVM_VERSION>305
+    aatags <- locationGetAATags loc >>= peek
+    return $ Location ptr size aatags
+#else
+    tbaatag <- locationGetTBAATag loc
+    return $ Location ptr size tbaatag
+#endif
+  poke loc (Location ptr size aatags) = do
+    locationSetPtr loc ptr
+    locationSetSize loc size
+#if HS_LLVM_VERSION>305
+    alloca $ \aatags' -> do
+      poke aatags' aatags
+      locationSetAATags loc aatags'
+#else
+    locationSetTBAATag loc aatags
+#endif
 #else
 aliasAnalysisAlias :: AliasAnalysisC t => Ptr t -> Ptr Value -> CUInt -> Ptr Value -> CUInt -> IO AliasResult
 aliasAnalysisAlias ptr v1 l1 v2 l2 = fmap toAliasResult $ aliasAnalysisAlias_ ptr v1 l1 v2 l2

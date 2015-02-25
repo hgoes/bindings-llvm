@@ -4,6 +4,11 @@ import Data.Version
 import Generator
 import CPPType
 
+llvm3_6 :: Version
+llvm3_6 = Version { versionBranch = [3,6]
+                  , versionTags = []
+                  }
+
 llvm3_5 :: Version
 llvm3_5 = Version { versionBranch = [3,5]
                   , versionTags = []
@@ -3114,11 +3119,35 @@ llvm version
                 , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
                 , specName = "Location"
                 , specTemplateArgs = []
-                , specType = classSpec
+                , specType = classSpecCustom
+                             ("data Location = Location { locationPtr :: Ptr Value, locationSize :: Word64, locationAATags :: "++
+                              (if version>=llvm3_6
+                               then "AAMDNodes"
+                               else "Ptr MDNode")++" }") $
                              [(Constructor [(True,constT $ ptr $ llvmType "Value")
                                            ,(False,normalT uint64_t)
                                            ,(False,constT $ ptr $ llvmType "MDNode")
-                                           ],"newLocation_")]
+                                           ],"newLocation_")
+                             ,(SizeOf,"locationSizeOf")
+                             ,(AlignOf,"locationAlignOf")
+                             ,(Getter "Ptr" (constT $ ptr $ llvmType "Value") False,
+                               "locationGetPtr")
+                             ,(Setter "Ptr" (constT $ ptr $ llvmType "Value"),
+                               "locationSetPtr")
+                             ,(Getter "Size" (normalT uint64_t) False,
+                               "locationGetSize")
+                             ,(Setter "Size" (normalT uint64_t),
+                               "locationSetSize")]++
+                             (if version>=llvm3_6
+                              then [(Getter "AATags" (normalT $ llvmType "AAMDNodes") False,
+                                     "locationGetAATags")
+                                   ,(Setter "AATags" (normalT $ llvmType "AAMDNodes"),
+                                     "locationSetAATags")]
+                              else [(Getter "TBAATag" (normalT $ ptr $ llvmType "MDNode") False,
+                                     "locationGetTBAATag")
+                                   ,(Setter "TBAATag" (normalT $ ptr $ llvmType "MDNode"),
+                                     "locationSetTBAATag")])
+                              
                 }]
      else [])++
        [Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
@@ -4741,4 +4770,30 @@ llvm version
                                   , ftName = "getPassRegistry"
                                   , ftStatic = True
                                   },"passRegistryGet")]
-         }]
+         }]++
+   (if version>=llvm3_6
+    then [Spec { specHeader = irInclude version "Metadata.h"
+               , specNS = llvmNS
+               , specName = "AAMDNodes"
+               , specTemplateArgs = []
+               , specType = classSpecCustom "data AAMDNodes = AAMDNodes { aaMDNodesTBAA :: Ptr MDNode, aaMDNodesScope :: Ptr MDNode, aaMDNodesNoAlias :: Ptr MDNode }"
+                            [(Constructor [(False,normalT $ ptr $ llvmType "MDNode")
+                                          ,(False,normalT $ ptr $ llvmType "MDNode")
+                                          ,(False,normalT $ ptr $ llvmType "MDNode")],
+                              "newAAMDNodes")
+                            ,(Getter "TBAA" (normalT $ ptr $ llvmType "MDNode") False,
+                              "aaMDNodesGetTBAA")
+                            ,(Setter "TBAA" (normalT $ ptr $ llvmType "MDNode"),
+                              "aaMDNodesSetTBAA")
+                            ,(Getter "Scope" (normalT $ ptr $ llvmType "MDNode") False,
+                              "aaMDNodesGetScope")
+                            ,(Setter "Scope" (normalT $ ptr $ llvmType "MDNode"),
+                              "aaMDNodesSetScope")
+                            ,(Getter "NoAlias" (normalT $ ptr $ llvmType "MDNode") False,
+                              "aaMDNodesGetNoAlias")
+                            ,(Setter "NoAlias" (normalT $ ptr $ llvmType "MDNode"),
+                              "aaMDNodesSetNoAlias")
+                            ,(SizeOf,"aaMDNodesSizeOf")
+                            ,(AlignOf,"aaMDNodesAlignOf")]
+               }]
+    else [])

@@ -13,7 +13,13 @@ module LLVM.FFI.Metadata
         namedMDNodeGetOperand,
         namedMDNodeGetNumOperands,
         namedMDNodeAddOperand,
+#if HS_LLVM_VERSION>305
+        namedMDNodeGetName,
+        AAMDNodes(..),
+        newAAMDNodes
+#else
         namedMDNodeGetName
+#endif
        ) where
 
 import LLVM.FFI.Interface
@@ -60,3 +66,18 @@ instance SmallVectorC (Pair CUInt (Ptr MDNode)) where
   deleteSmallVector = deleteSmallVectorMDNodePair
   smallVectorSize = smallVectorSizeMDNodePair
   smallVectorData = smallVectorDataMDNodePair
+
+#if HS_LLVM_VERSION>305
+instance Storable AAMDNodes where
+  sizeOf _ = fromIntegral aaMDNodesSizeOf
+  alignment _ = fromIntegral aaMDNodesAlignOf
+  peek ptr = do
+    tbaa <- aaMDNodesGetTBAA ptr
+    scope <- aaMDNodesGetScope ptr
+    noalias <- aaMDNodesGetNoAlias ptr
+    return $ AAMDNodes tbaa scope noalias
+  poke ptr node = do
+    aaMDNodesSetTBAA ptr (aaMDNodesTBAA node)
+    aaMDNodesSetScope ptr (aaMDNodesScope node)
+    aaMDNodesSetNoAlias ptr (aaMDNodesNoAlias node)
+#endif
