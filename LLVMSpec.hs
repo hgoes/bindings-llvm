@@ -858,7 +858,7 @@ llvm version
              , specNS = llvmNS
              , specName = "ConstantExpr"
              , specTemplateArgs = []
-             , specType = classSpec 
+             , specType = classSpec $
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getOpcode"
                                       , ftOverloaded = True
@@ -866,11 +866,13 @@ llvm version
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getPredicate"
                                       , ftOverloaded = True
-                                      },"constantExprGetPredicate_")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Instruction"
-                                      , ftName = "getAsInstruction"
-                                      , ftOverloaded = True
-                                      },"constantExprAsInstruction_")]
+                                      },"constantExprGetPredicate_")]++
+                          (if version>=llvm3_3
+                           then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Instruction"
+                                            , ftName = "getAsInstruction"
+                                            , ftOverloaded = True
+                                            },"constantExprAsInstruction_")]
+                           else [])
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
