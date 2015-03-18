@@ -22,6 +22,9 @@ SUBTYPE(Value,User)
 TYPE_LEAF(Operator)
 SUBTYPE2(Value,User,Operator)
 
+GETTYPE(User)
+GETTYPE(Operator)
+
 getNumOperands :: UserC t => Ptr t -> IO Integer
 getNumOperands ptr = fmap fromIntegral (getNumOperands_ ptr)
 
