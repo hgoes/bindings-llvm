@@ -66,7 +66,7 @@ adaptLocalBuildInfo bi = do
   let db = configPrograms $ configFlags bi
   version <- getLLVMVersion db
   cflags <- getLLVMCFlags db >>= filterCFlags db
-  ldflags <- getLLVMLDFlags db
+  ldflags <- getLLVMLDFlags version db
   libs <- getLLVMLibs db
   libdir <- getLLVMLibdir db
   incdir <- getLLVMIncludedir db
@@ -119,10 +119,13 @@ getLLVMCFlags db = do
   outp <- getDbProgramOutput normal llvmConfigProgram db ["--cxxflags"]
   return $ words outp
 
-getLLVMLDFlags :: ProgramConfiguration -> IO [String]
-getLLVMLDFlags db = do
-  outp <- getDbProgramOutput normal llvmConfigProgram db ["--ldflags"]
-  return $ words outp
+getLLVMLDFlags :: Version -> ProgramConfiguration -> IO [String]
+getLLVMLDFlags vers db = do
+  ldflags <- getDbProgramOutput normal llvmConfigProgram db ["--ldflags"]
+  syslibs <- if vers >= Version [3,5,0] []
+             then getDbProgramOutput normal llvmConfigProgram db ["--system-libs"]
+             else return ""
+  return $ words ldflags ++ words syslibs
 
 getLLVMLibdir :: ProgramConfiguration -> IO String
 getLLVMLibdir db = do
