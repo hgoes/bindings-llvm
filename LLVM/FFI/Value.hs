@@ -154,17 +154,17 @@ instance ValueUseIteratorC User where
   valueUseIteratorGetOperandNo = valueUseIteratorUserGetOperandNo
 #else
 
-valueUseIteratorDeref :: Ptr Use_iterator -> IO (Ptr User)
-valueUseIteratorDeref = valueUseIteratorUserDeref
+valueUseIteratorDeref :: Ptr Use_iterator -> IO (Ptr Use)
+valueUseIteratorDeref = valueUseIteratorUseDeref
 
 valueUseIteratorEq :: Ptr Use_iterator -> Ptr Use_iterator -> IO Bool
-valueUseIteratorEq = valueUseIteratorUserEq
+valueUseIteratorEq = valueUseIteratorUseEq
 
 valueUseIteratorNEq :: Ptr Use_iterator -> Ptr Use_iterator -> IO Bool
-valueUseIteratorNEq = valueUseIteratorUserNEq
+valueUseIteratorNEq = valueUseIteratorUseNEq
 
 valueUseIteratorNext :: Ptr Use_iterator -> IO (Ptr Use_iterator)
-valueUseIteratorNext = valueUseIteratorUserNext
+valueUseIteratorNext = valueUseIteratorUseNext
 
 #endif
 

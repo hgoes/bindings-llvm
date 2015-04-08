@@ -2419,7 +2419,7 @@ llvm version
                                             },"valueUseIterator"++tp++"GetOperandNo")]
                            else [])
              }
-       | tp <- ["User"]
+       | tp <- ["Use"]
        , let rtp = Type [] (llvmType tp)
        , let self = if version<llvm3_5
                     then NamedType llvmNS
