@@ -3,7 +3,9 @@ module LLVM.FFI.MemoryBuffer
         deleteMemoryBuffer,
         getBufferSize,
         getFileMemoryBuffer,
-        getFileMemoryBufferSimple
+        getFileMemoryBufferSimple,
+        getStdInMemoryBuffer,
+        getStdInMemoryBufferSimple
        ) where
 
 import LLVM.FFI.Interface
@@ -66,3 +68,23 @@ getFileMemoryBufferSimple name = do
 #endif    
   deleteStringRef str
   return res
+
+getStdInMemoryBufferSimple :: IO (Either String (Ptr MemoryBuffer))
+getStdInMemoryBufferSimple = do
+#if HS_LLVM_VERSION<209
+  res' <- getStdInMemoryBuffer
+  return $ if res'==nullPtr
+           then Left "Unknown error"
+           else Right res'
+#else
+  errc <- getStdInMemoryBuffer
+  isSucc <- errorOrIsSuccess errc
+  if not isSucc
+    then (do
+            msg <- errorOrGetError errc >>= errorCodeMessage
+            return $ Left msg)
+    else (do
+            uniq <- errorOrGet errc
+            buf <- releaseUniquePtr uniq
+            return $ Right buf)
+#endif

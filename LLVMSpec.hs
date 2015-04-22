@@ -1122,6 +1122,27 @@ llvm version
                                            , ftArgs = [(False,normalT (llvmType "StringRef"))]
                                            , ftStatic = True
                                            },"getFileMemoryBuffer")
+                          ,if version>=llvm2_9
+                           then (memberFun { ftReturnType = if version<llvm3_5
+                                                            then normalT (llvmType "error_code")
+                                                            else normalT $
+                                                                 NamedType llvmNS
+                                                                 "ErrorOr"
+                                                                 [normalT $
+                                                                  NamedType [ClassName "std" []]
+                                                                  "unique_ptr"
+                                                                  [normalT $ llvmType "MemoryBuffer"]
+                                                                  False]
+                                                                 False
+                                           , ftName = "getSTDIN"
+                                           , ftArgs = []
+                                           , ftStatic = True
+                                           },"getStdInMemoryBuffer")
+                           else (memberFun { ftReturnType = normalT $ ptr $ llvmType "MemoryBuffer"
+                                           , ftName = "getSTDIN"
+                                           , ftArgs = []
+                                           , ftStatic = True
+                                           },"getStdInMemoryBuffer")
                           ]
              }
        ,Spec { specHeader = "llvm/Support/SourceMgr.h"
