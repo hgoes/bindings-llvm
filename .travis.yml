@@ -1,26 +1,63 @@
-language: haskell
-ghc:
-  - 7.6
-env:
-  - LLVM_VERSION=2.8
-  - LLVM_VERSION=2.9
-  - LLVM_VERSION=3.0
-  - LLVM_VERSION=3.1
-  - LLVM_VERSION=3.2
-  - LLVM_VERSION=3.3
-  - LLVM_VERSION=3.4
-#  - LLVM_VERSION=3.5
+language: sh
+matrix:
+  include:
+    - env: LLVM_VERSION=2.8
+      addons:
+        apt:
+          packages: ['llvm-2.8-dev']
+    - env: LLVM_VERSION=2.9
+      addons:
+        apt:
+          packages: ['llvm-2.9-dev']
+    - env: LLVM_VERSION=3.0
+      addons:
+        apt:
+          packages: ['llvm-3.0-dev']
+    - env: LLVM_VERSION=3.1
+      addons:
+        apt:
+          packages: ['llvm-3.1-dev']
+    - env: LLVM_VERSION=3.2
+      addons:
+        apt:
+          packages: ['llvm-3.2-dev']
+    - env: LLVM_VERSION=3.3
+      addons:
+        apt:
+          packages: ['llvm-3.3-dev']
+    - env: LLVM_VERSION=3.4
+      addons:
+        apt:
+          packages: ['llvm-3.4-dev']
+    - env: LLVM_VERSION=3.5
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5']
+          packages: ['llvm-3.5-dev']
+    - env: LLVM_VERSION=3.6
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.6']
+          packages: ['llvm-3.6-dev']
+    - env: LLVM_VERSION=3.7
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.7']
+          packages: ['llvm-3.7-dev']
+    - env: LLVM_VERSION=3.8
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
+          packages: ['llvm-3.8-dev']
+before_install:
+  - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
+  - if [ ! -e /app ]; then sudo mkdir -p /app; sudo chown $USER /app; git clone https://github.com/mietek/halcyon.git /app/halcyon; fi
 install:
-  - sudo sh -c "echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.4 main' >> /etc/apt/sources.list"
-  - sudo sh -c "echo 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main' >> /etc/apt/sources.list"
-  - wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
-  - sudo apt-get update
-  - sudo apt-get install llvm-${LLVM_VERSION}-dev
-  - cabal install haskell-src filepath cpphs
-#  - sudo apt-get install libghc-haskell-src-dev libghc-system-filepath-dev cpphs libghc-tagged-dev
-  - cabal install --only-dependencies
+  - /app/halcyon/halcyon build --sandbox-extra-apps=cpphs
+  - /app/halcyon/halcyon paths > halcyon-env
+  - ln -sf /app/sandbox/cabal.sandbox.config cabal.sandbox.config
 script:
-  - ghc --make Setup.hs -o ./setup
-  - ./setup configure --user --enable-tests --with-llvm-config=llvm-config-${LLVM_VERSION}
-  - ./setup build
-  - ./setup test
+  - source halcyon-env && cabal configure --enable-tests && cabal test
+cache:
+  directories:
+  - /app

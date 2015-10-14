@@ -44,6 +44,11 @@ llvm2_9 = Version { versionBranch = [2,9]
                   , versionTags = []
                   }
 
+llvm2_8 :: Version
+llvm2_8 = Version { versionBranch = [2,8]
+                  , versionTags = []
+                  }
+
 irInclude :: Version -> String -> String
 irInclude ver hdr = if ver >= llvm3_3
                     then "llvm/IR/"++hdr
@@ -1124,7 +1129,9 @@ llvm version
                                            },"getFileMemoryBuffer")
                           ,if version>=llvm2_9
                            then (memberFun { ftReturnType = if version<llvm3_5
-                                                            then normalT (llvmType "error_code")
+                                                            then if version<=llvm2_8
+                                                                 then normalT $ ptr $ llvmType "MemoryBuffer"
+                                                                 else normalT (llvmType "error_code")
                                                             else normalT $
                                                                  NamedType llvmNS
                                                                  "ErrorOr"
@@ -1135,7 +1142,13 @@ llvm version
                                                                   False]
                                                                  False
                                            , ftName = "getSTDIN"
-                                           , ftArgs = []
+                                           , ftArgs = if version<llvm3_5 && version>=llvm2_9
+                                                      then [(False,normalT $ ref $
+                                                                   NamedType llvmNS
+                                                                   "OwningPtr"
+                                                                   [normalT $ llvmType "MemoryBuffer"]
+                                                                   False)]
+                                                      else []
                                            , ftStatic = True
                                            },"getStdInMemoryBuffer")
                            else (memberFun { ftReturnType = normalT $ ptr $ llvmType "MemoryBuffer"
@@ -2440,7 +2453,9 @@ llvm version
                                             },"valueUseIterator"++tp++"GetOperandNo")]
                            else [])
              }
-       | tp <- ["Use"]
+       | tp <- if version<llvm3_5
+               then ["User"]
+               else ["Use"]
        , let rtp = Type [] (llvmType tp)
        , let self = if version<llvm3_5
                     then NamedType llvmNS

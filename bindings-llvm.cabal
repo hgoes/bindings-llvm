@@ -23,6 +23,7 @@ library
     FlexibleInstances
     TypeFamilies
     DeriveDataTypeable
+    DoAndIfThenElse
   exposed-modules:
     LLVM.FFI
     LLVM.FFI.StringRef

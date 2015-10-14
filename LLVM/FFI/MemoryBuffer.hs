@@ -71,11 +71,24 @@ getFileMemoryBufferSimple name = do
 
 getStdInMemoryBufferSimple :: IO (Either String (Ptr MemoryBuffer))
 getStdInMemoryBufferSimple = do
-#if HS_LLVM_VERSION<209
+#if HS_LLVM_VERSION<=208
   res' <- getStdInMemoryBuffer
   return $ if res'==nullPtr
            then Left "Unknown error"
            else Right res'
+#elif HS_LLVM_VERSION<=304
+  ptr <- newOwningPtr nullPtr
+  errc <- getStdInMemoryBuffer ptr
+  errv <- errorCodeValue errc
+  if errv==0
+  then do
+    res <- takeOwningPtr ptr
+    deleteOwningPtr ptr
+    return (Right res)
+  else do
+    msg <- errorCodeMessage errc
+    deleteOwningPtr ptr
+    return (Left msg)
 #else
   errc <- getStdInMemoryBuffer
   isSucc <- errorOrIsSuccess errc

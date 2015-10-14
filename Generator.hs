@@ -2,8 +2,6 @@ module Generator where
 
 import CPPType
 import Data.List
-import Language.Haskell.Syntax
-import Language.Haskell.Pretty
 import Data.Char
 import System.FilePath
 import System.Directory
@@ -96,6 +94,11 @@ data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
 
 type OutConverter = String -> ([String],String)
 type InConverter = String -> ([String],String)
+
+bracket :: String -> String
+bracket str = case words str of
+  [_] -> str
+  _ -> "("++str++")"
 
 memberFun :: FunSpec
 memberFun = MemberFun { ftReturnType = normalT void
@@ -234,53 +237,49 @@ toCType (Type q c) = let (x,out,inC) = toCType' c
                  then (t,idOut,idIn)
                  else (ptr void,copyOut (Type q t),passAsPointer (Type q t))
 
-toHaskellType :: Bool -> Maybe String -> Type -> HsType
+toHaskellType :: Bool -> Maybe String -> Type -> String
 toHaskellType _ (Just v) _
-  = HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr") (HsTyVar $ HsIdent v)
+  = "Ptr "++v
 toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
   where
-    toHSType _ (RefType t) = HsTyApp 
-                             (HsTyCon $ UnQual $ HsIdent "Ptr")
-                             (toHSType True t)
-    toHSType _ (PtrType t) = HsTyApp 
-                             (HsTyCon $ UnQual $ HsIdent "Ptr")
-                             (toHSType True t)
+    toHSType _ (RefType t) = "Ptr "++bracket (toHSType True t)
+    toHSType _ (PtrType t) = "Ptr "++bracket (toHSType True t)
     toHSType isP (NamedType [ClassName "std" []] "string" [] False)
-      = if isP then HsTyCon $ UnQual $ HsIdent "CPPString"
-        else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr") (HsTyCon $ UnQual $ HsIdent "CPPString")
+      = if isP then "CPPString"
+        else "Ptr CPPString"
     toHSType isP (NamedType [] name [] iface) = case name of
-      "void" -> HsTyTuple []
-      "char" -> HsTyCon $ UnQual $ HsIdent "CChar"
-      "size_t" -> HsTyCon $ UnQual $ HsIdent "CSize"
-      "int" -> HsTyCon $ UnQual $ HsIdent "CInt"
-      "int64_t" -> HsTyCon $ UnQual $ HsIdent "Int64"
-      "uint64_t" -> HsTyCon $ UnQual $ HsIdent "Word64"
-      "uint8_t" -> HsTyCon $ UnQual $ HsIdent "Word8"
-      "bool" -> HsTyCon $ UnQual $ HsIdent "Bool"
-      "unsigned" -> HsTyCon $ UnQual $ HsIdent "CUInt"
-      "signed" -> HsTyCon $ UnQual $ HsIdent "CInt"
-      "double" -> HsTyCon $ UnQual $ HsIdent "CDouble"
-      "float" -> HsTyCon $ UnQual $ HsIdent "CFloat"
+      "void" -> "()"
+      "char" -> "CChar"
+      "size_t" -> "CSize"
+      "int" -> "CInt"
+      "int64_t" -> "Int64"
+      "uint64_t" -> "Word64"
+      "uint8_t" -> "Word8"
+      "bool" -> "Bool"
+      "unsigned" -> "CUInt"
+      "signed" -> "CInt"
+      "double" -> "CDouble"
+      "float" -> "CFloat"
       _ -> (if isP
             then id 
-            else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
-           ) $ HsTyCon $ UnQual $ HsIdent $ if iface
-                                            then fmap toLower name
-                                            else hsName name
+            else ("Ptr "++).bracket
+           ) $ if iface
+               then fmap toLower name
+               else hsName name
     toHSType isP (NamedType ns name tmpl iface) 
       = (if isP
          then id
-         else HsTyApp (HsTyCon $ UnQual $ HsIdent "Ptr")
-        ) $ foldl HsTyApp (toHSType True (NamedType [] name [] iface))
+         else ("Ptr "++).bracket
+        ) $ intercalate " " $ bracket (toHSType True (NamedType [] name [] iface)):
         (if iface
          then []
-         else (fmap (toHaskellType False Nothing) $
+         else (fmap (bracket . toHaskellType False Nothing) $
                filter (\tp -> case tp of
                           Type _ _ -> True
                           _ -> False) $
                concat (fmap classArgs ns)++tmpl))
     toHSType isP (EnumType ns name)
-      = HsTyCon $ UnQual $ HsIdent "CInt"
+      = "CInt"
 
 whenOlder :: (FilePath -> IO ()) -> FilePath -> UTCTime -> IO ()
 whenOlder act fp modTime = do
@@ -518,36 +517,32 @@ generateFFI mname header specs
                                                                                     else Nothing) tp') (zip r [0..])),
                                       (if isP
                                        then id
-                                       else HsTyApp (HsTyCon $ UnQual $ HsIdent "IO"))
+                                       else ("IO "++).bracket)
                                       (toHaskellType True Nothing rtp),
                                       cname)
                                 Constructor { ftConArgs = r }
                                   -> (fmap (\((isO',tp'),n) -> toHaskellType True (if isO'
                                                                                    then Just $ "t"++show n
                                                                                    else Nothing) tp') (zip r [0..]),
-                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True Nothing $ toPtr $ specFullType cs,
+                                      "IO "++(bracket $ toHaskellType True Nothing $ toPtr $ specFullType cs),
                                       cname)
                                 Destructor { ftOverloadedDestructor = isO }
                                   -> ([toHaskellType True (if isO
                                                            then Just "t"
                                                            else Nothing) $ toPtr $ specFullType cs],
-                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True Nothing $ normalT void,
+                                      "IO "++(bracket $ toHaskellType True Nothing $ normalT void),
                                       cname)
                                 Setter { ftSetType = tp }
                                   -> ([toHaskellType True Nothing $ toPtr $ specFullType cs,
                                        toHaskellType True Nothing tp],
-                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True Nothing $ normalT void,
+                                      "IO "++(bracket $ toHaskellType True Nothing $ normalT void),
                                       cname)
                                 Getter { ftGetType = tp
                                        , ftGetStatic = stat }
                                   -> (if stat
                                       then []
                                       else [toHaskellType True Nothing $ toPtr $ specFullType cs],
-                                      HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                      toHaskellType True Nothing tp,
+                                      "IO "++(bracket $ toHaskellType True Nothing tp),
                                       cname)
                                 SizeOf -> ([],toHaskellType True Nothing (normalT size_t),cname)
                                 AlignOf -> ([],toHaskellType True Nothing (normalT size_t),cname)
@@ -558,15 +553,13 @@ generateFFI mname header specs
                                  } -> [(fmap (\((isO',tp'),n) -> toHaskellType True (if isO'
                                                                                      then Just $ "t"++show n
                                                                                      else Nothing) tp') (zip args [0..]),
-                                        HsTyApp (HsTyCon $ UnQual $ HsIdent "IO") $
-                                        toHaskellType True Nothing rtp,
+                                        "IO "++(bracket $ toHaskellType True Nothing rtp),
                                         hsname)]
                    EnumSpec nd -> [([],toHaskellType True Nothing $ normalT int,"enum_"++specFullNameHS cs++"_"++el)
                                   | el <- allCEnums nd ]
-                 , let sig = (concat [ prettyPrint tp ++ " -> " 
+                 , let sig = (concat [ tp ++ " -> " 
                                      | tp <- tps
-                                     ]) ++
-                             prettyPrint rtp
+                                     ]) ++ rtp
                  ]
 
 hsName :: String -> String

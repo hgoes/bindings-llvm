@@ -98,6 +98,9 @@ adaptBuildInfo bi vers cflags ldflags libs libdir incdir
   = bi { cppOptions = ["-DHS_LLVM_VERSION="++versionToDefine vers]++
                       cppOptions bi
        , ccOptions = cflags++
+                     {-(if vers >= Version [3,0,0] []
+                      then ["-std=c++11"]
+                      else [])++-}
                      ["-DHS_LLVM_VERSION="++versionToDefine vers]++
                      ccOptions bi
        , ldOptions = ldflags++(ldOptions bi)
