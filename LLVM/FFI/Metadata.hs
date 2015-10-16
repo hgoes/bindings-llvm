@@ -1,10 +1,20 @@
 module LLVM.FFI.Metadata
+#if HS_LLVM_VERSION>=306
+       (Metadata(),
+        MetadataC(),
+        metadataGetID,
+        metadataDump,
+        MDNode(),
+#else        
        (MDNode(),
+#endif
         newMDNode,
         mdNodeGetNumOperands,
         mdNodeGetOperand,
+#if HS_LLVM_VERSION<306
         mdNodeIsFunctionLocal,
         mdNodeGetFunction,
+#endif
         MDString(),
         newMDString,
         mdStringGetString,
@@ -34,14 +44,29 @@ import Foreign.C
 #include "Helper.h"
 
 TYPE_LEAF(MDNode)
-SUBTYPE(Value,MDNode)
 TYPE_LEAF(MDString)
+#if HS_LLVM_VERSION>=306
+SUBTYPE(Metadata,MDNode)
+SUBTYPE(Metadata,MDString)
+#else
+SUBTYPE(Value,MDNode)
 SUBTYPE(Value,MDString)
 
 GETTYPE(MDNode)
 GETTYPE(MDString)
+#endif
 
 SPECIALIZE_IPLIST(NamedMDNode,capi)
+
+#if HS_LLVM_VERSION>=306
+class MetadataC m
+
+metadataGetID :: MetadataC m => Ptr m -> IO CUInt
+metadataGetID = metadataGetID_
+
+metadataDump :: MetadataC m => Ptr m -> IO ()
+metadataDump = metadataDump_
+#endif
 
 instance PairC CUInt (Ptr MDNode) where
   pairSize _ = sizeofPairUnsigned_MDNode

@@ -746,25 +746,42 @@ llvm version
                                 ,Right $ EnumLeaf "AD_Intel" "AsmDialectIntel"]
                    }]
         else [])++
+       (if version>=llvm3_6
+        then [Spec { specHeader = irInclude version "Metadata.h"
+                   , specNS = llvmNS
+                   , specName = "Metadata"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                [(memberFun { ftName = "dump"
+                                            , ftOverloaded = True
+                                            },"metadataDump_")
+                                ,(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getMetadataID"
+                                            , ftOverloaded = True
+                                            },"metadataGetID_")]
+                   }]
+        else [])++
        [Spec { specHeader = irInclude version "Metadata.h"
              , specNS = llvmNS
              , specName = "MDNode"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpec $
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getOperand"
                                       , ftArgs = [(False,normalT unsigned)]
                                       },"mdNodeGetOperand")
                           ,(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumOperands"
-                                      },"mdNodeGetNumOperands")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isFunctionLocal"
-                                      },"mdNodeIsFunctionLocal")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
-                                      , ftName = "getFunction"
-                                      },"mdNodeGetFunction")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDNode"
+                                      },"mdNodeGetNumOperands")]++
+                          (if version<llvm3_6
+                           then [(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isFunctionLocal"
+                                            },"mdNodeIsFunctionLocal")
+                                ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Function"
+                                            , ftName = "getFunction"
+                                            },"mdNodeGetFunction")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDNode"
                                       , ftName = "get"
                                       , ftArgs = if version>=llvm2_9
                                                  then [(False,normalT $ ref $ llvmType "LLVMContext")
@@ -1337,9 +1354,11 @@ llvm version
                                               | to' <- ["Value"
                                                       ,"Argument"
                                                       ,"BasicBlock"
-                                                      ,"InlineAsm"
-                                                      ,"MDNode"
-                                                      ,"MDString"]++
+                                                      ,"InlineAsm"]++
+                                                      (if version<llvm3_6
+                                                       then ["MDNode"
+                                                            ,"MDString"]
+                                                       else [])++
                                                       (if version<llvm3_5
                                                        then ["PseudoSourceValue"
                                                             ,"FixedStackPseudoSourceValue"]
@@ -1442,6 +1461,11 @@ llvm version
                                                       ,"StructType"
                                                       ,"FunctionType"
                                                       ,"IntegerType"]]++
+                                         (if version>=llvm3_6
+                                          then [(to',"Metadata")
+                                               | to' <- ["MDNode"
+                                                        ,"MDString"]]
+                                          else [])++
                                          (if version<llvm3_5
                                           then []
                                           else [("FixedStackPseudoSourceValue","PseudoSourceValue")])
