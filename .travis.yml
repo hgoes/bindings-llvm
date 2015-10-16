@@ -50,7 +50,7 @@ matrix:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
           packages: ['llvm-3.8-dev']
 before_install:
-  - sudo rm -f /usr/bin/llvm-config
+  - sudo rm -f `which llvm-config`
   - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
   - if [ ! -e /app ]; then sudo mkdir -p /app; sudo chown $USER /app; git clone https://github.com/mietek/halcyon.git /app/halcyon; fi
   - llvm-config --version
