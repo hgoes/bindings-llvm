@@ -4,10 +4,12 @@ module LLVM.FFI.ArrayRef
        ,ArrayRefC(..)
        ,newArrayRef
        ,arrayRefSize
+       ,withArrayRef
        ) where
 
 import Foreign
 import Foreign.C
+import Foreign.Marshal.Array
 
 import LLVM.FFI.Interface
 
@@ -46,6 +48,15 @@ instance ArrayRefC Word64 where
   arrayRefIndex' = arrayRefIndexWord64
   deleteArrayRef = deleteArrayRefWord64
 #endif
+
+withArrayRef :: (Storable a,ArrayRefC a) => [a] -> (Ptr (ArrayRef a) -> IO b) -> IO b
+withArrayRef xs f
+  = withArrayLen xs $
+    \len ptr -> do
+      ref <- newArrayRef' ptr (fromIntegral len)
+      res <- f ref
+      deleteArrayRef ref
+      return res
 
 #else
 module LLVM.FFI.ArrayRef () where
