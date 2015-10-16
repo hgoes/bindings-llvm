@@ -2443,6 +2443,7 @@ llvm version
                                       },"valueUseIterator"++tp++"NEq")
                           ,(memberFun { ftReturnType = normalT $ ref self
                                       , ftName = "operator++"
+                                      , ftIgnoreReturn = True
                                       },"valueUseIterator"++tp++"Next")]++
                           (if version<llvm3_5
                            then [(memberFun { ftReturnType = normalT $ ref $ llvmType "Use"
