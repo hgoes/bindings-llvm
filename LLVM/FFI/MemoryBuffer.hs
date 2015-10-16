@@ -5,7 +5,17 @@ module LLVM.FFI.MemoryBuffer
         getFileMemoryBuffer,
         getFileMemoryBufferSimple,
         getStdInMemoryBuffer,
+#if HS_LLVM_VERSION<=305
         getStdInMemoryBufferSimple
+#else
+        getStdInMemoryBufferSimple,
+        memoryBufferGetRef,
+        MemoryBufferRef(),
+        newEmptyMemoryBufferRef,
+        newMemoryBufferRef,
+        memoryBufferRefGetBuffer,
+        memoryBufferRefGetIdentifer
+#endif
        ) where
 
 import LLVM.FFI.Interface

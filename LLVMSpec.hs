@@ -786,7 +786,9 @@ llvm version
                                       , ftArgs = if version>=llvm2_9
                                                  then [(False,normalT $ ref $ llvmType "LLVMContext")
                                                       ,(False,normalT $ NamedType llvmNS "ArrayRef"
-                                                              [normalT $ ptr $ llvmType "Value"] False)]
+                                                              [if version>=llvm3_6
+                                                               then normalT $ ptr $ llvmType "Metadata"
+                                                               else normalT $ ptr $ llvmType "Value"] False)]
                                                  else [(False,normalT $ ref $ llvmType "LLVMContext")
                                                       ,(False,normalT $ ptr $ ptr $ llvmType "Value")
                                                       ,(False,normalT unsigned)]
@@ -1149,7 +1151,7 @@ llvm version
              , specNS = llvmNS
              , specName = "MemoryBuffer"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpec $
                           [(Destructor False,"deleteMemoryBuffer")
                           ,(memberFun { ftReturnType = normalT size_t 
                                       , ftName = "getBufferSize"
@@ -1216,9 +1218,32 @@ llvm version
                                            , ftArgs = []
                                            , ftStatic = True
                                            },"getStdInMemoryBuffer")
-                          ]
-             }
-       ,Spec { specHeader = "llvm/Support/SourceMgr.h"
+                          ]++
+                          (if version>=llvm3_6
+                           then [(memberFun { ftReturnType = normalT $ llvmType "MemoryBufferRef"
+                                            , ftName = "getMemBufferRef"
+                                            },"memoryBufferGetRef")]
+                           else [])
+             }]++
+       (if version>=llvm3_6
+        then [Spec { specHeader = "llvm/Support/MemoryBuffer.h"
+                   , specNS = llvmNS
+                   , specName = "MemoryBufferRef"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                [(Constructor [],"newEmptyMemoryBufferRef")
+                                ,(Constructor [(False,normalT $ llvmType "StringRef")
+                                              ,(False,normalT $ llvmType "StringRef")],
+                                  "newMemoryBufferRef")
+                                ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                            , ftName = "getBuffer"
+                                            },"memoryBufferRefGetBuffer")
+                                ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                            , ftName = "getIdentifier"
+                                            },"memoryBufferRefGetIdentifier")]
+                   }]
+        else [])++
+       [Spec { specHeader = "llvm/Support/SourceMgr.h"
              , specNS = llvmNS
              , specName = "SMDiagnostic"
              , specTemplateArgs = []
@@ -1335,8 +1360,12 @@ llvm version
              , specTemplateArgs = []
              , specType = classSpec $
                           [(memberFun { ftReturnType = normalT (ptr $ llvmType "Module") 
-                                      , ftName = "ParseIR"
-                                      , ftArgs = [(False,normalT (ptr $ llvmType "MemoryBuffer"))
+                                      , ftName = if version<llvm3_6
+                                                 then "ParseIR"
+                                                 else "parseIR"
+                                      , ftArgs = [(False,if version<llvm3_6
+                                                         then normalT (ptr $ llvmType "MemoryBuffer")
+                                                         else normalT $ llvmType "MemoryBufferRef")
                                                  ,(False,normalT (ref $ llvmType "SMDiagnostic"))
                                                  ,(False,normalT (ref $ llvmType "LLVMContext"))]
                                       , ftStatic = True
