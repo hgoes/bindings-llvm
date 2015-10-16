@@ -4,54 +4,69 @@ matrix:
     - env: LLVM_VERSION=2.8
       addons:
         apt:
-          packages: ['llvm-2.8-dev']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9','llvm-2.8-dev']
     - env: LLVM_VERSION=2.9
       addons:
         apt:
-          packages: ['llvm-2.9-dev']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9','llvm-2.9-dev']
     - env: LLVM_VERSION=3.0
       addons:
         apt:
-          packages: ['llvm-3.0-dev']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9','llvm-3.0-dev']
     - env: LLVM_VERSION=3.1
       addons:
         apt:
-          packages: ['llvm-3.1-dev']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9','llvm-3.1-dev']
     - env: LLVM_VERSION=3.2
       addons:
         apt:
-          packages: ['llvm-3.2-dev']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9','llvm-3.2-dev']
     - env: LLVM_VERSION=3.3
       addons:
         apt:
-          packages: ['llvm-3.3-dev']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9','llvm-3.3-dev']
     - env: LLVM_VERSION=3.4
       addons:
         apt:
-          packages: ['llvm-3.4-dev']
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-4.9','llvm-3.4-dev']
     - env: LLVM_VERSION=3.5
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5']
-          packages: ['llvm-3.5-dev']
+          packages: ['g++-4.9','llvm-3.5-dev']
     - env: LLVM_VERSION=3.6
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.6']
-          packages: ['llvm-3.6-dev']
+          packages: ['g++-4.9','llvm-3.6-dev']
     - env: LLVM_VERSION=3.7
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.7']
-          packages: ['llvm-3.7-dev']
+          packages: ['g++-4.9','llvm-3.7-dev']
     - env: LLVM_VERSION=3.8
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
-          packages: ['llvm-3.8-dev']
+          packages: ['g++-4.9','llvm-3.8-dev']
 before_install:
   - sudo rm -f `which llvm-config`
   - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
+  - sudo update-alternatives --remove-all gcc
+  - sudo update-alternatives --remove-all g++
+  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 10
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 10
+  - sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
+  - sudo update-alternatives --set cc /usr/bin/gcc
+  - sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
+  - sudo update-alternatives --set c++ /usr/bin/g++
   - if [ ! -e /app ]; then sudo mkdir -p /app; sudo chown $USER /app; git clone https://github.com/mietek/halcyon.git /app/halcyon; fi
   - llvm-config --version
 install:
