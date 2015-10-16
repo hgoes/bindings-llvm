@@ -1499,7 +1499,22 @@ llvm version
                           ,(memberFun { ftReturnType = constT $ ptr char
                                       , ftName = "getOpcodeName"
                                       , ftOverloaded = True
-                                      },"instructionGetOpcodeName_")]
+                                      },"instructionGetOpcodeName_")
+                          ,(memberFun { ftName = "insertBefore"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Instruction")]
+                                      , ftOverloaded = True
+                                      },"instructionInsertBefore_")
+                          ,(memberFun { ftName = "insertAfter"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Instruction")]
+                                      , ftOverloaded = True
+                                      },"instructionInsertAfter_")
+                          ,(memberFun { ftName = "moveBefore"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Instruction")]
+                                      , ftOverloaded = True
+                                      },"instructionMoveBefore_")
+                          ,(memberFun { ftName = "removeFromParent"
+                                      , ftOverloaded = True
+                                      },"instructionRemoveFromParent_")]
              }]++
     (if version>=llvm3_0
      then [Spec { specHeader = irInclude version "Instructions.h"
@@ -1609,12 +1624,25 @@ llvm version
                                       , ftName = "getArgOperand"
                                       , ftArgs = [(False,normalT unsigned)]
                                       },"callInstGetArgOperand_")
+                          ,(memberFun { ftReturnType = normalT void
+                                      , ftName = "setArgOperand"
+                                      , ftArgs = [(False,normalT unsigned)
+                                                 ,(True,normalT $ ptr $ llvmType "Value")]
+                                      },"callInstSetArgOperand_")
                           ,(memberFun { ftReturnType = normalT int
                                       , ftName = "getCallingConv"
                                       },"callInstGetCallingConv_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "getCalledValue"
                                       },"callInstGetCalledValue")
+                          ,(memberFun { ftReturnType = normalT void
+                                      , ftName = "setCalledFunction"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                      },"callInstSetCalledFunction_")
+                          {-,(memberFun { ftReturnType = normalT void
+                                      , ftName = "mutateFunctionType"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "FunctionType")]
+                                      },"callInstMutateFunctionType")-}
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "CallInst"
                                       , ftName = "Create"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")

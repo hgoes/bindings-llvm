@@ -36,6 +36,10 @@ module LLVM.FFI.Instruction
          instructionIsUsedOutsideOfBlock,
          instructionGetOpcode,
          instructionGetOpcodeName,
+         instructionRemoveFromParent,
+         instructionInsertBefore,
+         instructionInsertAfter,
+         instructionMoveBefore,
 #if HS_LLVM_VERSION>=300
          -- ** Atomic Compare & Exchange Instruction
          AtomicCmpXchgInst(),
@@ -72,8 +76,11 @@ module LLVM.FFI.Instruction
          callInstIsTailCall,
          callInstGetNumArgOperands,
          callInstGetArgOperand,
+         callInstSetArgOperand,
          callInstGetCallingConv,
          callInstGetCalledValue,
+         callInstSetCalledFunction,
+         --callInstMutateFunctionType,
          isMallocLikeFn,
          getMallocAllocatedType,
          getMallocArraySize,
@@ -345,6 +352,21 @@ instructionGetOpcodeName i = do
   strPtr <- instructionGetOpcodeName_ i
   peekCString strPtr
 
+instructionRemoveFromParent :: InstructionC i => Ptr i -> IO ()
+instructionRemoveFromParent = instructionRemoveFromParent_
+
+instructionInsertBefore :: (InstructionC i,InstructionC before)
+                        => Ptr i -> Ptr before -> IO ()
+instructionInsertBefore = instructionInsertBefore_
+
+instructionInsertAfter :: (InstructionC i,InstructionC after)
+                       => Ptr i -> Ptr after -> IO ()
+instructionInsertAfter = instructionInsertAfter_
+
+instructionMoveBefore :: (InstructionC i,InstructionC before)
+                      => Ptr i -> Ptr before -> IO ()
+instructionMoveBefore = instructionMoveBefore_
+
 newSelectInst :: (ValueC c,ValueC s1,ValueC s2) => Ptr c -> Ptr s1 -> Ptr s2 -> Ptr Twine -> IO (Ptr SelectInst)
 newSelectInst = newSelectInst_
 
@@ -516,6 +538,9 @@ landingPadInstGetNumClauses = fmap toInteger . landingPadInstGetNumClauses_
 
 callInstGetCallingConv :: Ptr CallInst -> IO CallingConv
 callInstGetCallingConv = fmap toCallingConv . callInstGetCallingConv_
+
+callInstSetCalledFunction :: ValueC v => Ptr CallInst -> Ptr v -> IO ()
+callInstSetCalledFunction = callInstSetCalledFunction_
 
 invokeInstGetCallingConv :: Ptr InvokeInst -> IO CallingConv
 invokeInstGetCallingConv = fmap toCallingConv . invokeInstGetCallingConv_
@@ -860,6 +885,9 @@ callInstGetNumArgOperands ptr = fmap toInteger (callInstGetNumArgOperands_ ptr)
 
 callInstGetArgOperand :: Ptr CallInst -> Integer -> IO (Ptr Value)
 callInstGetArgOperand ptr idx = callInstGetArgOperand_ ptr (fromInteger idx)
+
+callInstSetArgOperand :: ValueC v => Ptr CallInst -> Integer -> Ptr v -> IO ()
+callInstSetArgOperand ptr idx val = callInstSetArgOperand_ ptr (fromInteger idx) val
 
 getFCmpOp :: Ptr FCmpInst -> IO FCmpOp
 getFCmpOp ptr = fmap toFCmpOp (cmpInstGetPredicate_ ptr)
