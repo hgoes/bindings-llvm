@@ -19,6 +19,7 @@ module LLVM.FFI.Constant
 #if HS_LLVM_VERSION>=303
         constantExprAsInstruction,
 #endif
+        getPointerCast,
         {-BinaryConstantExpr(),
         CompareConstantExpr(),
         ExtractElementConstantExpr(),
@@ -221,3 +222,6 @@ instance GetType GlobalVariable where
 GETTYPE(UndefValue)
 
 SPECIALIZE_IPLIST(GlobalVariable,capi)
+
+getPointerCast :: (ConstantC c,TypeC t) => Ptr c -> Ptr t -> IO (Ptr Constant)
+getPointerCast = getPointerCast_

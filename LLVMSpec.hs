@@ -919,7 +919,13 @@ llvm version
                                             , ftName = "getAsInstruction"
                                             , ftOverloaded = True
                                             },"constantExprAsInstruction_")]
-                           else [])
+                           else [])++
+                          [(memberFun { ftStatic = True
+                                      , ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                      , ftName = "getPointerCast"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Constant")
+                                                 ,(True,normalT $ ptr $ llvmType "Type")]
+                                      },"getPointerCast_")]
              }
        ,Spec { specHeader = irInclude version "Constants.h"
              , specNS = llvmNS
