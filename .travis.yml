@@ -60,15 +60,7 @@ matrix:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
           packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
 install:
-  - sudo rm -f `which llvm-config`
-  - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
-  #- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 10
-  #- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 10
-  #- sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
-  #- sudo update-alternatives --set cc /usr/bin/gcc
-  #- sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
-  #- sudo update-alternatives --set c++ /usr/bin/g++
-  - llvm-config --version
+  - llvm-config-${LLVM_VERSION} --version
   - cabal install cpphs
   - cabal install --only-dependencies
 script:
@@ -76,6 +68,4 @@ script:
   - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="-pgmc gcc-4.9"
   - ./setup build --verbose=2
   - ./setup test
-cache:
-  directories:
-  - /app
+sudo: false
