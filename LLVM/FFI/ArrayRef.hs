@@ -15,7 +15,7 @@ import LLVM.FFI.Interface
 
 #include "Helper.h"
 
-class ArrayRefC a where
+class Storable a => ArrayRefC a where
   newArrayRef' :: Ptr a -> CSize -> IO (Ptr (ArrayRef a))
   newArrayRefEmpty :: IO (Ptr (ArrayRef a))
   arrayRefSize' :: Ptr (ArrayRef a) -> IO CSize
@@ -49,14 +49,14 @@ instance ArrayRefC Word64 where
   deleteArrayRef = deleteArrayRefWord64
 #endif
 
-withArrayRef :: (Storable a,ArrayRefC a) => [a] -> (Ptr (ArrayRef a) -> IO b) -> IO b
-withArrayRef xs f
-  = withArrayLen xs $
-    \len ptr -> do
-      ref <- newArrayRef' ptr (fromIntegral len)
-      res <- f ref
-      deleteArrayRef ref
-      return res
+withArrayRef :: ArrayRefC a => [a]
+             -> (Ptr (ArrayRef a) -> IO b)
+             -> IO b
+withArrayRef xs f = withArrayLen xs $ \len arr -> do
+  arrRef <- newArrayRef' arr (fromIntegral len)
+  res <- f arrRef
+  deleteArrayRef arrRef
+  return res
 
 #else
 module LLVM.FFI.ArrayRef () where
