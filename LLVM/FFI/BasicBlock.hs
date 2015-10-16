@@ -5,6 +5,7 @@ module LLVM.FFI.BasicBlock
        ,basicBlockGetParent
        ,getInstList
        ,getTerminator
+       ,getFirstNonPHI
        )where
 
 import LLVM.FFI.Interface

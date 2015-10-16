@@ -699,6 +699,9 @@ llvm version
                                       , ftStatic = True
                                       },"createBasicBlock")
                           ,(Destructor False,"deleteBasicBlock")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Instruction"
+                                      , ftName = "getFirstNonPHI"
+                                      },"getFirstNonPHI")
                           ]
              }
        ,Spec { specHeader = irInclude version "InlineAsm.h"
