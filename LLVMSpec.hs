@@ -5037,7 +5037,9 @@ llvm version
                       ,(False,normalT $ ptr $ llvmType "ClonedCodeInfo")]
                       "cloneBasicBlock"
          }]++
-   [Spec { specHeader = irInclude version "ValueMap.h"
+   [Spec { specHeader = if version>=llvm3_5
+                        then irInclude version "ValueMap.h"
+                        else "llvm/ADT/ValueMap.h"
          , specNS = llvmNS
          , specName = "ValueMap"
          , specTemplateArgs = [keyT,valueT]

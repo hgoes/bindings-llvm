@@ -49,6 +49,9 @@ import LLVM.FFI.CPP.String
 import Foreign.Ptr
 import Foreign.C
 import Data.Word
+#if HS_LLVM_VERSION>=306
+import LLVM.FFI.CPP.UniquePtr
+#endif
 
 class ExecutionEngineC t
 
@@ -62,7 +65,11 @@ newExecutionEngine mod forceInterp errs lvl arg = newExecutionEngine_ mod forceI
 deleteExecutionEngine :: ExecutionEngineC t => Ptr t -> IO ()
 deleteExecutionEngine = deleteExecutionEngine_
 
+#if HS_LLVM_VERSION<306
 executionEngineAddModule :: ExecutionEngineC t => Ptr t -> Ptr Module -> IO ()
+#else
+executionEngineAddModule :: ExecutionEngineC t => Ptr t -> Ptr (Unique_ptr Module) -> IO ()
+#endif
 executionEngineAddModule = executionEngineAddModule_
 
 executionEngineRemoveModule :: ExecutionEngineC t => Ptr t -> Ptr Module -> IO Bool
