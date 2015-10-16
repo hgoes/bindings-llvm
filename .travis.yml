@@ -59,8 +59,6 @@ matrix:
 before_install:
   - sudo rm -f `which llvm-config`
   - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
-  - sudo update-alternatives --remove-all gcc
-  - sudo update-alternatives --remove-all g++
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 10
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 10
   - sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
