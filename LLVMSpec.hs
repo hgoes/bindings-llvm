@@ -650,6 +650,11 @@ llvm version
                                          , ftName = "use_end"
                                          , ftOverloaded = True
                                          },"valueUseEnd_")
+                             ,(memberFun { ftReturnType = normalT void
+                                         , ftName = "replaceAllUsesWith"
+                                         , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                         , ftOverloaded = True
+                                         },"valueReplaceAllUsesWith_")
                              ]
              }
        ,Spec { specHeader = irInclude version "Argument.h"

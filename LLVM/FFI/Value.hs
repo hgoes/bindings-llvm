@@ -1,6 +1,7 @@
 {-# OPTIONS -cpp -pgmPcpphs -optP--cpp #-}
 module LLVM.FFI.Value
        (Value(),ValueC(),
+        valueReplaceAllUsesWith,
         Argument(),
         createArgument,
         argumentGetParent,
@@ -175,3 +176,6 @@ valueUseIteratorNext = valueUseIteratorUseNext
 inlineAsmGetDialect :: Ptr InlineAsm -> IO AsmDialect
 inlineAsmGetDialect = fmap toAsmDialect . inlineAsmGetDialect_
 #endif
+
+valueReplaceAllUsesWith :: (ValueC orig,ValueC repl) => Ptr orig -> Ptr repl -> IO ()
+valueReplaceAllUsesWith = valueReplaceAllUsesWith_
