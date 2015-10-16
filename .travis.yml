@@ -68,7 +68,7 @@ before_install:
   - if [ ! -e /app ]; then sudo mkdir -p /app; sudo chown $USER /app; git clone https://github.com/mietek/halcyon.git /app/halcyon; fi
   - llvm-config --version
 install:
-  - /app/halcyon/halcyon build --sandbox-extra-apps=cpphs
+  - /app/halcyon/halcyon build --sandbox-extra-apps=cpphs --extra-configure-flags="--verbose 3"
   - /app/halcyon/halcyon paths > halcyon-env
   - ln -sf /app/sandbox/cabal.sandbox.config cabal.sandbox.config
 script:
