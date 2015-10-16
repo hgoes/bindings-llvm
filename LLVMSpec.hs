@@ -443,6 +443,20 @@ llvm version
                                    then ["X86_MMX"]
                                    else [])++
                                   ["Label","Metadata"]
+                          ]++
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Type"
+                                      , ftName = "get"++tp++"Ty"
+                                      , ftStatic = True
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")]
+                                      },"get"++tp++"Type")
+                          | tp <- ["Void"]++(if version>=llvm3_1
+                                             then ["Half"]
+                                             else [])++
+                                  ["Float","Double","X86_FP80","FP128","PPC_FP128"]++
+                                  (if version>=llvm2_9
+                                   then ["X86_MMX"]
+                                   else [])++
+                                  ["Label","Metadata"]
                           ]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"

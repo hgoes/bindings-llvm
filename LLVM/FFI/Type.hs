@@ -4,21 +4,31 @@ module LLVM.FFI.Type
         ,TypeC()
         ,typeGetContext
         ,isVoidType
+        ,getVoidType
 #if HS_LLVM_VERSION>=301
         ,isHalfType
+        ,getHalfType
 #endif
         ,isFloatType
+        ,getFloatType
         ,isDoubleType
+        ,getDoubleType
         ,isX86_FP80Type
+        ,getX86_FP80Type
         ,isFP128Type
+        ,getFP128Type
         ,isPPC_FP128Type
+        ,getPPC_FP128Type
         ,isFloatingPointType
 #if HS_LLVM_VERSION>=209
         ,isX86_MMXType
+        ,getX86_MMXType
 #endif
         ,isLabelType
+        ,getLabelType
         ,isMetadataType
-        ,typeDump 
+        ,getMetadataType
+        ,typeDump
          -- ** Integer Type
         ,IntegerType()
         ,getBitWidth
