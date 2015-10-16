@@ -3,6 +3,7 @@ module LLVM.FFI.IPList
         IPListC(..),
         ipListSize,
         ipListToList,
+        ipListToLazyList,
         Ilist_iterator(),
         IListIteratorC(..),
         IListNodeC(..)
@@ -11,6 +12,7 @@ module LLVM.FFI.IPList
 import LLVM.FFI.Interface
 import Foreign
 import Foreign.C
+import System.IO.Unsafe (unsafeInterleaveIO)
 
 class IPListC a where
   ipListSize' :: Ptr (Iplist a) -> IO CSize
@@ -28,6 +30,8 @@ class IListIteratorC a where
   iListIteratorDeref :: Ptr (Ilist_iterator a) -> IO (Ptr a)
   iListIteratorNext :: Ptr (Ilist_iterator a)
                        -> IO (Ptr (Ilist_iterator a))
+  iListIteratorPrev :: Ptr (Ilist_iterator a)
+                    -> IO (Ptr (Ilist_iterator a))
   iListIteratorEq :: Ptr (Ilist_iterator a)
                      -> Ptr (Ilist_iterator a)
                      -> IO Bool
@@ -54,4 +58,21 @@ ipListToList list = do
                  x <- iListIteratorDeref cur
                  nxt <- iListIteratorNext cur
                  xs <- toList' nxt end
+                 return (x:xs))
+
+ipListToLazyList :: (IPListC a,IListIteratorC a) 
+                => Ptr (Iplist a) -> IO [Ptr a]
+ipListToLazyList list = do
+  begin <- ipListBegin list
+  end <- ipListEnd list
+  toList' begin end
+  where
+    toList' cur end = do
+      isEnd <- iListIteratorEq cur end
+      if isEnd
+        then return []
+        else (do
+                 x <- iListIteratorDeref cur
+                 nxt <- iListIteratorNext cur
+                 xs <- unsafeInterleaveIO $ toList' nxt end
                  return (x:xs))

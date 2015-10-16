@@ -179,6 +179,10 @@ llvm version
                                                             NamedType llvmNS "ilist_iterator" [rtp] False
                                            , ftName = "operator++"
                                            },"listIterator"++tp++"Next")
+                               ,(memberFun { ftReturnType = normalT $ RefType $ 
+                                                            NamedType llvmNS "ilist_iterator" [rtp] False
+                                           , ftName = "operator--"
+                                           },"listIterator"++tp++"Prev")
                                ,(memberFun { ftReturnType = normalT bool
                                            , ftName = "operator=="
                                            , ftArgs = [(False,constT $ RefType $ 
@@ -430,7 +434,7 @@ llvm version
                                       , ftOverloaded = True
                                       , ftPure = True
                                       },"is"++tp++"Ty_")
-                           | tp <- ["Void"]++(if version>=llvm3_1
+                          | tp <- ["Void"]++(if version>=llvm3_1
                                              then ["Half"]
                                              else [])++
                                   ["Float","Double","X86_FP80","FP128","PPC_FP128"

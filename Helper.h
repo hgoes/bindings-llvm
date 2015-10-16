@@ -51,6 +51,7 @@ instance IPListC name where {\
 instance IListIteratorC name where {\
   iListIteratorDeref = listIterator##name##Deref ;\
   iListIteratorNext = listIterator##name##Next ;\
+  iListIteratorPrev = listIterator##name##Prev ;\
   iListIteratorEq = listIterator##name##Eq ;\
   iListIteratorNEq = listIterator##name##NEq\
 } ;\
