@@ -73,8 +73,8 @@ install:
   - cabal install --only-dependencies
 script:
   - ghc --make Setup.hs -o ./setup
-  - ./setup configure --user --enable-tests --verbose=3 --with-llvm-config=llvm-config-${LLVM_VERSION}
-  - ./setup build --verbose=3
+  - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION}
+  - ./setup build --verbose=2
   - ./setup test
 cache:
   directories:
