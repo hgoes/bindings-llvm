@@ -3572,13 +3572,15 @@ llvm version
                         , ftName = "getPointerToBasicBlock"
                         , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
                         , ftOverloaded = True
-                        },"executionEngineGetPointerToBasicBlock_")
-            ,(memberFun { ftName = "runJITOnFunction"
-                        , ftArgs = [(False,normalT $ ptr $ llvmType "Function")
-                                   ,(False,normalT $ ptr $ llvmType "MachineCodeInfo")]
-                        , ftOverloaded = True
-                        },"executionEngineRunJITOnFunction_")
-            ,(memberFun { ftReturnType = constT $ ptr $ llvmType "GlobalValue"
+                        },"executionEngineGetPointerToBasicBlock_")]++                        
+            (if version<llvm3_6
+             then [(memberFun { ftName = "runJITOnFunction"
+                              , ftArgs = [(False,normalT $ ptr $ llvmType "Function")
+                                         ,(False,normalT $ ptr $ llvmType "MachineCodeInfo")]
+                              , ftOverloaded = True
+                              },"executionEngineRunJITOnFunction_")]
+             else [])++
+            [(memberFun { ftReturnType = constT $ ptr $ llvmType "GlobalValue"
                         , ftName = "getGlobalValueAtAddress"
                         , ftArgs = [(False,normalT $ ptr void)]
                         , ftOverloaded = True
@@ -3712,27 +3714,29 @@ llvm version
           , specType = EnumSpec (EnumNode "EngineKind" [Right $ EnumLeaf "JIT" "JIT"
                                                        ,Right $ EnumLeaf "Interpreter" "Interpreter"
                                                        ,Right $ EnumLeaf "Either" "EitherEngine"])
-          }
-    ,Spec { specHeader = "llvm/CodeGen/MachineCodeInfo.h"
-          , specNS = llvmNS
-          , specName = "MachineCodeInfo"
-          , specTemplateArgs = []
-          , specType = classSpec
-                       [(Constructor [],"newMachineCodeInfo")
-                       ,(memberFun { ftName = "setSize"
-                                   , ftArgs = [(False,normalT size_t)]
-                                   },"machineCodeInfoSetSize")
-                       ,(memberFun { ftName = "setAddress"
-                                   , ftArgs = [(False,normalT $ ptr void)]
-                                   },"machineCodeInfoSetAddress")
-                       ,(memberFun { ftReturnType = normalT size_t
-                                   , ftName = "size"
-                                   },"machineCodeInfoGetSize")
-                       ,(memberFun { ftReturnType = normalT $ ptr void
-                                   , ftName = "address"
-                                   },"machineCodeInfoGetAddress")]
-          }
-    ,Spec { specHeader = "llvm/Pass.h"
+          }]++
+    (if version<llvm3_6
+     then [Spec { specHeader = "llvm/CodeGen/MachineCodeInfo.h"
+                , specNS = llvmNS
+                , specName = "MachineCodeInfo"
+                , specTemplateArgs = []
+                , specType = classSpec
+                             [(Constructor [],"newMachineCodeInfo")
+                             ,(memberFun { ftName = "setSize"
+                                         , ftArgs = [(False,normalT size_t)]
+                                         },"machineCodeInfoSetSize")
+                             ,(memberFun { ftName = "setAddress"
+                                         , ftArgs = [(False,normalT $ ptr void)]
+                                         },"machineCodeInfoSetAddress")
+                             ,(memberFun { ftReturnType = normalT size_t
+                                         , ftName = "size"
+                                         },"machineCodeInfoGetSize")
+                             ,(memberFun { ftReturnType = normalT $ ptr void
+                                         , ftName = "address"
+                                         },"machineCodeInfoGetAddress")]
+                }]
+     else [])++
+    [Spec { specHeader = "llvm/Pass.h"
           , specNS = llvmNS
           , specName = "PassKind"
           , specTemplateArgs = []

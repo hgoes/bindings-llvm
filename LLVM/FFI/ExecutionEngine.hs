@@ -25,7 +25,9 @@ module LLVM.FFI.ExecutionEngine
        ,executionEngineGetPointerToFunction
        ,executionEngineGetPointerToBasicBlock
        ,executionEngineGetPointerToFunctionOrStub
+#if HS_LLVM_VERSION<306
        ,executionEngineRunJITOnFunction
+#endif
        ,executionEngineGetGlobalValueAtAddress
        ,executionEngineStoreValueToMemory
        ,executionEngineInitializeMemory
@@ -110,8 +112,10 @@ executionEngineUpdateGlobalMapping = executionEngineUpdateGlobalMapping_
 executionEngineGetPointerToBasicBlock :: ExecutionEngineC t => Ptr t -> Ptr BasicBlock -> IO (Ptr ())
 executionEngineGetPointerToBasicBlock = executionEngineGetPointerToBasicBlock_
 
+#if HS_LLVM_VERSION<306
 executionEngineRunJITOnFunction :: ExecutionEngineC t => Ptr t -> Ptr Function -> Ptr MachineCodeInfo -> IO ()
 executionEngineRunJITOnFunction = executionEngineRunJITOnFunction_
+#endif
 
 executionEngineGetGlobalValueAtAddress :: ExecutionEngineC t => Ptr t -> Ptr () -> IO (Ptr GlobalValue)
 executionEngineGetGlobalValueAtAddress = executionEngineGetGlobalValueAtAddress_
