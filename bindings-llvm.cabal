@@ -78,6 +78,8 @@ library
     LLVM.FFI.Attributes
     LLVM.FFI.CPP.UniquePtr
     LLVM.FFI.PassRegistry
+    LLVM.FFI.ValueMap
+    LLVM.FFI.Cloning
   other-modules:
     LLVM.FFI.Interface
 

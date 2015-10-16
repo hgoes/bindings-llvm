@@ -5,6 +5,7 @@ module LLVM.FFI
        ,module LLVM.FFI.ArrayRef
        ,module LLVM.FFI.Attributes
        ,module LLVM.FFI.BasicBlock
+       ,module LLVM.FFI.Cloning
        ,module LLVM.FFI.CPP
        ,module LLVM.FFI.CPP.String
        ,module LLVM.FFI.Constant
@@ -46,7 +47,8 @@ module LLVM.FFI
        ,module LLVM.FFI.Type
        ,module LLVM.FFI.Use
        ,module LLVM.FFI.User
-       ,module LLVM.FFI.Value) where
+       ,module LLVM.FFI.Value
+       ,module LLVM.FFI.ValueMap) where
 
 import LLVM.FFI.APFloat
 import LLVM.FFI.APInt
@@ -54,6 +56,7 @@ import LLVM.FFI.AliasAnalysis
 import LLVM.FFI.ArrayRef
 import LLVM.FFI.Attributes
 import LLVM.FFI.BasicBlock
+import LLVM.FFI.Cloning
 import LLVM.FFI.CPP
 import LLVM.FFI.CPP.String
 import LLVM.FFI.Constant
@@ -96,3 +99,4 @@ import LLVM.FFI.Type
 import LLVM.FFI.Use
 import LLVM.FFI.User
 import LLVM.FFI.Value
+import LLVM.FFI.ValueMap

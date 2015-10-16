@@ -4898,4 +4898,55 @@ llvm version
                             ,(SizeOf,"aaMDNodesSizeOf")
                             ,(AlignOf,"aaMDNodesAlignOf")]
                }]
-    else [])
+    else [])++
+   [Spec { specHeader = irInclude version "ValueHandle.h"
+         , specNS = llvmNS
+         , specName = "WeakVH"
+         , specTemplateArgs = []
+         , specType = classSpec $
+                      [(Constructor [],"newWeakVHEmpty")
+                      ,(Constructor [(True,normalT $ ptr $ llvmType "Value")],"newWeakVH_")]
+         }
+   ,Spec { specHeader = "llvm/Transforms/Utils/Cloning.h"
+         , specNS = llvmNS
+         , specName = "ClonedCodeInfo"
+         , specTemplateArgs = []
+         , specType = classSpecCustom
+                      "data ClonedCodeInfo = ClonedCodeInfo { containsCalls :: Bool, containsDynamicAllocas :: Bool }"
+                      [(Constructor [],"newClonedCodeInfo")
+                      ,(Getter "ContainsCalls" (normalT bool) False,"clonedCodeInfoGetContainsCalls")
+                      ,(Setter "ContainsCalls" (normalT bool),"clonedCodeInfoSetContainsCalls")
+                      ,(Getter "ContainsDynamicAllocas" (normalT bool) False,
+                        "clonedCodeInfoGetContainsDynamicAllocas")
+                      ,(Setter "ContainsDynamicAllocas" (normalT bool),
+                        "clonedCodeInfoSetContainsDynamicAllocas")
+                      ,(SizeOf,"clonedCodeInfoSizeOf")
+                      ,(AlignOf,"clonedCodeInfoAlignOf")]
+         }
+   ,Spec { specHeader = "llvm/Transforms/Utils/Cloning.h"
+         , specNS = llvmNS
+         , specName = "CloneBasicBlock"
+         , specTemplateArgs = []
+         , specType = GlobalFunSpec
+                      (normalT $ ptr $ llvmType "BasicBlock")
+                      [(False,constT $ ptr $ llvmType "BasicBlock")
+                      ,(False,normalT $ ref $ NamedType llvmNS "ValueMap"
+                                              [constT $ ptr $ llvmType "Value"
+                                              ,normalT $ llvmType "WeakVH"] False)
+                      ,(False,constT $ ref $ llvmType "Twine")
+                      ,(False,normalT $ ptr $ llvmType "Function")
+                      ,(False,normalT $ ptr $ llvmType "ClonedCodeInfo")]
+                      "cloneBasicBlock"
+         }]++
+   [Spec { specHeader = irInclude version "ValueMap.h"
+         , specNS = llvmNS
+         , specName = "ValueMap"
+         , specTemplateArgs = [keyT,valueT]
+         , specType = classSpec $
+                      [(Constructor [],"newValueMap"++name)
+                      ,(Destructor False,"deleteValueMap"++name)
+                      ,(memberFun { ftReturnType = normalT bool
+                                  , ftName = "empty"
+                                  },"valueMapEmpty"++name)]
+         }
+   | (keyT,valueT,name) <- [(constT $ ptr $ llvmType "Value",normalT $ llvmType "WeakVH","ValueToValue")] ]
