@@ -38,6 +38,7 @@ module LLVM.FFI.Type
          -- *** Struct Type
         ,StructType()
         ,newStructType
+        ,newNamedStructType
         ,structTypeIsPacked
 #if HS_LLVM_VERSION>=300
         ,structTypeHasName
