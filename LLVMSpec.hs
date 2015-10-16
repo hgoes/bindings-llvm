@@ -4995,7 +4995,9 @@ llvm version
                }]
     else [])++
    (if version>=llvm3_1
-    then [Spec { specHeader = irInclude version "ValueHandle.h"
+    then [Spec { specHeader = if version>=llvm3_5
+                              then irInclude version "ValueHandle.h"
+                              else "llvm/Support/ValueHandle.h"
                , specNS = llvmNS
                , specName = "WeakVH"
                , specTemplateArgs = []

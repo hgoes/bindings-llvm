@@ -2,7 +2,9 @@ module LLVM.FFI.ExecutionEngine
        (ExecutionEngine()
        ,ExecutionEngineC()
        ,deleteExecutionEngine
+#if HS_LLVM_VERSION<306
        ,newExecutionEngine
+#endif
        ,executionEngineAddModule
        ,executionEngineRemoveModule
 #if HS_LLVM_VERSION >= 302
@@ -23,7 +25,9 @@ module LLVM.FFI.ExecutionEngine
        ,executionEngineGetPointerToGlobal
        ,executionEngineGetPointerToGlobalIfAvailable
        ,executionEngineGetPointerToFunction
+#if HS_LLVM_VERSION<306
        ,executionEngineGetPointerToBasicBlock
+#endif
        ,executionEngineGetPointerToFunctionOrStub
 #if HS_LLVM_VERSION<306
        ,executionEngineRunJITOnFunction
@@ -31,8 +35,10 @@ module LLVM.FFI.ExecutionEngine
        ,executionEngineGetGlobalValueAtAddress
        ,executionEngineStoreValueToMemory
        ,executionEngineInitializeMemory
+#if HS_LLVM_VERSION<306
        ,executionEngineRecompileAndRelinkFunction
        ,executionEngineFreeMachineCodeForFunction
+#endif
        ,executionEngineGetOrEmitGlobalVariable
        ) where
 
@@ -48,8 +54,10 @@ class ExecutionEngineC t
 
 instance ExecutionEngineC ExecutionEngine
 
+#if HS_LLVM_VERSION<306
 newExecutionEngine :: Ptr Module -> Bool -> Ptr CPPString -> CodeGenOptLevel -> Bool -> IO (Ptr ExecutionEngine)
 newExecutionEngine mod forceInterp errs lvl arg = newExecutionEngine_ mod forceInterp errs (fromCodeGenOptLevel lvl) arg
+#endif
 
 deleteExecutionEngine :: ExecutionEngineC t => Ptr t -> IO ()
 deleteExecutionEngine = deleteExecutionEngine_
@@ -109,10 +117,10 @@ executionEngineClearAllGlobalMappings = executionEngineClearAllGlobalMappings_
 executionEngineUpdateGlobalMapping :: (ExecutionEngineC t,GlobalValueC v) => Ptr t -> Ptr v -> Ptr () -> IO (Ptr ())
 executionEngineUpdateGlobalMapping = executionEngineUpdateGlobalMapping_
 
+#if HS_LLVM_VERSION<306
 executionEngineGetPointerToBasicBlock :: ExecutionEngineC t => Ptr t -> Ptr BasicBlock -> IO (Ptr ())
 executionEngineGetPointerToBasicBlock = executionEngineGetPointerToBasicBlock_
 
-#if HS_LLVM_VERSION<306
 executionEngineRunJITOnFunction :: ExecutionEngineC t => Ptr t -> Ptr Function -> Ptr MachineCodeInfo -> IO ()
 executionEngineRunJITOnFunction = executionEngineRunJITOnFunction_
 #endif
@@ -126,11 +134,13 @@ executionEngineStoreValueToMemory = executionEngineStoreValueToMemory_
 executionEngineInitializeMemory :: (ExecutionEngineC t,ConstantC c) => Ptr t -> Ptr c -> Ptr () -> IO ()
 executionEngineInitializeMemory = executionEngineInitializeMemory_
 
+#if HS_LLVM_VERSION<306
 executionEngineRecompileAndRelinkFunction :: (ExecutionEngineC t) => Ptr t -> Ptr Function -> IO (Ptr ())
 executionEngineRecompileAndRelinkFunction = executionEngineRecompileAndRelinkFunction_
 
 executionEngineFreeMachineCodeForFunction :: (ExecutionEngineC t) => Ptr t -> Ptr Function -> IO ()
 executionEngineFreeMachineCodeForFunction = executionEngineFreeMachineCodeForFunction_
+#endif
 
 executionEngineGetOrEmitGlobalVariable :: (ExecutionEngineC t) => Ptr t -> Ptr GlobalVariable -> IO (Ptr ())
 executionEngineGetOrEmitGlobalVariable = executionEngineGetOrEmitGlobalVariable_
