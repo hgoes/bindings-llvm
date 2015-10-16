@@ -43,31 +43,31 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5']
-          packages: ['g++-4.9','llvm-3.5-dev']
+          packages: ['g++-4.9','libedit-dev','llvm-3.5-dev']
     - env: LLVM_VERSION=3.6
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.6']
-          packages: ['g++-4.9','llvm-3.6-dev']
+          packages: ['g++-4.9','libedit-dev','llvm-3.6-dev']
     - env: LLVM_VERSION=3.7
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.7']
-          packages: ['g++-4.9','llvm-3.7-dev']
+          packages: ['g++-4.9','libedit-dev','llvm-3.7-dev']
     - env: LLVM_VERSION=3.8
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
-          packages: ['g++-4.9','llvm-3.8-dev']
+          packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
 install:
   - sudo rm -f `which llvm-config`
   - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 10
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 10
-  - sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
-  - sudo update-alternatives --set cc /usr/bin/gcc
-  - sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
-  - sudo update-alternatives --set c++ /usr/bin/g++
+  #- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 10
+  #- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 10
+  #- sudo update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 30
+  #- sudo update-alternatives --set cc /usr/bin/gcc
+  #- sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
+  #- sudo update-alternatives --set c++ /usr/bin/g++
   - llvm-config --version
   - cabal install cpphs
   - cabal install --only-dependencies
