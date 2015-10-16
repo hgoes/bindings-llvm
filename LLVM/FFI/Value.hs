@@ -48,6 +48,7 @@ import LLVM.FFI.StringRef
 import LLVM.FFI.IPList
 import LLVM.FFI.CPP
 import LLVM.FFI.SmallVector
+import LLVM.FFI.ArrayRef
 
 import Foreign
 import Foreign.C
@@ -89,6 +90,8 @@ instance GetType InlineAsm where
 GETTYPE(PseudoSourceValue)
 GETTYPE(FixedStackPseudoSourceValue)
 #endif
+
+SPECIALIZE_ARRAYREF(Value)
 
 deleteValue :: ValueC t => Ptr t -> IO ()
 deleteValue = deleteValue_

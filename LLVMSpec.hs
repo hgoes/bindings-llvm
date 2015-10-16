@@ -128,8 +128,9 @@ llvm version
                              ]
                 }
            | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
-                        ,("CChar",constT $ ptr char)
-                        ,("Word64",normalT uint64_t)]
+                         ,("Value",normalT $ ptr $ llvmType "Value")
+                         ,("CChar",constT $ ptr char)
+                         ,("Word64",normalT uint64_t)]
           ]
      else [])++
     concat [[Spec { specHeader = "llvm/ADT/ilist.h"
