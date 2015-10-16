@@ -4936,15 +4936,17 @@ llvm version
                             ,(AlignOf,"aaMDNodesAlignOf")]
                }]
     else [])++
-   [Spec { specHeader = irInclude version "ValueHandle.h"
-         , specNS = llvmNS
-         , specName = "WeakVH"
-         , specTemplateArgs = []
-         , specType = classSpec $
-                      [(Constructor [],"newWeakVHEmpty")
-                      ,(Constructor [(True,normalT $ ptr $ llvmType "Value")],"newWeakVH_")]
-         }
-   ,Spec { specHeader = "llvm/Transforms/Utils/Cloning.h"
+   (if version>=llvm3_5
+    then [Spec { specHeader = irInclude version "ValueHandle.h"
+               , specNS = llvmNS
+               , specName = "WeakVH"
+               , specTemplateArgs = []
+               , specType = classSpec $
+                            [(Constructor [],"newWeakVHEmpty")
+                            ,(Constructor [(True,normalT $ ptr $ llvmType "Value")],"newWeakVH_")]
+               }]
+    else [])++
+   [Spec { specHeader = "llvm/Transforms/Utils/Cloning.h"
          , specNS = llvmNS
          , specName = "ClonedCodeInfo"
          , specTemplateArgs = []

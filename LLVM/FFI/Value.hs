@@ -92,7 +92,9 @@ GETTYPE(PseudoSourceValue)
 GETTYPE(FixedStackPseudoSourceValue)
 #endif
 
+#if HS_LLVM_VERSION>=300
 SPECIALIZE_ARRAYREF(Value)
+#endif
 
 deleteValue :: ValueC t => Ptr t -> IO ()
 deleteValue = deleteValue_
