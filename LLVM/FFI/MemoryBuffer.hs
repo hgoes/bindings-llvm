@@ -14,7 +14,7 @@ module LLVM.FFI.MemoryBuffer
         newEmptyMemoryBufferRef,
         newMemoryBufferRef,
         memoryBufferRefGetBuffer,
-        memoryBufferRefGetIdentifer
+        memoryBufferRefGetIdentifier
 #endif
        ) where
 

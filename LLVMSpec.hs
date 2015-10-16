@@ -4994,7 +4994,7 @@ llvm version
                             ,(AlignOf,"aaMDNodesAlignOf")]
                }]
     else [])++
-   (if version>=llvm3_5
+   (if version>=llvm3_1
     then [Spec { specHeader = irInclude version "ValueHandle.h"
                , specNS = llvmNS
                , specName = "WeakVH"
