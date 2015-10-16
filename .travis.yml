@@ -1,5 +1,8 @@
-language: sh
+language: haskell
+ghc: 7.8
 matrix:
+  exclude:
+    - ghc: 7.8
   include:
     - env: LLVM_VERSION=2.8
       addons:
@@ -56,7 +59,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
           packages: ['g++-4.9','llvm-3.8-dev']
-before_install:
+install:
   - sudo rm -f `which llvm-config`
   - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 10
@@ -65,14 +68,14 @@ before_install:
   - sudo update-alternatives --set cc /usr/bin/gcc
   - sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 30
   - sudo update-alternatives --set c++ /usr/bin/g++
-  - if [ ! -e /app ]; then sudo mkdir -p /app; sudo chown $USER /app; git clone https://github.com/mietek/halcyon.git /app/halcyon; fi
   - llvm-config --version
-install:
-  - /app/halcyon/halcyon build --sandbox-extra-apps=cpphs --extra-configure-flags="--verbose=3"
-  - /app/halcyon/halcyon paths > halcyon-env
-  - ln -sf /app/sandbox/cabal.sandbox.config cabal.sandbox.config
+  - cabal install cpphs
+  - cabal install --only-dependencies
 script:
-  - source halcyon-env && cabal configure --enable-tests && cabal test
+  - ghc --make Setup.hs -o ./setup
+  - ./setup configure --user --enable-tests --verbose=3 --with-llvm-config=llvm-config-${LLVM_VERSION}
+  - ./setup build
+  - ./setup test
 cache:
   directories:
   - /app
