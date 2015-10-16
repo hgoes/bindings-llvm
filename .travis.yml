@@ -52,6 +52,7 @@ matrix:
 before_install:
   - sudo ln -s `which llvm-config-${LLVM_VERSION}` /usr/bin/llvm-config
   - if [ ! -e /app ]; then sudo mkdir -p /app; sudo chown $USER /app; git clone https://github.com/mietek/halcyon.git /app/halcyon; fi
+  - llvm-config --version
 install:
   - /app/halcyon/halcyon build --sandbox-extra-apps=cpphs
   - /app/halcyon/halcyon paths > halcyon-env
