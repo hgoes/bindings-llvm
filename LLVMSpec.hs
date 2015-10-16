@@ -3290,7 +3290,9 @@ llvm version
                                else "Ptr MDNode")++" }") $
                              [(Constructor [(True,constT $ ptr $ llvmType "Value")
                                            ,(False,normalT uint64_t)
-                                           ,(False,constT $ ptr $ llvmType "MDNode")
+                                           ,(False,if version<llvm3_6
+                                                   then constT $ ptr $ llvmType "MDNode"
+                                                   else constT $ ref $ llvmType "AAMDNodes")
                                            ],"newLocation_")
                              ,(SizeOf,"locationSizeOf")
                              ,(AlignOf,"locationAlignOf")
@@ -3311,7 +3313,6 @@ llvm version
                                      "locationGetTBAATag")
                                    ,(Setter "TBAATag" (normalT $ ptr $ llvmType "MDNode"),
                                      "locationSetTBAATag")])
-                              
                 }]
      else [])++
        [Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
@@ -3542,7 +3543,13 @@ llvm version
           , specType = classSpec $
                        [(Destructor True,"deleteExecutionEngine_")
                        ,(memberFun { ftName = "addModule"
-                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]
+                                   , ftArgs = [(False,if version<llvm3_6
+                                                      then normalT $ ptr $ llvmType "Module"
+                                                      else normalT $
+                                                           NamedType [ClassName "std" []]
+                                                                     "unique_ptr"
+                                                                     [normalT $ llvmType "Module"]
+                                                                     False)]
                                    , ftOverloaded = True
                                    },"executionEngineAddModule_")
                        ,if version >= llvm3_2
@@ -3623,12 +3630,14 @@ llvm version
                         , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")
                                    ,(False,normalT $ ptr void)]
                         , ftOverloaded = True
-                        },"executionEngineUpdateGlobalMapping_")
-            ,(memberFun { ftReturnType = normalT $ ptr void
-                        , ftName = "getPointerToBasicBlock"
-                        , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
-                        , ftOverloaded = True
-                        },"executionEngineGetPointerToBasicBlock_")]++                        
+                        },"executionEngineUpdateGlobalMapping_")]++
+            (if version<llvm3_6
+             then [(memberFun { ftReturnType = normalT $ ptr void
+                              , ftName = "getPointerToBasicBlock"
+                              , ftArgs = [(False,normalT $ ptr $ llvmType "BasicBlock")]
+                              , ftOverloaded = True
+                              },"executionEngineGetPointerToBasicBlock_")]
+             else [])++
             (if version<llvm3_6
              then [(memberFun { ftName = "runJITOnFunction"
                               , ftArgs = [(False,normalT $ ptr $ llvmType "Function")
@@ -3651,33 +3660,36 @@ llvm version
                         , ftArgs = [(True,constT $ ptr $ llvmType "Constant")
                                    ,(False,normalT $ ptr void)]
                         , ftOverloaded = True
-                        },"executionEngineInitializeMemory_")
-            ,(memberFun { ftReturnType = normalT $ ptr void
-                        , ftName = "recompileAndRelinkFunction"
-                        , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
-                        , ftOverloaded = True
-                        },"executionEngineRecompileAndRelinkFunction_")
-            ,(memberFun { ftName = "freeMachineCodeForFunction"
-                        , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
-                        , ftOverloaded = True
-                        },"executionEngineFreeMachineCodeForFunction_")
-            ,(memberFun { ftReturnType = normalT $ ptr void
+                        },"executionEngineInitializeMemory_")]++
+            (if version<llvm3_6
+             then [(memberFun { ftReturnType = normalT $ ptr void
+                              , ftName = "recompileAndRelinkFunction"
+                              , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
+                              , ftOverloaded = True
+                              },"executionEngineRecompileAndRelinkFunction_")
+                  ,(memberFun { ftName = "freeMachineCodeForFunction"
+                              , ftArgs = [(False,normalT $ ptr $ llvmType "Function")]
+                              , ftOverloaded = True
+                              },"executionEngineFreeMachineCodeForFunction_")]
+             else [])++
+            [(memberFun { ftReturnType = normalT $ ptr void
                         , ftName = "getOrEmitGlobalVariable"
                         , ftArgs = [(False,constT $ ptr $ llvmType "GlobalVariable")]
                         , ftOverloaded = True
-                        },"executionEngineGetOrEmitGlobalVariable_")
-            ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
-                        , ftName = "create"
-                        , ftArgs = [(False,normalT $ ptr $ llvmType "Module")
-                                   ,(False,normalT bool)
-                                   ,(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)
-                                   ,(False,normalT $ EnumType [ClassName "llvm" []
-                                                              ,ClassName "CodeGenOpt" []
-                                                              ] "Level")
-                                   ,(False,normalT bool)]
-                        , ftStatic = True
-                        },"newExecutionEngine_")
-            ]
+                        },"executionEngineGetOrEmitGlobalVariable_")]++
+            (if version<llvm3_6
+             then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "ExecutionEngine"
+                              , ftName = "create"
+                              , ftArgs = [(False,normalT $ ptr $ llvmType "Module")
+                                         ,(False,normalT bool)
+                                         ,(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)
+                                         ,(False,normalT $ EnumType [ClassName "llvm" []
+                                                                    ,ClassName "CodeGenOpt" []
+                                                                    ] "Level")
+                                         ,(False,normalT bool)]
+                              , ftStatic = True
+                              },"newExecutionEngine_")]
+             else [])
           }
     ,Spec { specHeader = if version>=llvm3_0
                          then "llvm/Support/CodeGen.h"
@@ -3727,7 +3739,14 @@ llvm version
           , specName = "EngineBuilder"
           , specTemplateArgs = []
           , specType = classSpec $
-                       [(Constructor [(False,normalT $ ptr $ llvmType "Module")],"newEngineBuilder")
+                       [(Constructor [(False,if version<llvm3_6
+                                             then normalT $ ptr $ llvmType "Module"
+                                             else normalT $ NamedType
+                                                  [ClassName "std" []]
+                                                  "unique_ptr"
+                                                  [normalT $ llvmType "Module"]
+                                                  False)],
+                         "newEngineBuilder")
                        ,(Destructor False,"deleteEngineBuilder")
                        ,(memberFun { ftIgnoreReturn = True
                                    , ftName = "setEngineKind"
@@ -4137,7 +4156,10 @@ llvm version
                        | name <- ["UnknownArch"
                                  ,"arm"]++
                                  (if version>=llvm3_5
-                                  then ["armeb","arm64","arm64_be"]
+                                  then ["armeb"]++
+                                       (if version>=llvm3_6
+                                        then ["arm64","arm64_be"]
+                                        else [])
                                   else [])++
                                  (if version<=llvm3_1
                                   then ["cellspu"]
@@ -4219,8 +4241,11 @@ llvm version
           , specType = EnumSpec $
                        EnumNode "OSType"
                        [Right $ EnumLeaf name ("OS_"++name)
-                       | name <- ["UnknownOS"
-                                 ,"AuroraUX","Cygwin","Darwin","DragonFly","FreeBSD"]++
+                       | name <- ["UnknownOS"]++
+                                 (if version<llvm3_6
+                                  then ["AuroraUX","Cygwin"]
+                                  else [])++
+                                 ["Darwin","DragonFly","FreeBSD"]++
                                  (if version>=llvm3_0
                                   then ["IOS","KFreeBSD"]
                                   else [])++
@@ -4228,8 +4253,10 @@ llvm version
                                  (if version>=llvm3_0
                                   then ["MacOSX"]
                                   else [])++
-                                 ["MinGW32"
-                                 ,"NetBSD","OpenBSD","Solaris","Win32"
+                                 (if version<llvm3_6
+                                  then ["MinGW32"]
+                                  else [])++
+                                 ["NetBSD","OpenBSD","Solaris","Win32"
                                  ,"Haiku","Minix"]++
                                  (if version>=llvm3_0
                                   then ["RTEMS"]
@@ -4710,7 +4737,9 @@ llvm version
                                              (if version>=llvm3_3
                                               then [(False,normalT unsigned)]
                                               else [])++
-                                             [(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)]
+                                             (if version<llvm3_6
+                                              then [(False,normalT $ ptr $ NamedType [ClassName "std" []] "string" [] False)]
+                                              else [])
                                   },"linkerLinkInModule")]
          }
    ,if version>=llvm3_3
