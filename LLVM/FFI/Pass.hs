@@ -29,10 +29,12 @@ module LLVM.FFI.Pass
        ,AnalysisResolver()
        ,analysisResolverFindImplPass
        ,analysisResolverFindImplPassFun
+#if HS_LLVM_VERSION < 306
        ,FindUsedTypes()
        ,newFindUsedTypes
        ,deleteFindUsedTypes
        ,findUsedTypesGetTypes
+#endif
 #if HS_LLVM_VERSION >= 209
        ,TargetLibraryInfo()
        ,LibFunc(..)
@@ -156,7 +158,7 @@ passGetResolver = passGetResolver_
 
 class PassC t
 
-class PassC t => PassId t where
+class PassId t where
   passId :: Proxy t -> Ptr CChar
 
 instance PassC Pass
@@ -164,9 +166,11 @@ instance PassC FunctionPass
 instance PassC ModulePass
 instance PassC ImmutablePass
 instance PassC BasicBlockPass
+#if HS_LLVM_VERSION<306
 instance PassC FindUsedTypes
 instance PassId FindUsedTypes where
   passId _ = passId_FindUsedTypes
+#endif
 #if HS_LLVM_VERSION>=209
 instance PassC TargetLibraryInfo
 instance PassId TargetLibraryInfo where
@@ -180,7 +184,9 @@ class ModulePassC t
 
 instance ModulePassC ModulePass
 instance ModulePassC ImmutablePass
+#if HS_LLVM_VERSION<306
 instance ModulePassC FindUsedTypes
+#endif
 #if HS_LLVM_VERSION>=209
 instance ModulePassC TargetLibraryInfo
 #endif
@@ -238,13 +244,13 @@ functionPassRun :: FunctionPassC p => Ptr p -> Ptr Function -> IO Bool
 functionPassRun = functionPassRun_
 
 analysisUsageAddRequired :: PassId p => Ptr AnalysisUsage -> Proxy p -> IO ()
-analysisUsageAddRequired au p = analysisUsageAddRequired_ au (passId p)
+analysisUsageAddRequired au p = analysisUsageAddRequired_ au (castPtr $ passId p)
 
 analysisUsageAddRequiredTransitive :: PassId p => Ptr AnalysisUsage -> Proxy p -> IO ()
-analysisUsageAddRequiredTransitive au p = analysisUsageAddRequiredTransitive_ au (passId p)
+analysisUsageAddRequiredTransitive au p = analysisUsageAddRequiredTransitive_ au (castPtr $ passId p)
 
 analysisUsageAddPreserved :: PassId p => Ptr AnalysisUsage -> Proxy p -> IO ()
-analysisUsageAddPreserved au p = analysisUsageAddPreserved_ au (passId p)
+analysisUsageAddPreserved au p = analysisUsageAddPreserved_ au (castPtr $ passId p)
 
 analysisResolverFindImplPass :: PassId p => Ptr AnalysisResolver -> Proxy p -> IO (Ptr Pass)
 analysisResolverFindImplPass res p = analysisResolverFindImplPass_ res (castPtr $ passId p)
@@ -281,7 +287,7 @@ foreign import capi _TO_STRING(extra.h passId_TargetLibraryInfo)
 
 foreign import capi _TO_STRING(extra.h passId_LoopInfo)
   passId_LoopInfo :: Ptr CChar
-foreign import capi _TO_STRING(extra.h passId_FindUsedTypes)
+foreign import capi _TO_STRING(extra.h value passId_FindUsedTypes)
   passId_FindUsedTypes :: Ptr CChar
 
 #if HS_LLVM_VERSION<305

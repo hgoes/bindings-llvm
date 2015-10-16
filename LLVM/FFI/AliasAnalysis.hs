@@ -33,6 +33,7 @@ import LLVM.FFI.Pass (TargetLibraryInfo)
 #endif
 import LLVM.FFI.Type (TypeC)
 #if HS_LLVM_VERSION >= 300
+import LLVM.FFI.Pass (PassId(..))
 import LLVM.FFI.Instruction (LoadInst,StoreInst,VAArgInst,AtomicCmpXchgInst,AtomicRMWInst)
 #else
 import LLVM.FFI.Instruction (LoadInst,StoreInst,VAArgInst)
@@ -46,6 +47,11 @@ import Data.Word
 #include "Helper.h"
 
 class AliasAnalysisC t
+
+instance PassId AliasAnalysis where
+  passId _ = passId_AliasAnalysis
+foreign import capi _TO_STRING(extra.h passId_AliasAnalysis)
+  passId_AliasAnalysis :: Ptr CChar
 
 deleteAliasAnalysis :: AliasAnalysisC t => Ptr t -> IO ()
 deleteAliasAnalysis = deleteAliasAnalysis_

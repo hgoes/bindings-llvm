@@ -2660,18 +2660,20 @@ llvm version
              , specName = "BasicBlockPass"
              , specTemplateArgs = []
              , specType = classSpec []
-             }
-       ,Spec { specHeader = "llvm/Analysis/FindUsedTypes.h"
-             , specNS = llvmNS
-             , specName = "FindUsedTypes"
-             , specTemplateArgs = []
-             , specType = classSpec 
-                          [(Constructor [],"newFindUsedTypes")
-                          ,(Destructor False,"deleteFindUsedTypes")
-                          ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "llvm" []] "SetVector" [normalT $ ptr $ llvmType "Type"] False
-                                      , ftName = "getTypes"
-                                      },"findUsedTypesGetTypes")]
              }]++
+       (if version<llvm3_6
+        then [Spec { specHeader = "llvm/Analysis/FindUsedTypes.h"
+                   , specNS = llvmNS
+                   , specName = "FindUsedTypes"
+                   , specTemplateArgs = []
+                   , specType = classSpec 
+                                [(Constructor [],"newFindUsedTypes")
+                                ,(Destructor False,"deleteFindUsedTypes")
+                                ,(memberFun { ftReturnType = constT $ ref $ NamedType [ClassName "llvm" []] "SetVector" [normalT $ ptr $ llvmType "Type"] False
+                                            , ftName = "getTypes"
+                                            },"findUsedTypesGetTypes")]
+                   }]
+        else [])++
     (if version>=llvm2_9
      then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
                 , specNS = llvmNS
@@ -3245,7 +3247,8 @@ llvm version
                                       , ftOverloaded = True
                                       },"aliasAnalysisAlias_")
                           ]
-             }]++
+             }
+       ]++
     (if version>=llvm2_9
      then [Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
                 , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]

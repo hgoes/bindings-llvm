@@ -26,6 +26,7 @@ public:
   ~HaskellModulePass();
   void getAnalysisUsage(llvm::AnalysisUsage &Info) const;
   bool runOnModule(llvm::Module& m);
+  const char* getPassName() const;
   static char ID;
 };
 
@@ -56,6 +57,7 @@ extern "C" {
 
 void* newHaskellModulePass(GetUsageFunctionT,RunOnModuleFunctionT);
 void deleteHaskellModulePass(void*);
+extern const char* passId_HaskellModulePass;
 
 void* newHaskellFunctionPass(GetUsageFunctionT,InitializationFunctionT,FinalizationFunctionT,RunOnFunctionFunctionT);
 void deleteHaskellFunctionPass(void*);

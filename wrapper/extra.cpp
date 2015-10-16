@@ -35,7 +35,8 @@
 
 extern "C" {
   char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
-  char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
+  //char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
+  const char* passId_FindUsedTypes = &llvm::FindUsedTypes::ID;
 #if HS_LLVM_VERSION >= 209
   char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }
 #endif
@@ -51,7 +52,8 @@ extern "C" {
 #else
   char* passId_DominatorTreeWrapperPass() { return &llvm::DominatorTreeWrapperPass::ID; }
 #endif
-
+  char* passId_AliasAnalysis() { return &llvm::AliasAnalysis::ID; }
+  
   int writeBitCodeToFile(void* m,const char* path) {
     std::string ErrorInfo;
 #if HS_LLVM_VERSION <= 303

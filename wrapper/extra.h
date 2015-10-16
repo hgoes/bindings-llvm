@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 extern char* passId_LoopInfo();
-extern char* passId_FindUsedTypes();
+extern const char* passId_FindUsedTypes;
 #if HS_LLVM_VERSION >= 209
 extern char* passId_TargetLibraryInfo();
 #endif
@@ -21,6 +21,7 @@ extern char* passId_DominatorTree();
 #else
 extern char* passId_DominatorTreeWrapperPass();
 #endif
+extern char* passId_AliasAnalysis();
 
 extern int writeBitCodeToFile(void* m,const char* path);
 

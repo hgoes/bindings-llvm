@@ -11,6 +11,7 @@ import LLVM.FFI.Pass
 import LLVM.FFI.Module
 import LLVM.FFI.Function
 import Foreign.Ptr
+import Foreign.C
 
 data HaskellModulePass = HaskellModulePass
 
@@ -18,6 +19,8 @@ data HaskellFunctionPass = HaskellFunctionPass
 
 instance PassC HaskellModulePass
 instance ModulePassC HaskellModulePass
+instance PassId HaskellModulePass where
+  passId _ = passId_HaskellModulePass
 
 instance PassC HaskellFunctionPass
 instance FunctionPassC HaskellFunctionPass
@@ -43,6 +46,10 @@ newHaskellFunctionPass usage init fin run = do
   run_f <- wrap_Function_Bool run
   pass <- newHaskellFunctionPass_ usage_f init_f fin_f run_f
   return pass
+
+foreign import capi "HaskellPass.h value passId_HaskellModulePass"
+  passId_HaskellModulePass :: Ptr CChar
+
 
 foreign import capi "HaskellPass.h newHaskellModulePass"
   newHaskellModulePass_ :: FunPtr (Ptr HaskellModulePass -> Ptr AnalysisUsage -> IO ())

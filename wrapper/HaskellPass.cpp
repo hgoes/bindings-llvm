@@ -1,7 +1,7 @@
 #include "HaskellPass.h"
 #include <iostream>
 
-static llvm::RegisterPass<HaskellModulePass> X1("haskell-module","Haskell module pass",false,false);
+//static llvm::RegisterPass<HaskellModulePass> X1("haskell-module","Haskell module pass",false,false);
 
 char HaskellModulePass::ID = 0;
 
@@ -28,6 +28,10 @@ bool HaskellModulePass::runOnModule(llvm::Module& m) {
   return RunOnModule(this,(void*)&m);
 }
 
+const char* HaskellModulePass::getPassName() const {
+  return "Haskell Pass";
+}
+
 extern "C" {
   void* newHaskellModulePass(GetUsageFunctionT usage,RunOnModuleFunctionT run) {
     return (void*)new HaskellModulePass(usage,run);
@@ -35,9 +39,10 @@ extern "C" {
   void deleteHaskellModulePass(void* pass) {
     delete (HaskellModulePass*)pass;
   }
+  const char* passId_HaskellModulePass = &HaskellModulePass::ID;
 }
 
-static llvm::RegisterPass<HaskellFunctionPass> X2("haskell-function","Haskell function pass",false,false);
+//static llvm::RegisterPass<HaskellFunctionPass> X2("haskell-function","Haskell function pass",false,false);
 
 char HaskellFunctionPass::ID = 0;
 
