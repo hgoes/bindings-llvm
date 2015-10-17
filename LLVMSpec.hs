@@ -1359,7 +1359,13 @@ llvm version
              , specName = "llvm"
              , specTemplateArgs = []
              , specType = classSpec $
-                          [(memberFun { ftReturnType = normalT (ptr $ llvmType "Module") 
+                          [(memberFun { ftReturnType = if version<llvm3_6
+                                                       then normalT (ptr $ llvmType "Module")
+                                                       else normalT $ NamedType
+                                                            [ClassName "std" []]
+                                                            "unique_ptr"
+                                                            [normalT $ llvmType "Module"]
+                                                            False
                                       , ftName = if version<llvm3_6
                                                  then "ParseIR"
                                                  else "parseIR"
@@ -4734,7 +4740,7 @@ llvm version
                                              then "linkInModule"
                                              else "LinkInModule"
                                   , ftArgs = [(False,normalT $ ptr $ llvmType "Module")]++
-                                             (if version>=llvm3_3
+                                             (if version>=llvm3_3 && version<llvm3_6
                                               then [(False,normalT unsigned)]
                                               else [])++
                                              (if version<llvm3_6
