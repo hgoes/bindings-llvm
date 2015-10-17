@@ -248,8 +248,8 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
       = if isP then "CPPString"
         else "Ptr CPPString"
     toHSType isP (NamedType [ClassName "std" []] "unique_ptr" [arg] False)
-      = if isP then "Unique_ptr "++toHaskellType False arg
-        else "Ptr (Unique_ptr "++toHaskellType False arg++")"
+      = if isP then "Unique_ptr "++toHaskellType False Nothing arg
+        else "Ptr (Unique_ptr "++toHaskellType False Nothing arg++")"
     toHSType isP (NamedType [] name [] iface) = case name of
       "void" -> "()"
       "char" -> "CChar"
