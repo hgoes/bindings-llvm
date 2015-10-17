@@ -87,7 +87,11 @@ aliasAnalysisGetLocationAtomicRMWInst = aliasAnalysisGetLocationAtomicRMW_
 aliasAnalysisAlias :: AliasAnalysisC t => Ptr t -> Ptr Location -> Ptr Location -> IO AliasResult
 aliasAnalysisAlias ptr l1 l2 = fmap toAliasResult $ aliasAnalysisAlias_ ptr l1 l2
 
+#if HS_LLVM_VERSION<306
 newLocation :: ValueC v => Ptr v -> Word64 -> Ptr MDNode -> IO (Ptr Location)
+#else
+newLocation :: ValueC v => Ptr v -> Word64 -> Ptr AAMDNodes -> IO (Ptr Location)
+#endif
 newLocation ptr size tbaa = newLocation_ ptr size tbaa
 
 instance Storable Location where
