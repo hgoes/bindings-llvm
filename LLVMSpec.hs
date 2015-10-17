@@ -1239,7 +1239,7 @@ llvm version
                                             , ftName = "getBuffer"
                                             },"memoryBufferRefGetBuffer")
                                 ,(memberFun { ftReturnType = normalT $ llvmType "StringRef"
-                                            , ftName = "getIdentifier"
+                                            , ftName = "getBufferIdentifier"
                                             },"memoryBufferRefGetIdentifier")]
                    }]
         else [])++
@@ -4157,7 +4157,7 @@ llvm version
                                  ,"arm"]++
                                  (if version>=llvm3_5
                                   then ["armeb"]++
-                                       (if version>=llvm3_6
+                                       (if version<llvm3_6
                                         then ["arm64","arm64_be"]
                                         else [])
                                   else [])++
