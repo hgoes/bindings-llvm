@@ -68,4 +68,7 @@ script:
   - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="-pgmc gcc-4.9 -optc=-std=gnu++11"
   - ./setup build --verbose=2
   - ./setup test
+cache:
+  directories:
+    - $HOME/.cabal
 sudo: false
