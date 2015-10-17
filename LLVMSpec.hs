@@ -4994,18 +4994,26 @@ llvm version
                             ,(AlignOf,"aaMDNodesAlignOf")]
                }]
     else [])++
-   (if version>=llvm3_1
-    then [Spec { specHeader = if version>=llvm3_5
-                              then irInclude version "ValueHandle.h"
-                              else "llvm/Support/ValueHandle.h"
-               , specNS = llvmNS
-               , specName = "WeakVH"
-               , specTemplateArgs = []
-               , specType = classSpec $
-                            [(Constructor [],"newWeakVHEmpty")
-                            ,(Constructor [(True,normalT $ ptr $ llvmType "Value")],"newWeakVH_")]
-               }]
-    else [])++
+   [Spec { specHeader = if version>=llvm3_5
+                        then irInclude version "ValueHandle.h"
+                        else "llvm/Support/ValueHandle.h"
+         , specNS = llvmNS
+         , specName = "WeakVH"
+         , specTemplateArgs = []
+         , specType = classSpec $
+                      [(Constructor [],"newWeakVHEmpty")
+                      ,(Constructor [(True,normalT $ ptr $ llvmType "Value")],"newWeakVH_")]
+         }
+   ,Spec { specHeader = if version>=llvm3_5
+                        then irInclude version "ValueHandle.h"
+                        else "llvm/Support/ValueHandle.h"
+         , specNS = llvmNS
+         , specName = "TrackingVH"
+         , specTemplateArgs = [normalT $ llvmType "Value"]
+         , specType = classSpec $
+                      [(Constructor [],"newTrackingVHEmpty")
+                      ,(Constructor [(True,normalT $ ptr $ llvmType "Value")],"newTrackingVH_")]
+         }]++
    [Spec { specHeader = "llvm/Transforms/Utils/Cloning.h"
          , specNS = llvmNS
          , specName = "ClonedCodeInfo"
@@ -5031,7 +5039,12 @@ llvm version
                       [(False,constT $ ptr $ llvmType "BasicBlock")
                       ,(False,normalT $ ref $ NamedType llvmNS "ValueMap"
                                               [constT $ ptr $ llvmType "Value"
-                                              ,normalT $ llvmType "WeakVH"] False)
+                                              ,if version>=llvm3_1
+                                               then normalT $ llvmType "WeakVH"
+                                               else normalT $ NamedType llvmNS
+                                                              "TrackingVH"
+                                                              [normalT $ llvmType "Value"]
+                                                              False] False)
                       ,(False,constT $ ref $ llvmType "Twine")
                       ,(False,normalT $ ptr $ llvmType "Function")
                       ,(False,normalT $ ptr $ llvmType "ClonedCodeInfo")]
