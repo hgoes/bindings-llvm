@@ -31,6 +31,9 @@ module LLVM.FFI.Module
 
 import LLVM.FFI.Interface
 import LLVM.FFI.StringRef
+#if HS_LLVM_VERSION>=305
+import LLVM.FFI.CPP.UniquePtr
+#endif
 
 import Foreign
 import Foreign.C
