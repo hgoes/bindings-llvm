@@ -59,16 +59,27 @@ extern "C" {
   char* passId_AliasAnalysis() { return &llvm::AliasAnalysis::ID; }
   
   int writeBitCodeToFile(void* m,const char* path) {
+#if HS_LLVM_VERSION < 306
     std::string ErrorInfo;
+#else
+    std::error_code ErrorInfo;
+#endif
 #if HS_LLVM_VERSION <= 303
     llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::raw_fd_ostream::F_Binary);
 #elif HS_LLVM_VERSION < 305
     llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::sys::fs::F_None);
+#elif HS_LLVM_VERSION < 306
+    llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::sys::fs::OpenFlags::F_None);
 #else
     llvm::raw_fd_ostream OS(path, ErrorInfo, llvm::sys::fs::OpenFlags::F_None);
 #endif
+#if HS_LLVM_VERSION < 306
     if (!ErrorInfo.empty())
       return -1;
+#else
+    if (ErrorInfo)
+      return -1;
+#endif
     llvm::WriteBitcodeToFile((llvm::Module*)m, OS);
     return 0;
   }
