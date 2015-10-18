@@ -35,6 +35,8 @@ import LLVM.FFI.StringRef
 import Foreign
 import Foreign.C
 
+#include "Helper.h"
+
 writeBitCodeToFile :: Ptr Module -> String -> IO Bool
 writeBitCodeToFile md name = withCString name
                              $ \str -> do
