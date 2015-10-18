@@ -9,7 +9,7 @@ import LLVM.FFI.CPP.UniquePtr
 
 executeExampleFunction :: Bool -> Ptr Module -> Ptr Function -> Int -> IO Int
 executeExampleFunction jit mod fun v = do
-#if LLVM_VERSION<306
+#if HS_LLVM_VERSION<306
   if jit then linkInJIT
     else linkInInterpreter
 #endif
