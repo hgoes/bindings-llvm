@@ -5046,7 +5046,7 @@ llvm version
                       [(False,constT $ ptr $ llvmType "BasicBlock")
                       ,(False,normalT $ ref $ NamedType llvmNS "ValueMap"
                                               [constT $ ptr $ llvmType "Value"
-                                              ,if version<llvm2_8
+                                              ,if version<llvm2_9
                                                then normalT $ ptr $ llvmType "Value"
                                                else if version>=llvm3_1
                                                     then normalT $ llvmType "WeakVH"
