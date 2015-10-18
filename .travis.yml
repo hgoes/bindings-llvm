@@ -4,57 +4,55 @@ matrix:
   exclude:
     - ghc: 7.8
   include:
-    - env: LLVM_VERSION=2.8
+    - env: LLVM_VERSION=2.8 COMPILER=g++
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9','llvm-2.8-dev']
-    - env: LLVM_VERSION=2.9
+          packages: ['llvm-2.8-dev']
+    - env: LLVM_VERSION=2.9 COMPILER=g++
       addons:
         apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9','llvm-2.9-dev']
+          packages: ['llvm-2.9-dev']
     - env: LLVM_VERSION=3.0
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9','llvm-3.0-dev']
-    - env: LLVM_VERSION=3.1
+    - env: LLVM_VERSION=3.1 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9','llvm-3.1-dev']
-    - env: LLVM_VERSION=3.2
+    - env: LLVM_VERSION=3.2 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9','llvm-3.2-dev']
-    - env: LLVM_VERSION=3.3
+    - env: LLVM_VERSION=3.3 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9','llvm-3.3-dev']
-    - env: LLVM_VERSION=3.4
+    - env: LLVM_VERSION=3.4 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9','llvm-3.4-dev']
-    - env: LLVM_VERSION=3.5
+    - env: LLVM_VERSION=3.5 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5']
           packages: ['g++-4.9','libedit-dev','llvm-3.5-dev']
-    - env: LLVM_VERSION=3.6
+    - env: LLVM_VERSION=3.6 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.6']
           packages: ['g++-4.9','libedit-dev','llvm-3.6-dev']
-    - env: LLVM_VERSION=3.7
+    - env: LLVM_VERSION=3.7 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.7']
           packages: ['g++-4.9','libedit-dev','llvm-3.7-dev']
-    - env: LLVM_VERSION=3.8
+    - env: LLVM_VERSION=3.8 COMPILER=g++-4.9 COMPILER_OPTS=-std=gnu++11
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
@@ -67,7 +65,7 @@ install:
   - cabal install --only-dependencies
 script:
   - ghc --make Setup.hs -o ./setup
-  - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="-pgmc gcc-4.9 -optc=-std=gnu++11"
+  - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="-pgmc ${COMPILER} -optc=${COMPILER_OPTS}"
   - ./setup build --verbose=2
   - ./setup test
 #cache:
