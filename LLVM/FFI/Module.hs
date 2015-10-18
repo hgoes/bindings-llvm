@@ -47,3 +47,7 @@ moduleGetFunctionString md name
 
 foreign import capi "extra.h writeBitCodeToFile"
   writeBitCodeToFile_ :: Ptr Module -> CString -> IO CInt
+
+#if HS_LLVM_VERSION>=305
+SPECIALIZE_UNIQUEPTR(Module,capi)
+#endif

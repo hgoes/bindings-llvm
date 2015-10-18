@@ -99,7 +99,7 @@ llvm version
                                         , ftName = "release"
                                         },"releaseUniquePtr"++tp)]
                }
-     | tp <- ["MemoryBuffer"]
+     | tp <- ["MemoryBuffer","Module"]
     , let rtp = Type [] (llvmType tp)
     ]++
     (if version>=llvm2_9
