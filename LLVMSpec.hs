@@ -571,18 +571,19 @@ llvm version
                                                          else constT $ ref $ NamedType [ClassName "std" []] "vector" [constT $ ptr $ llvmType "Type"] False)
                                                  ,(False,normalT bool)]
                                       , ftStatic = True
-                                      },"newStructType")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
-                                      , ftName = "create"
-                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
-                                                 ,(False,if version>=llvm3_0
-                                                         then normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Type"] False
-                                                         else constT $ ref $ NamedType [ClassName "std" []] "vector" [constT $ ptr $ llvmType "Type"] False)
-                                                 ,(False,normalT $ llvmType "StringRef")
-                                                 ,(False,normalT bool)]
-                                      , ftStatic = True
-                                      },"newNamedStructType")
-                          ]
+                                      },"newStructType")]++
+                          (if version>=llvm3_0
+                           then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
+                                            , ftName = "create"
+                                            , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                       ,(False,if version>=llvm3_0
+                                                               then normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Type"] False
+                                                               else constT $ ref $ NamedType [ClassName "std" []] "vector" [constT $ ptr $ llvmType "Type"] False)
+                                                       ,(False,normalT $ llvmType "StringRef")
+                                                       ,(False,normalT bool)]
+                                            , ftStatic = True
+                                            },"newNamedStructType")]
+                           else [])
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = llvmNS
