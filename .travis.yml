@@ -60,8 +60,8 @@ matrix:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
           packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
 install:
-  - cabal install cabal-install
-  - cabal --version
+  #- cabal install cabal-install
+  #- cabal --version
   - llvm-config-${LLVM_VERSION} --version
   - cabal install cpphs
   - cabal install --only-dependencies
@@ -70,7 +70,7 @@ script:
   - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="-pgmc gcc-4.9 -optc=-std=gnu++11"
   - ./setup build --verbose=2
   - ./setup test
-cache:
-  directories:
-    - $HOME/.cabal
+#cache:
+#  directories:
+#    - $HOME/.cabal
 sudo: false
