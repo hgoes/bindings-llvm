@@ -9,8 +9,10 @@ import LLVM.FFI.CPP.UniquePtr
 
 executeExampleFunction :: Bool -> Ptr Module -> Ptr Function -> Int -> IO Int
 executeExampleFunction jit mod fun v = do
+#if LLVM_VERSION<306
   if jit then linkInJIT
     else linkInInterpreter
+#endif
   if jit then case nativeTarget of
     Nothing -> error "No native target available!"
     Just trg -> do

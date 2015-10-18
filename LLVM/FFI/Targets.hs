@@ -123,8 +123,10 @@ targets = mp3
 #include <llvm/Config/Disassemblers.def>
                   ])
 
+#if HS_LLVM_VERSION<306
 foreign import capi "LLVMLinkInInterpreter"
   linkInInterpreter :: IO ()
 
 foreign import capi "LLVMLinkInJIT"
   linkInJIT :: IO ()
+#endif
