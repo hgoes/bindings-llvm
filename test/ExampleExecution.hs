@@ -3,6 +3,9 @@ module ExampleExecution where
 import LLVM.FFI
 import Foreign
 import Foreign.C.String
+#if HS_LLVM_VERSION>=306
+import LLVM.FFI.CPP.UniquePtr
+#endif
 
 executeExampleFunction :: Bool -> Ptr Module -> Ptr Function -> Int -> IO Int
 executeExampleFunction jit mod fun v = do
