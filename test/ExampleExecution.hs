@@ -16,7 +16,13 @@ executeExampleFunction jit mod fun v = do
       initializeTargetMC trg
       return ()
     else return ()
+#if HS_LLVM_VERSION<306
   builder <- newEngineBuilder mod
+#else
+  ref <- newUniquePtr mod
+  builder <- newEngineBuilder ref
+  deleteUniquePtr ref
+#endif
   engineBuilderSetKind builder (if jit then JIT else Interpreter)
   errStr <- cppStringEmpty
   engineBuilderSetErrorStr builder errStr
