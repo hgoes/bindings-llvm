@@ -12,6 +12,9 @@ executeExampleFunction jit mod fun v = do
 #if HS_LLVM_VERSION<306
   if jit then linkInJIT
     else linkInInterpreter
+#else
+  if jit then return ()
+    else linkInInterpreter
 #endif
   if jit then case nativeTarget of
     Nothing -> error "No native target available!"
