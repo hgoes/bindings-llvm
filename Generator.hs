@@ -129,6 +129,9 @@ addressOut x = ([],"&("++x++")")
 passAsPointer :: Type -> InConverter
 passAsPointer tp x = ([],"*(("++renderType tp++"*)"++x++")")
 
+passAsUniquePtr :: Type -> InConverter
+passAsUniquePtr tp x = ([],"std::move(*((unique_ptr<"++renderType tp++">*)"++x++"))")
+
 refToPtr :: Type -> OutConverter
 refToPtr tp x = ([],"("++(renderType tp)++"*) &"++x)
 
@@ -233,6 +236,8 @@ toCType (Type q c) = let (x,out,inC) = toCType' c
                            then (PtrType t,idOut,idIn)
                            else (PtrType void,voidCastOut (QConst `elem` q),voidCastIn (Type q t))
     toCType' (EnumType ns name) = (NamedType [] "int" [] False,idOut,enumCastIn ns name)
+    toCType' (NamedType [ClassName "std" []] "unique_ptr" [val] False)
+      = (PtrType void,voidCastOut (QConst `elem` q),passAsUniquePtr val)
     toCType' t = if isCType t
                  then (t,idOut,idIn)
                  else (ptr void,copyOut (Type q t),passAsPointer (Type q t))
