@@ -5046,12 +5046,14 @@ llvm version
                       [(False,constT $ ptr $ llvmType "BasicBlock")
                       ,(False,normalT $ ref $ NamedType llvmNS "ValueMap"
                                               [constT $ ptr $ llvmType "Value"
-                                              ,if version>=llvm3_1
-                                               then normalT $ llvmType "WeakVH"
-                                               else normalT $ NamedType llvmNS
-                                                              "TrackingVH"
-                                                              [normalT $ llvmType "Value"]
-                                                              False] False)
+                                              ,if version<llvm2_8
+                                               then normalT $ ptr $ llvmType "Value"
+                                               else if version>=llvm3_1
+                                                    then normalT $ llvmType "WeakVH"
+                                                    else normalT $ NamedType llvmNS
+                                                                  "TrackingVH"
+                                                                  [normalT $ llvmType "Value"]
+                                                                  False] False)
                       ,(False,constT $ ref $ llvmType "Twine")
                       ,(False,normalT $ ptr $ llvmType "Function")
                       ,(False,normalT $ ptr $ llvmType "ClonedCodeInfo")]
