@@ -287,8 +287,10 @@ foreign import capi _TO_STRING(extra.h passId_TargetLibraryInfo)
 
 foreign import capi _TO_STRING(extra.h passId_LoopInfo)
   passId_LoopInfo :: Ptr CChar
+#if HS_LLVM_VERSION<306
 foreign import capi _TO_STRING(extra.h value passId_FindUsedTypes)
   passId_FindUsedTypes :: Ptr CChar
+#endif
 
 #if HS_LLVM_VERSION<305
 foreign import capi _TO_STRING(extra.h passId_DominatorTree)

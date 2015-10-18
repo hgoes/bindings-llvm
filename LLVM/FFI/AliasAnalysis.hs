@@ -32,8 +32,8 @@ import LLVM.FFI.Value
 import LLVM.FFI.Pass (TargetLibraryInfo)
 #endif
 import LLVM.FFI.Type (TypeC)
-#if HS_LLVM_VERSION >= 300
 import LLVM.FFI.Pass (PassId(..))
+#if HS_LLVM_VERSION >= 300
 import LLVM.FFI.Instruction (LoadInst,StoreInst,VAArgInst,AtomicCmpXchgInst,AtomicRMWInst)
 #else
 import LLVM.FFI.Instruction (LoadInst,StoreInst,VAArgInst)

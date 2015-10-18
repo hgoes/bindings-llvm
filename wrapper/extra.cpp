@@ -24,7 +24,9 @@
 #endif
 #include <llvm/Analysis/AliasAnalysis.h>
 #include <llvm/Analysis/LoopInfo.h>
+#if HS_LLVM_VERSION<306
 #include <llvm/Analysis/FindUsedTypes.h>
+#endif
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ADT/APInt.h>
 #if HS_LLVM_VERSION>=305
@@ -36,7 +38,9 @@
 extern "C" {
   char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
   //char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
+#if HS_LLVM_VERSION<306
   const char* passId_FindUsedTypes = &llvm::FindUsedTypes::ID;
+#endif
 #if HS_LLVM_VERSION >= 209
   char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }
 #endif

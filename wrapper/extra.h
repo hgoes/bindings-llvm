@@ -5,7 +5,9 @@
 #include <stdint.h>
 
 extern char* passId_LoopInfo();
+#if HS_LLVM_VERSION<306
 extern const char* passId_FindUsedTypes;
+#endif
 #if HS_LLVM_VERSION >= 209
 extern char* passId_TargetLibraryInfo();
 #endif
