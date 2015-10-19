@@ -1076,7 +1076,9 @@ llvm version
                                           ,(False,if version>=llvm3_2
                                                   then normalT $ EnumType
                                                                  [ClassName "llvm" []
-                                                                 ,ClassName "GlobalValue" []]
+                                                                 ,if version>=llvm3_5
+                                                                  then ClassName "GlobalValue" []
+                                                                  else ClassName "GlobalVariable" []]
                                                                  "ThreadLocalMode"
                                                   else normalT bool)
                                           ,(False,normalT unsigned)]++
