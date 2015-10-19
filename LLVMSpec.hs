@@ -988,7 +988,7 @@ llvm version
              , specNS = llvmNS
              , specName = "ConstantStruct"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpec $
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
                                       , ftName = "get"
                                       , ftArgs = [(False,normalT $ ptr $ llvmType "StructType")
@@ -996,29 +996,25 @@ llvm version
                                                          then normalT $ NamedType llvmNS "ArrayRef"
                                                               [normalT $ ptr $ llvmType "Constant"]
                                                               False
-                                                         else constT $ NamedType
+                                                         else constT $ ref $ NamedType
                                                               [ClassName "std" []]
                                                               "vector"
                                                               [normalT $ ptr $ llvmType "Constant"]
                                                               False)]
                                       , ftStatic = True
-                                      },"newConstantStruct")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
-                                      , ftName = "getAnon"
-                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
-                                                 ,(False,if version>=llvm3_0
-                                                         then normalT $ NamedType llvmNS "ArrayRef"
-                                                              [normalT $ ptr $ llvmType "Constant"]
-                                                              False
-                                                         else constT $ NamedType
-                                                              [ClassName "std" []]
-                                                              "vector"
-                                                              [normalT $ ptr $ llvmType "Constant"]
-                                                              False)
-                                                 ,(False,normalT bool)]
-                                      , ftStatic = True
-                                      },"newConstantAnonStruct")
-                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
+                                      },"newConstantStruct")]++
+                          (if version>=llvm3_0
+                           then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                            , ftName = "getAnon"
+                                            , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                       ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                                               [normalT $ ptr $ llvmType "Constant"]
+                                                               False)
+                                                       ,(False,normalT bool)]
+                                            , ftStatic = True
+                                            },"newConstantAnonStruct")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
                                       , ftName = "getType"
                                       },"constantStructGetType")]
              }
