@@ -43,6 +43,8 @@ module LLVM.FFI.Constant
         globalValueIsDeclaration,
         GlobalAlias(),
         GlobalVariable(),
+        ThreadLocalMode(..),
+        newGlobalVariable,
         globalVariableIsConstant,
         globalVariableIsThreadLocal,
         globalVariableGetInitializer,
@@ -67,6 +69,10 @@ import Foreign
 import Foreign.C
 
 #include "Helper.h"
+
+newGlobalVariable :: (TypeC tp,ConstantC init) => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine -> ThreadLocalMode -> CUInt -> Bool -> IO (Ptr GlobalVariable)
+newGlobalVariable tp isConst linkage init name tlmode addrSpace extInit
+  = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name (fromThreadLocalMode tlmode) addrSpace extInit
 
 globalValueIsDeclaration :: GlobalValueC v => Ptr v -> IO Bool
 globalValueIsDeclaration = globalValueIsDeclaration_

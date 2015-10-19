@@ -1037,6 +1037,20 @@ llvm version
                                     ]]
              }
        ,Spec { specHeader = irInclude version "GlobalValue.h"
+             , specNS = [ClassName "llvm" []
+                        ,ClassName "GlobalValue" []]
+             , specName = "ThreadLocalMode"
+             , specTemplateArgs = []
+             , specType = EnumSpec $
+                          EnumNode "ThreadLocalMode"
+                          [Right $ EnumLeaf name name
+                          | name <- ["NotThreadLocal"
+                                    ,"GeneralDynamicTLSModel"
+                                    ,"LocalDynamicTLSModel"
+                                    ,"InitialExecTLSModel"
+                                    ,"LocalExecTLSModel"]]
+             }
+       ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = llvmNS
              , specName = "GlobalAlias"
              , specTemplateArgs = []
@@ -1047,7 +1061,22 @@ llvm version
              , specName = "GlobalVariable"
              , specTemplateArgs = []
              , specType = classSpec
-                          [(memberFun { ftReturnType = normalT bool
+                          [(Constructor [(True,normalT $ ptr $ llvmType "Type")
+                                        ,(False,normalT bool)
+                                        ,(False,normalT $ EnumType
+                                                          [ClassName "llvm" []
+                                                          ,ClassName "GlobalValue" []]
+                                                          "LinkageTypes")
+                                        ,(True,normalT $ ptr $ llvmType "Constant")
+                                        ,(False,constT $ ref $ llvmType "Twine")
+                                        ,(False,normalT $ EnumType
+                                                          [ClassName "llvm" []
+                                                          ,ClassName "GlobalValue" []]
+                                                          "ThreadLocalMode")
+                                        ,(False,normalT unsigned)
+                                        ,(False,normalT bool)],
+                            "newGlobalVariable_")
+                          ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isConstant"
                                       },"globalVariableIsConstant")
                           ,(memberFun { ftReturnType = normalT bool
