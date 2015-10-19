@@ -37,7 +37,9 @@ module LLVM.FFI.Constant
         ConstantPointerNull(),
         ConstantStruct(),
         newConstantStruct,
+#if HS_LLVM_VERSION>=300
         newConstantAnonStruct,
+#endif
         ConstantVector(),
         GlobalValue(),
         GlobalValueC(),
