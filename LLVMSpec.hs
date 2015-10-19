@@ -988,7 +988,24 @@ llvm version
              , specName = "ConstantStruct"
              , specTemplateArgs = []
              , specType = classSpec
-                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                      , ftName = "get"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "StructType")
+                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                                         [normalT $ ptr $ llvmType "Constant"]
+                                                         False)]
+                                      , ftStatic = True
+                                      },"newConstantStruct")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
+                                      , ftName = "getAnon"
+                                      , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
+                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef"
+                                                         [normalT $ ptr $ llvmType "Constant"]
+                                                         False)
+                                                 ,(False,normalT bool)]
+                                      , ftStatic = True
+                                      },"newConstantAnonStruct")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "StructType"
                                       , ftName = "getType"
                                       },"constantStructGetType")]
              }

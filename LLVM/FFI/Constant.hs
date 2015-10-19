@@ -36,6 +36,8 @@ module LLVM.FFI.Constant
         constantIntGetValue,
         ConstantPointerNull(),
         ConstantStruct(),
+        newConstantStruct,
+        newConstantAnonStruct,
         ConstantVector(),
         GlobalValue(),
         GlobalValueC(),
