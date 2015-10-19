@@ -68,11 +68,18 @@ import LLVM.FFI.User
 import LLVM.FFI.Type
 import LLVM.FFI.IPList
 import LLVM.FFI.Instruction
+#if HS_LLVM_VERSION>=209
+import LLVM.FFI.ArrayRef
+#endif
 
 import Foreign
 import Foreign.C
 
 #include "Helper.h"
+
+#if HS_LLVM_VERSION>=209
+SPECIALIZE_ARRAYREF(Constant)
+#endif
 
 #if HS_LLVM_VERSION<302
 newGlobalVariable :: (TypeC tp,ConstantC init)

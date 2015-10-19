@@ -130,7 +130,8 @@ llvm version
            | (tp,rtp) <- [("Type",normalT $ ptr $ llvmType "Type")
                          ,("Value",normalT $ ptr $ llvmType "Value")
                          ,("CChar",constT $ ptr char)
-                         ,("Word64",normalT uint64_t)]
+                         ,("Word64",normalT uint64_t)
+                         ,("Constant",normalT $ ptr $ llvmType "Constant")]
           ]
      else [])++
     concat [[Spec { specHeader = "llvm/ADT/ilist.h"
@@ -991,17 +992,29 @@ llvm version
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
                                       , ftName = "get"
                                       , ftArgs = [(False,normalT $ ptr $ llvmType "StructType")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef"
-                                                         [normalT $ ptr $ llvmType "Constant"]
-                                                         False)]
+                                                 ,(False,if version>=llvm3_0
+                                                         then normalT $ NamedType llvmNS "ArrayRef"
+                                                              [normalT $ ptr $ llvmType "Constant"]
+                                                              False
+                                                         else constT $ NamedType
+                                                              [ClassName "std" []]
+                                                              "vector"
+                                                              [normalT $ ptr $ llvmType "Constant"]
+                                                              False)]
                                       , ftStatic = True
                                       },"newConstantStruct")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
                                       , ftName = "getAnon"
                                       , ftArgs = [(False,normalT $ ref $ llvmType "LLVMContext")
-                                                 ,(False,normalT $ NamedType llvmNS "ArrayRef"
-                                                         [normalT $ ptr $ llvmType "Constant"]
-                                                         False)
+                                                 ,(False,if version>=llvm3_0
+                                                         then normalT $ NamedType llvmNS "ArrayRef"
+                                                              [normalT $ ptr $ llvmType "Constant"]
+                                                              False
+                                                         else constT $ NamedType
+                                                              [ClassName "std" []]
+                                                              "vector"
+                                                              [normalT $ ptr $ llvmType "Constant"]
+                                                              False)
                                                  ,(False,normalT bool)]
                                       , ftStatic = True
                                       },"newConstantAnonStruct")
