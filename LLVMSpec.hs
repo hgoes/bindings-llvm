@@ -1035,22 +1035,26 @@ llvm version
                                     ,"ExternalWeakLinkage"         -- ExternalWeak linkage description.
                                     ,"CommonLinkage"               -- Tentative definitions.
                                     ]]
-             }
-       ,Spec { specHeader = irInclude version "GlobalValue.h"
-             , specNS = [ClassName "llvm" []
-                        ,ClassName "GlobalValue" []]
-             , specName = "ThreadLocalMode"
-             , specTemplateArgs = []
-             , specType = EnumSpec $
-                          EnumNode "ThreadLocalMode"
-                          [Right $ EnumLeaf name name
-                          | name <- ["NotThreadLocal"
-                                    ,"GeneralDynamicTLSModel"
-                                    ,"LocalDynamicTLSModel"
-                                    ,"InitialExecTLSModel"
-                                    ,"LocalExecTLSModel"]]
-             }
-       ,Spec { specHeader = irInclude version "GlobalValue.h"
+             }]++
+       (if version>=llvm3_2
+        then [Spec { specHeader = irInclude version "GlobalValue.h"
+                   , specNS = [ClassName "llvm" []
+                              ,if version>=llvm3_5
+                               then ClassName "GlobalValue" []
+                               else ClassName "GlobalVariable" []]
+                   , specName = "ThreadLocalMode"
+                   , specTemplateArgs = []
+                   , specType = EnumSpec $
+                                EnumNode "ThreadLocalMode"
+                                [Right $ EnumLeaf name name
+                                | name <- ["NotThreadLocal"
+                                          ,"GeneralDynamicTLSModel"
+                                          ,"LocalDynamicTLSModel"
+                                          ,"InitialExecTLSModel"
+                                          ,"LocalExecTLSModel"]]
+                   }]
+        else [])++
+       [Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = llvmNS
              , specName = "GlobalAlias"
              , specTemplateArgs = []
@@ -1061,20 +1065,24 @@ llvm version
              , specName = "GlobalVariable"
              , specTemplateArgs = []
              , specType = classSpec
-                          [(Constructor [(True,normalT $ ptr $ llvmType "Type")
-                                        ,(False,normalT bool)
-                                        ,(False,normalT $ EnumType
-                                                          [ClassName "llvm" []
-                                                          ,ClassName "GlobalValue" []]
-                                                          "LinkageTypes")
-                                        ,(True,normalT $ ptr $ llvmType "Constant")
-                                        ,(False,constT $ ref $ llvmType "Twine")
-                                        ,(False,normalT $ EnumType
-                                                          [ClassName "llvm" []
-                                                          ,ClassName "GlobalValue" []]
-                                                          "ThreadLocalMode")
-                                        ,(False,normalT unsigned)
-                                        ,(False,normalT bool)],
+                          [(Constructor $ [(True,normalT $ ptr $ llvmType "Type")
+                                          ,(False,normalT bool)
+                                          ,(False,normalT $ EnumType
+                                                            [ClassName "llvm" []
+                                                            ,ClassName "GlobalValue" []]
+                                                            "LinkageTypes")
+                                          ,(True,normalT $ ptr $ llvmType "Constant")
+                                          ,(False,constT $ ref $ llvmType "Twine")
+                                          ,(False,if version>=llvm3_2
+                                                  then normalT $ EnumType
+                                                                 [ClassName "llvm" []
+                                                                 ,ClassName "GlobalValue" []]
+                                                                 "ThreadLocalMode"
+                                                  else normalT bool)
+                                          ,(False,normalT unsigned)]++
+                                          (if version>=llvm3_3
+                                           then [(False,normalT bool)]
+                                           else []),
                             "newGlobalVariable_")
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isConstant"

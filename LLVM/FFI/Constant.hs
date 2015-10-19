@@ -43,7 +43,9 @@ module LLVM.FFI.Constant
         globalValueIsDeclaration,
         GlobalAlias(),
         GlobalVariable(),
+#if HS_LLVM_VERSION>=302
         ThreadLocalMode(..),
+#endif
         newGlobalVariable,
         globalVariableIsConstant,
         globalVariableIsThreadLocal,
@@ -70,9 +72,27 @@ import Foreign.C
 
 #include "Helper.h"
 
-newGlobalVariable :: (TypeC tp,ConstantC init) => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine -> ThreadLocalMode -> CUInt -> Bool -> IO (Ptr GlobalVariable)
+#if HS_LLVM_VERSION<302
+newGlobalVariable :: (TypeC tp,ConstantC init)
+                  => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine
+                  -> Bool -> CUInt -> IO (Ptr GlobalVariable)
+newGlobalVariable tp isConst linkage init name tlmode addrSpace
+  = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name tlmode addrSpace extInit
+#elif HS_LLVM_VERSION<303
+newGlobalVariable :: (TypeC tp,ConstantC init)
+                  => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine
+                  -> ThreadLocalMode -> CUInt -> IO (Ptr GlobalVariable)
+newGlobalVariable tp isConst linkage init name tlmode addrSpace
+  = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name
+    (fromThreadLocalMode tlmode) addrSpace extInit
+#else
+newGlobalVariable :: (TypeC tp,ConstantC init)
+                  => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine
+                  -> ThreadLocalMode -> CUInt -> Bool -> IO (Ptr GlobalVariable)
 newGlobalVariable tp isConst linkage init name tlmode addrSpace extInit
-  = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name (fromThreadLocalMode tlmode) addrSpace extInit
+  = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name
+    (fromThreadLocalMode tlmode) addrSpace extInit
+#endif
 
 globalValueIsDeclaration :: GlobalValueC v => Ptr v -> IO Bool
 globalValueIsDeclaration = globalValueIsDeclaration_
