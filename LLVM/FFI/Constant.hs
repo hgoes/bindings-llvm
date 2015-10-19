@@ -77,14 +77,14 @@ newGlobalVariable :: (TypeC tp,ConstantC init)
                   => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine
                   -> Bool -> CUInt -> IO (Ptr GlobalVariable)
 newGlobalVariable tp isConst linkage init name tlmode addrSpace
-  = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name tlmode addrSpace extInit
+  = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name tlmode addrSpace
 #elif HS_LLVM_VERSION<303
 newGlobalVariable :: (TypeC tp,ConstantC init)
                   => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine
                   -> ThreadLocalMode -> CUInt -> IO (Ptr GlobalVariable)
 newGlobalVariable tp isConst linkage init name tlmode addrSpace
   = newGlobalVariable_ tp isConst (fromLinkageTypes linkage) init name
-    (fromThreadLocalMode tlmode) addrSpace extInit
+    (fromThreadLocalMode tlmode) addrSpace
 #else
 newGlobalVariable :: (TypeC tp,ConstantC init)
                   => Ptr tp -> Bool -> LinkageTypes -> Ptr init -> Ptr Twine
