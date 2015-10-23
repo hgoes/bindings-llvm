@@ -2575,6 +2575,11 @@ llvm version
                                       , ftArgs = [(False,normalT unsigned)]
                                       , ftOverloaded = True
                                       },"getOperand_")
+                          ,(memberFun { ftName = "setOperand"
+                                      , ftArgs = [(False,normalT unsigned)
+                                                 ,(True,normalT $ ptr $ llvmType "Value")]
+                                      , ftOverloaded = True
+                                      },"setOperand_")
                           ,(memberFun { ftReturnType = normalT $ ref $ llvmType "Use"
                                       , ftName = "getOperandUse"
                                       , ftArgs = [(False,normalT unsigned)]

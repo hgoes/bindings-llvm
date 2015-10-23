@@ -4,6 +4,7 @@ module LLVM.FFI.User
         Operator(),
         getNumOperands,
         getOperand,
+        setOperand,
         getOperandUse,
         replaceUsesOfWith)
        where
@@ -25,14 +26,17 @@ SUBTYPE2(Value,User,Operator)
 GETTYPE(User)
 GETTYPE(Operator)
 
-getNumOperands :: UserC t => Ptr t -> IO Integer
-getNumOperands ptr = fmap fromIntegral (getNumOperands_ ptr)
+getNumOperands :: UserC t => Ptr t -> IO CUInt
+getNumOperands = getNumOperands_
 
-getOperand :: UserC t => Ptr t -> Integer -> IO (Ptr Value)
-getOperand ptr idx = getOperand_ ptr (fromIntegral idx)
+getOperand :: UserC t => Ptr t -> CUInt -> IO (Ptr Value)
+getOperand = getOperand_
 
-getOperandUse :: UserC t => Ptr t -> Integer -> IO (Ptr Use)
-getOperandUse ptr idx = getOperandUse_ ptr (fromIntegral idx)
+setOperand :: (UserC t,ValueC val) => Ptr t -> CUInt -> Ptr val -> IO ()
+setOperand = setOperand_
+
+getOperandUse :: UserC t => Ptr t -> CUInt -> IO (Ptr Use)
+getOperandUse = getOperandUse_
 
 replaceUsesOfWith :: (UserC t,ValueC v1,ValueC v2)
                      => Ptr t -> Ptr v1 -> Ptr v2 -> IO ()
