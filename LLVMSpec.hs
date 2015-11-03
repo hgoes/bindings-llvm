@@ -3,51 +3,38 @@ module LLVMSpec where
 import Data.Version
 import Generator
 import CPPType
+import Text.ParserCombinators.ReadP (readP_to_S)
+
+mkVersion' :: String -> Version
+mkVersion' vers = case [ v | (v,"") <- readP_to_S parseVersion vers ] of
+  [v] -> v
 
 llvm3_6 :: Version
-llvm3_6 = Version { versionBranch = [3,6]
-                  , versionTags = []
-                  }
+llvm3_6 = mkVersion' "3.6"
 
 llvm3_5 :: Version
-llvm3_5 = Version { versionBranch = [3,5]
-                  , versionTags = []
-                  }
+llvm3_5 = mkVersion' "3.5"
 
 llvm3_4 :: Version
-llvm3_4 = Version { versionBranch = [3,4]
-                  , versionTags = []
-                  }
+llvm3_4 = mkVersion' "3.4"
 
 llvm3_3 :: Version
-llvm3_3 = Version { versionBranch = [3,3]
-                  , versionTags = []
-                  }
+llvm3_3 = mkVersion' "3.3"
 
 llvm3_2 :: Version
-llvm3_2 = Version { versionBranch = [3,2]
-                  , versionTags = []
-                  }
+llvm3_2 = mkVersion' "3.2"
 
 llvm3_1 :: Version
-llvm3_1 = Version { versionBranch = [3,1]
-                  , versionTags = []
-                  }
+llvm3_1 = mkVersion' "3.1"
 
 llvm3_0 :: Version
-llvm3_0 = Version { versionBranch = [3,0]
-                  , versionTags = []
-                  }
+llvm3_0 = mkVersion' "3.0"
 
 llvm2_9 :: Version
-llvm2_9 = Version { versionBranch = [2,9]
-                  , versionTags = []
-                  }
+llvm2_9 = mkVersion' "2.9"
 
 llvm2_8 :: Version
-llvm2_8 = Version { versionBranch = [2,8]
-                  , versionTags = []
-                  }
+llvm2_8 = mkVersion' "2.8"
 
 irInclude :: Version -> String -> String
 irInclude ver hdr = if ver >= llvm3_3
