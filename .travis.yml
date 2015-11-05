@@ -47,11 +47,11 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.7']
           packages: ['g++-4.9','libedit-dev','llvm-3.7-dev']
-    - env: LLVM_VERSION=3.8 COMPILER_OPTS="-pgmc g++-4.9 -optc=-std=gnu++11"
-      addons:
-        apt:
-          sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
-          packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
+    # - env: LLVM_VERSION=3.8 COMPILER_OPTS="-pgmc g++-4.9 -optc=-std=gnu++11"
+    #   addons:
+    #     apt:
+    #       sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
+    #       packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
 install:
   #- cabal install cabal-install
   #- cabal --version
