@@ -121,7 +121,11 @@ executionEngineAddGlobalMapping = executionEngineAddGlobalMapping_
 executionEngineClearAllGlobalMappings :: ExecutionEngineC t => Ptr t -> IO ()
 executionEngineClearAllGlobalMappings = executionEngineClearAllGlobalMappings_
 
+#if HS_LLVM_VERSION<307
 executionEngineUpdateGlobalMapping :: (ExecutionEngineC t,GlobalValueC v) => Ptr t -> Ptr v -> Ptr () -> IO (Ptr ())
+#else
+executionEngineUpdateGlobalMapping :: (ExecutionEngineC t,GlobalValueC v) => Ptr t -> Ptr v -> Ptr () -> IO Word64
+#endif
 executionEngineUpdateGlobalMapping = executionEngineUpdateGlobalMapping_
 
 #if HS_LLVM_VERSION<306

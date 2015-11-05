@@ -48,9 +48,13 @@ module LLVM.FFI.Pass
 #endif
        ,targetLibraryInfoHas
 #endif
+#if HS_LLVM_VERSION >= 307
+       ,TargetLibraryInfoImpl()
+       ,newTargetLibraryInfoImpl
+#endif
 #if HS_LLVM_VERSION >= 302
        ,DataLayout()
-#if HS_LLVM_VERSION >= 305
+#if HS_LLVM_VERSION == 306
        ,DataLayoutPass()
        ,dataLayoutPassGetDataLayout
 #endif
@@ -111,7 +115,9 @@ module LLVM.FFI.Pass
        ,structLayoutElementOffsetInBits
        ,LoopInfo()
        ,newLoopInfo
+#if HS_LLVM_VERSION<307
        ,loopInfoGetBase
+#endif
        ,createCFGSimplificationPass
        ,DominatorTree()
        ,DomTreeNodeBase()
@@ -176,9 +182,11 @@ instance PassC TargetLibraryInfo
 instance PassId TargetLibraryInfo where
   passId _ = passId_TargetLibraryInfo
 #endif
+#if HS_LLVM_VERSION<307
 instance PassC LoopInfo
 instance PassId LoopInfo where
   passId _ = passId_LoopInfo
+#endif
 
 class ModulePassC t
 
@@ -198,7 +206,9 @@ instance ImmutablePassC TargetLibraryInfo
 
 class FunctionPassC t
 instance FunctionPassC FunctionPass
+#if HS_LLVM_VERSION<307
 instance FunctionPassC LoopInfo
+#endif
 
 #if HS_LLVM_VERSION < 302
 instance PassC TargetData
@@ -216,7 +226,7 @@ instance PassId DataLayout where
   passId _ = passId_DataLayout
 foreign import capi _TO_STRING(extra.h passId_DataLayout)
   passId_DataLayout :: Ptr CChar
-#else
+#elif HS_LLVM_VERSION < 307
 instance PassC DataLayoutPass
 instance ModulePassC DataLayoutPass
 instance ImmutablePassC DataLayoutPass
@@ -285,8 +295,10 @@ foreign import capi _TO_STRING(extra.h passId_TargetLibraryInfo)
   passId_TargetLibraryInfo :: Ptr CChar
 #endif
 
+#if HS_LLVM_VERSION<307
 foreign import capi _TO_STRING(extra.h passId_LoopInfo)
   passId_LoopInfo :: Ptr CChar
+#endif
 #if HS_LLVM_VERSION<306
 foreign import capi _TO_STRING(extra.h value passId_FindUsedTypes)
   passId_FindUsedTypes :: Ptr CChar

@@ -9,6 +9,12 @@ mkVersion' :: String -> Version
 mkVersion' vers = case [ v | (v,"") <- readP_to_S parseVersion vers ] of
   [v] -> v
 
+llvm3_8 :: Version
+llvm3_8 = mkVersion' "3.8"
+
+llvm3_7 :: Version
+llvm3_7 = mkVersion' "3.7"
+
 llvm3_6 :: Version
 llvm3_6 = mkVersion' "3.6"
 
@@ -36,10 +42,43 @@ llvm2_9 = mkVersion' "2.9"
 llvm2_8 :: Version
 llvm2_8 = mkVersion' "2.8"
 
+llvmNS :: NS
+llvmNS = [ClassName "llvm" []]
+
+llvmLegacyNS :: NS
+llvmLegacyNS = [ClassName "llvm" []
+               ,ClassName "legacy" []]
+
+llvmType :: String -> TypeC
+llvmType name = NamedType llvmNS name [] False
+
+llvmLegacyType :: String -> TypeC
+llvmLegacyType name = NamedType llvmLegacyNS name [] False
+
 irInclude :: Version -> String -> String
 irInclude ver hdr = if ver >= llvm3_3
                     then "llvm/IR/"++hdr
                     else "llvm/"++hdr
+
+mdSpec :: String -> String -> [(String,Bool,Type)] -> SpecType
+mdSpec prf name vars
+  = classSpec $
+    [(memberFun { ftReturnType = normalT $ ptr $ llvmType name
+                , ftStatic = True
+                , ftName = "get"
+                , ftArgs = (False,normalT $ ref $ llvmType "LLVMContext"):
+                           [(overl,tp)
+                           | (_,overl,tp) <- vars ]
+                },"new"++name++(if any (\(_,overl,_) -> overl) vars
+                                then "_"
+                                else ""))]++
+    [(memberFun { ftReturnType = tp
+                , ftName = case var of
+                  'I':'s':var' -> "is"++var'
+                  _ -> "get"++var
+                , ftOverloaded = overl
+                },prf++"Get"++var)
+    | (var,overl,tp) <- vars ]
 
 llvm :: Version -> [Spec]
 llvm version
@@ -118,7 +157,8 @@ llvm version
                          ,("Value",normalT $ ptr $ llvmType "Value")
                          ,("CChar",constT $ ptr char)
                          ,("Word64",normalT uint64_t)
-                         ,("Constant",normalT $ ptr $ llvmType "Constant")]
+                         ,("Constant",normalT $ ptr $ llvmType "Constant")
+                         ,("MDTuple",normalT $ ptr $ llvmType "MDTuple")]
           ]
      else [])++
     concat [[Spec { specHeader = "llvm/ADT/ilist.h"
@@ -313,9 +353,11 @@ llvm version
                                 },"pairSecond"++tp1++"_"++tp2)
                        ,(Setter { ftSetVar = "first"
                                 , ftSetType = rtp1
+                                , ftSetOverloaded = False
                                 },"pairSetFirst"++tp1++"_"++tp2)
                        ,(Setter { ftSetVar = "second"
                                 , ftSetType = rtp2
+                                , ftSetOverloaded = False
                                 },"pairSetSecond"++tp1++"_"++tp2)
                        ,(SizeOf,"sizeofPair"++tp1++"_"++tp2)
                        ,(AlignOf,"alignofPair"++tp1++"_"++tp2)
@@ -378,11 +420,13 @@ llvm version
              , specName = "DebugLoc"
              , specTemplateArgs = []
              , specType = classSpec $
-                          [(Constructor { ftConArgs = [] },"newDebugLoc")
-                          ,(memberFun { ftReturnType = normalT bool
-                                      , ftName = "isUnknown"
-                                      },"debugLocIsUnknown")
-                          ,(memberFun { ftReturnType = normalT unsigned
+                          [(Constructor { ftConArgs = [] },"newDebugLoc")]++
+                          (if version<llvm3_7
+                           then [(memberFun { ftReturnType = normalT bool
+                                            , ftName = "isUnknown"
+                                            },"debugLocIsUnknown")]
+                           else [])++
+                          [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getLine"
                                       },"debugLocGetLine")
                           ,(memberFun { ftReturnType = normalT unsigned
@@ -390,19 +434,208 @@ llvm version
                                       },"debugLocGetCol")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDNode"
                                       , ftName = "getScope"
-                                      , ftArgs = [(False,constT $ ref $ llvmType "LLVMContext")]
+                                      , ftArgs = if version<llvm3_7
+                                                 then [(False,constT $ ref $ llvmType "LLVMContext")]
+                                                 else []
                                       },"debugLocGetScope")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "MDNode"
                                       , ftName = "getInlinedAt"
-                                      , ftArgs = [(False,constT $ ref $ llvmType "LLVMContext")]
+                                      , ftArgs = if version<llvm3_7
+                                                 then [(False,constT $ ref $ llvmType "LLVMContext")]
+                                                 else []
                                       },"debugLocGetInlinedAt")]++
                           (if version>=llvm3_0
                            then [(memberFun { ftName = "dump" 
-                                            , ftArgs = [(False,constT $ ref $ llvmType "LLVMContext")]
+                                            , ftArgs = if version<llvm3_7
+                                                       then [(False,constT $ ref $ llvmType "LLVMContext")]
+                                                       else []
                                             },"debugLocDump")]
                            else [])
              }
        ]++
+       (if version<llvm3_7
+        then []
+        else [Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "TypedDINodeRef"
+                   , specTemplateArgs = [tp]
+                   , specType = classSpec
+                                [(Constructor [(True,constT $ ptr $ llvmType "Metadata")],
+                                  "newTypedDINodeRef"++name)
+                                ,(memberFun { ftReturnType = normalT $ NamedType llvmNS
+                                                             "TypedDINodeRef"
+                                                             [tp] False
+                                            , ftStatic = True
+                                            , ftName = "get"
+                                            , ftArgs = [(True,toConstPtr tp)]
+                                            },"typedDINodeRefGet"++name)]
+                   }
+             | (tp,name) <- [(normalT $ llvmType "DIScope","Scope")
+                            ,(normalT $ llvmType "DIType","Type")]
+             ]++
+             [Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DINode"
+                   , specTemplateArgs = []
+                   , specType = classSpec []
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DIVariable"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                [(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getLine"
+                                            , ftOverloaded = True
+                                            },"diVariableGetLine_")]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DILocalVariable"
+                   , specTemplateArgs = []
+                   , specType = mdSpec "diLocalVariable" "DILocalVariable" $
+                                (if version<llvm3_8
+                                 then [("Tag",False,normalT unsigned)]
+                                 else [])++
+                                [("Scope",True,normalT $ ptr $ llvmType "DILocalScope")
+                                ,("Name",False,normalT $ llvmType "StringRef")
+                                ,("File",False,normalT $ ptr $ llvmType "DIFile")
+                                ,("Line",False,normalT unsigned)
+                                ,("Type",True,normalT $ NamedType llvmNS "TypedDINodeRef"
+                                              [normalT $ llvmType "DIType"] False)
+                                ,("Arg",False,normalT unsigned)
+                                ,("Flags",False,normalT unsigned)]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DILocation"
+                   , specTemplateArgs = []
+                   , specType = mdSpec "diLocation" "DILocation"
+                                [("Line",False,normalT unsigned)
+                                ,("Column",False,normalT unsigned)
+                                ,("Scope",True,normalT $ ptr $ llvmType "DILocalScope")
+                                ,("InlinedAt",False,normalT $ ptr $ llvmType "DILocation")
+                                ]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DIScope"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                [(memberFun { ftReturnType = normalT $ ptr $ llvmType
+                                                             "DIFile"
+                                            , ftName = "getFile"
+                                            , ftOverloaded = True
+                                            },"diScopeGetFile_")
+                                ,(memberFun { ftReturnType = normalT $ llvmType
+                                                             "StringRef"
+                                            , ftName = "getName"
+                                            , ftOverloaded = True
+                                            },"diScopeGetName_")]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DIFile"
+                   , specTemplateArgs = []
+                   , specType = mdSpec "diFile" "DIFile"
+                                [("Filename",False,normalT $ llvmType "StringRef")
+                                ,("Directory",False,normalT $ llvmType "StringRef")
+                                ]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DILocalScope"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                (if version>=llvm3_8
+                                 then [(memberFun { ftReturnType = normalT $ ptr $ llvmType
+                                                                   "DISubprogram"
+                                                  , ftName = "getSubprogram"
+                                                  , ftOverloaded = True
+                                                  },"diLocalScopeGetSubprogram_")]
+                                 else [])
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DISubprogram"
+                   , specTemplateArgs = []
+                   , specType = mdSpec "diSubprogram" "DISubprogram" $
+                                [("Scope",False,normalT $ NamedType llvmNS "TypedDINodeRef"
+                                                [normalT $ llvmType "DIScope"] False)
+                                ,("Name",False,normalT $ llvmType "StringRef")
+                                ,("LinkageName",False,normalT $ llvmType "StringRef")
+                                ,("File",False,normalT $ ptr $ llvmType "DIFile")
+                                ,("Line",False,normalT unsigned)
+                                ,("Type",False,normalT $ ptr $ llvmType "DISubroutineType")
+                                ,("IsLocalToUnit",False,normalT bool)
+                                ,("IsDefinition",False,normalT bool)
+                                ,("ScopeLine",False,normalT unsigned)
+                                ,("ContainingType",False,normalT $ NamedType llvmNS
+                                                         "TypedDINodeRef"
+                                                         [normalT $ llvmType "DIType"] False)
+                                ,("Virtuality",False,normalT unsigned)
+                                ,("VirtualIndex",False,normalT unsigned)
+                                ,("Flags",False,normalT unsigned)
+                                ,("IsOptimized",False,normalT bool)
+                                ,("Function",False,normalT $ ptr $ llvmType "Function")
+                                ,("TemplateParams",False,normalT $ NamedType llvmNS
+                                                         "MDTupleTypedArrayWrapper"
+                                                         [normalT $ llvmType "DITemplateParameter"]
+                                                         False)
+                                ,("Declaration",False,normalT $ ptr $ llvmType "DISubprogram")
+                                ,("Variables",False,normalT $ NamedType llvmNS
+                                                    "MDTupleTypedArrayWrapper"
+                                                    [normalT $ llvmType "DILocalVariable"]
+                                                    False
+                                                    {-normalT $ NamedType llvmNS
+                                                    "ArrayRef"
+                                                    [normalT $ ptr $ llvmType "Metadata"] False-})
+                                ]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DIType"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                [(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getLine"
+                                            , ftOverloaded = True
+                                            },"diTypeGetLine")]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DISubroutineType"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                []
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DITemplateParameter"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                [(memberFun { ftReturnType = normalT $ llvmType "StringRef"
+                                            , ftName = "getName"
+                                            , ftOverloaded = True
+                                            },"diTemplateParameterGetName_")
+                                ,(memberFun { ftReturnType = normalT $ NamedType llvmNS
+                                                             "TypedDINodeRef"
+                                                             [normalT $ llvmType "DIType"] False
+                                            , ftName = "getType"
+                                            , ftOverloaded = True
+                                            },"diTemplateParameterGetType_")]
+                   }
+             ,Spec { specHeader = "llvm/IR/DebugInfoMetadata.h"
+                   , specNS = llvmNS
+                   , specName = "DITemplateTypeParameter"
+                   , specTemplateArgs = []
+                   , specType = mdSpec "diTemplateTypeParameter" "DITemplateTypeParameter"
+                                [("Name",False,normalT $ llvmType "StringRef")
+                                ,("Type",False,normalT $ NamedType llvmNS
+                                               "TypedDINodeRef"
+                                               [normalT $ llvmType "DIType"] False)]
+                   }
+             ])++
        [Spec { specHeader = irInclude version "Type.h"
              , specNS = llvmNS
              , specName = "Type"
@@ -748,7 +981,36 @@ llvm version
                                             , ftName = "getMetadataID"
                                             , ftOverloaded = True
                                             },"metadataGetID_")]
+                   }
+             ,Spec { specHeader = irInclude version "Metadata.h"
+                   , specNS = llvmNS
+                   , specName = "MDTuple"
+                   , specTemplateArgs = []
+                   , specType = classSpec
+                                [(memberFun { ftReturnType = normalT $ ptr $ llvmType
+                                                             "MDTuple"
+                                            , ftStatic = True
+                                            , ftName = "get"
+                                            , ftArgs = [(False,normalT $ ref $ llvmType
+                                                               "LLVMContext")
+                                                       ,(False,normalT $ NamedType llvmNS
+                                                               "ArrayRef"
+                                                               [normalT $ ptr $ llvmType
+                                                                "Metadata"] False)]
+                                            },"mdTupleGet")]
                    }]
+        else [])++
+       (if version>=llvm3_7
+        then [Spec { specHeader = irInclude version "Metadata.h"
+                   , specNS = llvmNS
+                   , specName = "MDTupleTypedArrayWrapper"
+                   , specTemplateArgs = [tp]
+                   , specType = classSpec
+                                [(Constructor [(False,constT $ ptr $ llvmType "MDTuple")],
+                                  "newMDTupleTypedArrayWrapper"++name)]
+                   }
+             | (tp,name) <- [(normalT $ llvmType "DILocalVariable","LocalVariable")]
+             ]
         else [])++
        [Spec { specHeader = irInclude version "Metadata.h"
              , specNS = llvmNS
@@ -1552,7 +1814,22 @@ llvm version
                                          (if version>=llvm3_6
                                           then [(to',"Metadata")
                                                | to' <- ["MDNode"
-                                                        ,"MDString"]]
+                                                        ,"MDString"
+                                                        ,"MDTuple"]]
+                                          else [])++
+                                         (if version>=llvm3_7
+                                          then [(to',"Metadata")
+                                               | to' <- ["DINode"
+                                                        ,"DIScope"
+                                                        ,"DILocalScope"
+                                                        ,"DISubprogram"
+                                                        ,"DIType"
+                                                        ,"DISubroutineType"
+                                                        ,"DIVariable"
+                                                        ,"DILocalVariable"
+                                                        ,"DIFile"
+                                                        ,"DITemplateParameter"
+                                                        ,"DITemplateTypeParameter"]]
                                           else [])++
                                          (if version<llvm3_5
                                           then []
@@ -1884,7 +2161,10 @@ llvm version
                                       },"getElementPtrInstGetNumIndices_")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "GetElementPtrInst"
                                       , ftName = "Create"
-                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")
+                                      , ftArgs = (if version>=llvm3_7
+                                                  then [(True,normalT $ ptr $ llvmType "Type")]
+                                                  else [])++
+                                                 [(True,normalT $ ptr $ llvmType "Value")
                                                  ,if version>=llvm3_0
                                                   then (False,normalT $ NamedType llvmNS "ArrayRef" [normalT $ ptr $ llvmType "Value"] False)
                                                   else (False,normalT $ ptr $ llvmType "Value")
@@ -1931,11 +2211,13 @@ llvm version
                 , specNS = llvmNS
                 , specName = "LandingPadInst"
                 , specTemplateArgs = []
-                , specType = classSpec
-                             [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
-                                         , ftName = "getPersonalityFn"
-                                         },"landingPadInstGetPersonaliteFn")
-                             ,(memberFun { ftReturnType = normalT bool
+                , specType = classSpec $
+                             (if version<llvm3_7
+                              then [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
+                                               , ftName = "getPersonalityFn"
+                                               },"landingPadInstGetPersonaliteFn")]
+                              else [])++
+                             [(memberFun { ftReturnType = normalT bool
                                          , ftName = "isCleanup"
                                          },"landingPadInstIsCleanup")
                              ,(memberFun { ftReturnType = normalT unsigned
@@ -1955,9 +2237,11 @@ llvm version
                                          },"landingPadInstIsFilter_")
                              ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "LandingPadInst"
                                          , ftName = "Create"
-                                         , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
-                                                    ,(True,normalT $ ptr $ llvmType "Value")
-                                                    ,(False,normalT unsigned)
+                                         , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]++
+                                                    (if version<llvm3_7
+                                                     then [(True,normalT $ ptr $ llvmType "Value")]
+                                                     else [])++
+                                                    [(False,normalT unsigned)
                                                     ,(False,constT $ ref $ llvmType "Twine")]
                                          , ftStatic = True
                                          },"newLandingPadInst_")
@@ -2652,8 +2936,12 @@ llvm version
                     else NamedType [ClassName "llvm" []
                                    ,ClassName "Value" []]
                          "use_iterator" [] False ]++
-       [Spec { specHeader = "llvm/PassManager.h"
-             , specNS = llvmNS
+       [Spec { specHeader = if version<llvm3_7
+                            then "llvm/PassManager.h"
+                            else "llvm/IR/LegacyPassManager.h"
+             , specNS = if version<llvm3_7
+                        then llvmNS
+                        else llvmLegacyNS
              , specName = "PassManager"
              , specTemplateArgs = []
              , specType = classSpec
@@ -2669,8 +2957,12 @@ llvm version
                                       },"passManagerRun")
                           ]
              }
-       ,Spec { specHeader = "llvm/PassManager.h"
-             , specNS = llvmNS
+       ,Spec { specHeader = if version<llvm3_7
+                            then "llvm/PassManager.h"
+                            else "llvm/IR/LegacyPassManager.h"
+             , specNS = if version<llvm3_7
+                        then llvmNS
+                        else llvmLegacyNS
              , specName = "FunctionPassManager"
              , specTemplateArgs = []
              , specType = classSpec
@@ -2768,12 +3060,17 @@ llvm version
                    }]
         else [])++
     (if version>=llvm2_9
-     then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
+     then [Spec { specHeader = if version<llvm3_7
+                               then "llvm/Target/TargetLibraryInfo.h"
+                               else "llvm/Analysis/TargetLibraryInfo.h"
                 , specNS = llvmNS
                 , specName = "TargetLibraryInfo"
                 , specTemplateArgs = []
                 , specType = classSpec $
-                             [(Constructor [],"newTargetLibraryInfo")
+                             [(Constructor
+                               (if version>=llvm3_7
+                                then [(False,constT $ ref $ llvmType "TargetLibraryInfoImpl")]
+                                else []),"newTargetLibraryInfo")
                              ,(Destructor False,"deleteTargetLibraryInfo")]++
                              (if version>=llvm3_3
                               then [(memberFun { ftReturnType = normalT bool
@@ -2793,6 +3090,15 @@ llvm version
                                          , ftArgs = [(False,normalT $ EnumType [ClassName "llvm" [],ClassName "LibFunc" []] "Func")]
                                          },"targetLibraryInfoHas_")
                              ]
+                }]
+     else [])++
+    (if version>=llvm3_7
+     then [Spec { specHeader = "llvm/Analysis/TargetLibraryInfo.h"
+                , specNS = llvmNS
+                , specName = "TargetLibraryInfoImpl"
+                , specTemplateArgs = []
+                , specType = classSpec
+                             [(Constructor [],"newTargetLibraryInfoImpl")]
                 }]
      else [])++
        (if version >= llvm3_2
@@ -2958,7 +3264,7 @@ llvm version
                                             , ftArgs = [(False,normalT $ ptr $ llvmType "GlobalVariable")]
                                             },"targetDataPreferedAlignment")]
                    }])++
-       (if version<llvm3_5
+       (if version<llvm3_5 || version>=llvm3_7
         then []
         else [Spec { specHeader = "llvm/IR/DataLayout.h"
                    , specNS = llvmNS
@@ -3019,15 +3325,16 @@ llvm version
              , specNS = llvmNS
              , specName = "LoopInfo"
              , specTemplateArgs = []
-             , specType = classSpec
-                          [(Constructor [],"newLoopInfo")
-                          ,(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "LoopInfoBase" 
-                                                       [normalT $ llvmType "BasicBlock"
-                                                       ,normalT $ llvmType "Loop"]
-                                                       False
-                                      , ftName = "getBase"
-                                      },"loopInfoGetBase")
-                          ]
+             , specType = classSpec $
+                          [(Constructor [],"newLoopInfo")]++
+                          (if version<llvm3_7
+                           then [(memberFun { ftReturnType = normalT $ ref $ NamedType llvmNS "LoopInfoBase" 
+                                                             [normalT $ llvmType "BasicBlock"
+                                                             ,normalT $ llvmType "Loop"]
+                                                             False
+                                            , ftName = "getBase"
+                                            },"loopInfoGetBase")]
+                           else [])
              }
        ]++
     (if version>=llvm3_0
@@ -3039,43 +3346,56 @@ llvm version
                              [(Constructor [],"newPassManagerBuilder")
                              ,(Destructor False,"deletePassManagerBuilder")
                              ,(memberFun { ftName = "populateFunctionPassManager"
-                                         , ftArgs = [(False,normalT $ ref $ llvmType "FunctionPassManager")
+                                         , ftArgs = [(False,normalT $ ref $
+                                                            if version<llvm3_7
+                                                            then llvmType "FunctionPassManager"
+                                                            else llvmLegacyType "FunctionPassManager")
                                                     ]
                                          },"populateFunctionPassManager")
                              ,(Setter { ftSetVar = "OptLevel"
                                       , ftSetType = normalT unsigned
+                                      , ftSetOverloaded = False
                                       },"setPassManagerBuilderOptLevel")
                              ,(Setter { ftSetVar = "SizeLevel"
                                       , ftSetType = normalT unsigned
+                                      , ftSetOverloaded = False
                                       },"setPassManagerBuilderSizeLevel")
                              ,(Setter { ftSetVar = "Inliner"
                                       , ftSetType = normalT $ ptr $ llvmType "Pass"
+                                      , ftSetOverloaded = False
                                       },"setPassManagerBuilderInliner")]++
                              (if version<=llvm3_3
                               then [(Setter { ftSetVar = "DisableSimplifyLibCalls"
                                             , ftSetType = normalT bool
+                                            , ftSetOverloaded = False
                                             },"setPassManagerBuilderDisableSimplifyLibCalls")]
                               else [])++
                              [(Setter { ftSetVar = "DisableUnitAtATime"
                                       , ftSetType = normalT bool
+                                      , ftSetOverloaded = False
                                       },"setPassManagerBuilderDisableUnitAtATime")
                              ,(Setter { ftSetVar = "DisableUnrollLoops"
                                       , ftSetType = normalT bool
+                                      , ftSetOverloaded = False
                                       },"setPassManagerBuilderDisableUnrollLoops")]++
                              (if version>=llvm3_1
                               then (if version>=llvm3_3
                                     then [(Setter { ftSetVar = "BBVectorize"
                                                   , ftSetType = normalT bool
+                                                  , ftSetOverloaded = False
                                                   },"setPassManagerBuilderBBVectorize")
                                          ,(Setter { ftSetVar = "SLPVectorize"
                                                   , ftSetType = normalT bool
+                                                  , ftSetOverloaded = False
                                                   },"setPassManagerBuilderSLPVectorize")]
                                     else [(Setter { ftSetVar = "Vectorize"
                                                   , ftSetType = normalT bool
+                                                  , ftSetOverloaded = False
                                                   },"setPassManagerBuilderVectorize")]++
                                          (if version>=llvm3_2
                                           then [(Setter { ftSetVar = "LoopVectorize"
                                                         , ftSetType = normalT bool
+                                                        , ftSetOverloaded = False
                                                         },"setPassManagerBuilderLoopVectorize")]
                                           else []))
                               else [])
@@ -3113,7 +3433,12 @@ llvm version
                             ,("createLICMPass","Pass",[])
                             ,("createLoopStrengthReducePass","Pass",[])]++
                             (if version>=llvm3_1
-                             then [("createGlobalMergePass","Pass",[])]
+                             then [("createGlobalMergePass","Pass",
+                                    if version<llvm3_7
+                                    then []
+                                    else [constT $ ptr $ llvmType "TargetMachine"
+                                         ,normalT unsigned
+                                         ,normalT bool])]
                              else [])++
                             [("createLoopUnswitchPass","Pass",[normalT bool])]++
                             (if version>=llvm2_9
@@ -3274,7 +3599,9 @@ llvm version
                              then [("FunctionPass","createMemDepPrinter",[])]
                              else [])++
                             (if version>=llvm3_5
-                             then [("ImmutablePass","createJumpInstrTableInfoPass",[])]
+                             then if version>=llvm3_7
+                                  then []
+                                  else [("ImmutablePass","createJumpInstrTableInfoPass",[])]
                              else [])
        ]++
        [Spec { specHeader = "llvm/Support/raw_ostream.h"
@@ -3300,83 +3627,109 @@ llvm version
              , specType = classSpec
                            [(Constructor [(False,normalT $ ref $ NamedType [ClassName "std" []] "string" [] False)],"newStringOStream")]
              }
-       ,Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
-             , specNS = llvmNS
-             , specName = "AliasAnalysis"
-             , specTemplateArgs = []
-             , specType = classSpec $
-                          [(Constructor [],"newAliasAnalysis")
-                          ,(Destructor True,"deleteAliasAnalysis_")]++
-                          (if version>=llvm3_3
-                           then [(memberFun { ftReturnType = constT $ ptr $ llvmType "TargetLibraryInfo"
-                                            , ftName = "getTargetLibraryInfo"
-                                            , ftOverloaded = True
-                                            },"aliasAnalysisGetTargetLibraryInfo_")]
-                           else [])++
-                          [(memberFun { ftReturnType = normalT uint64_t
-                                      , ftName = "getTypeStoreSize"
-                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
-                                      , ftOverloaded = True
-                                      },"aliasAnalysisGetTypeStoreSize_")]++
-                          (if version>=llvm2_9
-                           then [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [] False
-                                            , ftName = "getLocation"
-                                            , ftArgs = [(False,constT $ ptr $ llvmType (inst++"Inst"))]
-                                            , ftOverloaded = True
-                                            },"aliasAnalysisGetLocation"++inst++"_")
-                                 | inst <- ["Load","Store","VAArg"]++(if version>=llvm3_0
-                                                                     then ["AtomicCmpXchg","AtomicRMW"]
-                                                                     else [])]
-                           else [])++
-                          [(memberFun { ftReturnType = normalT $ EnumType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "AliasResult"
-                                      , ftName = "alias"
-                                      , ftArgs = if version>=llvm2_9
-                                                 then [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [] False)
-                                                      ,(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [] False)]
-                                                 else [(False,constT $ ptr $ llvmType "Value")
-                                                      ,(False,normalT unsigned)
-                                                      ,(False,constT $ ptr $ llvmType "Value")
-                                                      ,(False,normalT unsigned)]
-                                      , ftOverloaded = True
-                                      },"aliasAnalysisAlias_")
-                          ]
-             }
+       ,let aaName = if version<llvm3_8
+                     then "AliasAnalysis"
+                     else "AAResults"
+            aaName' = if version<llvm3_8
+                      then "aliasAnalysis"
+                      else "aaResults"
+        in Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
+                , specNS = llvmNS
+                , specName = aaName
+                , specTemplateArgs = []
+                , specType = classSpec $
+                             [(Constructor [],"new"++aaName)
+                             ,(Destructor True,"delete"++aaName++"_")]++
+                             (if version>=llvm3_3
+                              then [(memberFun { ftReturnType = constT $ ptr $ llvmType "TargetLibraryInfo"
+                                               , ftName = "getTargetLibraryInfo"
+                                               , ftOverloaded = True
+                                               },aaName'++"GetTargetLibraryInfo_")]
+                              else [])++
+                             (if version<llvm3_7
+                              then [(memberFun { ftReturnType = normalT uint64_t
+                                               , ftName = "getTypeStoreSize"
+                                               , ftArgs = [(True,normalT $ ptr $ llvmType "Type")]
+                                               , ftOverloaded = True
+                                               },aaName'++"GetTypeStoreSize_")]
+                              else [])++
+                             (if version>=llvm2_9 && version<llvm3_7
+                              then [(memberFun { ftReturnType = normalT $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [] False
+                                               , ftName = "getLocation"
+                                               , ftArgs = [(False,constT $ ptr $ llvmType (inst++"Inst"))]
+                                               , ftOverloaded = True
+                                               },"aliasAnalysisGetLocation"++inst++"_")
+                                    | inst <- ["Load","Store","VAArg"]++(if version>=llvm3_0
+                                                                         then ["AtomicCmpXchg","AtomicRMW"]
+                                                                         else [])]
+                              else [])++
+                             [(memberFun { ftReturnType = normalT $ EnumType
+                                                          (if version<llvm3_7
+                                                           then [ClassName "llvm" [],
+                                                                 ClassName "AliasAnalysis" []]
+                                                           else llvmNS) "AliasResult"
+                                         , ftName = "alias"
+                                         , ftArgs = if version>=llvm2_9
+                                                    then if version<llvm3_7
+                                                         then [(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [] False)
+                                                              ,(False,constT $ ref $ NamedType [ClassName "llvm" [],ClassName "AliasAnalysis" []] "Location" [] False)]
+                                                         else [(False,constT $ ref $ llvmType "MemoryLocation")
+                                                              ,(False,constT $ ref $ llvmType "MemoryLocation")]
+                                                    else [(False,constT $ ptr $ llvmType "Value")
+                                                         ,(False,normalT unsigned)
+                                                         ,(False,constT $ ptr $ llvmType "Value")
+                                                         ,(False,normalT unsigned)]
+                                         , ftOverloaded = True
+                                         },aaName'++"Alias_")
+                             ]
+                }
        ]++
     (if version>=llvm2_9
-     then [Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
-                , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
-                , specName = "Location"
-                , specTemplateArgs = []
-                , specType = classSpecCustom
-                             ("data Location = Location { locationPtr :: Ptr Value, locationSize :: Word64, locationAATags :: "++
-                              (if version>=llvm3_6
-                               then "AAMDNodes"
-                               else "Ptr MDNode")++" }") $
-                             [(Constructor [(True,constT $ ptr $ llvmType "Value")
-                                           ,(False,normalT uint64_t)
-                                           ,(False,if version<llvm3_6
-                                                   then constT $ ptr $ llvmType "MDNode"
-                                                   else constT $ ref $ llvmType "AAMDNodes")
-                                           ],"newLocation_")
-                             ,(SizeOf,"locationSizeOf")
-                             ,(AlignOf,"locationAlignOf")
-                             ,(Getter "Ptr" (constT $ ptr $ llvmType "Value") False,
-                               "locationGetPtr")
-                             ,(Setter "Ptr" (constT $ ptr $ llvmType "Value"),
-                               "locationSetPtr")
-                             ,(Getter "Size" (normalT uint64_t) False,
-                               "locationGetSize")
-                             ,(Setter "Size" (normalT uint64_t),
-                               "locationSetSize")]++
-                             (if version>=llvm3_6
-                              then [(Getter "AATags" (normalT $ llvmType "AAMDNodes") False,
-                                     "locationGetAATags")
-                                   ,(Setter "AATags" (normalT $ llvmType "AAMDNodes"),
-                                     "locationSetAATags")]
-                              else [(Getter "TBAATag" (normalT $ ptr $ llvmType "MDNode") False,
-                                     "locationGetTBAATag")
-                                   ,(Setter "TBAATag" (normalT $ ptr $ llvmType "MDNode"),
-                                     "locationSetTBAATag")])
+     then [let prf = if version<llvm3_7
+                     then "location"
+                     else "memoryLocation"
+               name = if version<llvm3_7
+                      then "Location"
+                      else "MemoryLocation"
+           in Spec { specHeader = if version<llvm3_7
+                                  then "llvm/Analysis/AliasAnalysis.h"
+                                  else "llvm/Analysis/MemoryLocation.h"
+                   , specNS = if version<llvm3_7
+                              then [ClassName "llvm" [],ClassName "AliasAnalysis" []]
+                              else llvmNS
+                   , specName = name
+                   , specTemplateArgs = []
+                   , specType = classSpecCustom
+                                ("data "++name++" = "++name++
+                                  " { "++prf++"Ptr :: Ptr Value, "++prf++"Size :: Word64, "++prf++"AATags :: "++
+                                 (if version>=llvm3_6
+                                  then "AAMDNodes"
+                                  else "Ptr MDNode")++" }") $
+                                [(Constructor [(True,constT $ ptr $ llvmType "Value")
+                                              ,(False,normalT uint64_t)
+                                              ,(False,if version<llvm3_6
+                                                      then constT $ ptr $ llvmType "MDNode"
+                                                      else constT $ ref $ llvmType "AAMDNodes")
+                                              ],"new"++name++"_")
+                                ,(SizeOf,prf++"SizeOf")
+                                ,(AlignOf,prf++"AlignOf")
+                                ,(Getter "Ptr" (constT $ ptr $ llvmType "Value") False,
+                                  prf++"GetPtr")
+                                ,(Setter "Ptr" (constT $ ptr $ llvmType "Value") True,
+                                  prf++"SetPtr")
+                                ,(Getter "Size" (normalT uint64_t) False,
+                                  prf++"GetSize")
+                                ,(Setter "Size" (normalT uint64_t) False,
+                                  prf++"SetSize")]++
+                                (if version>=llvm3_6
+                                 then [(Getter "AATags" (normalT $ llvmType "AAMDNodes") False,
+                                        prf++"GetAATags")
+                                      ,(Setter "AATags" (normalT $ llvmType "AAMDNodes") False,
+                                        prf++"SetAATags")]
+                                 else [(Getter "TBAATag" (normalT $ ptr $ llvmType "MDNode") False,
+                                        prf++"GetTBAATag")
+                                      ,(Setter "TBAATag" (normalT $ ptr $ llvmType "MDNode") False,
+                                        prf++"SetTBAATag")])
                 }]
      else [])++
        [Spec { specHeader = "llvm/Analysis/MemoryBuiltins.h"
@@ -3398,7 +3751,9 @@ llvm version
              , specType = GlobalFunSpec { gfunReturnType = normalT $ ptr $ llvmType "Value"
                                         , gfunArgs = [(False,normalT $ ptr $ llvmType "CallInst")]++
                                                      (if version >= llvm3_2
-                                                      then [(False,constT $ ptr $ llvmType "DataLayout")
+                                                      then [(False,constT $ (if version<llvm3_7
+                                                                             then ptr
+                                                                             else ref) $ llvmType "DataLayout")
                                                            ,(False,constT $ ptr $ llvmType "TargetLibraryInfo")]
                                                       else [(False,constT $ ptr $ llvmType "TargetData")])++
                                                      [(False,normalT bool)]
@@ -3564,6 +3919,7 @@ llvm version
                                 },"genericValueGetDouble")
                        ,(Setter { ftSetVar = "DoubleVal"
                                 , ftSetType = normalT double
+                                , ftSetOverloaded = False
                                 },"genericValueSetDouble")
                        ,(Getter { ftGetVar = "FloatVal"
                                 , ftGetType = normalT float
@@ -3571,6 +3927,7 @@ llvm version
                                 },"genericValueGetFloat")
                        ,(Setter { ftSetVar = "FloatVal"
                                 , ftSetType = normalT float
+                                , ftSetOverloaded = False
                                 },"genericValueSetFloat")
                        ,(Getter { ftGetVar = "PointerVal"
                                 , ftGetType = normalT $ ptr void
@@ -3578,6 +3935,7 @@ llvm version
                                 },"genericValueGetPointer")
                        ,(Setter { ftSetVar = "PointerVal"
                                 , ftSetType = normalT $ ptr void
+                                , ftSetOverloaded = False
                                 },"genericValueSetPointer")
                        ,(Getter { ftGetVar = "IntVal"
                                 , ftGetType = normalT $ llvmType "APInt"
@@ -3585,6 +3943,7 @@ llvm version
                                 },"genericValueGetInt")
                        ,(Setter { ftSetVar = "IntVal"
                                 , ftSetType = normalT $ llvmType "APInt"
+                                , ftSetOverloaded = False
                                 },"genericValueSetInt")]++
                        (if version>=llvm3_3
                         then [(Getter { ftGetVar = "AggregateVal"
@@ -3597,6 +3956,7 @@ llvm version
                                       , ftSetType = normalT $ NamedType [ClassName "std" []] "vector"
                                                     [normalT $ llvmType "GenericValue"]
                                                     False
+                                      , ftSetOverloaded = False
                                       },"genericValueSetAggregate")]
                         else [])
           }
@@ -3689,7 +4049,9 @@ llvm version
             ,(memberFun { ftName = "clearAllGlobalMappings"
                         , ftOverloaded = True
                         },"executionEngineClearAllGlobalMappings_")
-            ,(memberFun { ftReturnType = normalT $ ptr void
+            ,(memberFun { ftReturnType = if version<llvm3_7
+                                         then normalT $ ptr void
+                                         else normalT uint64_t
                         , ftName = "updateGlobalMapping"
                         , ftArgs = [(True,constT $ ptr $ llvmType "GlobalValue")
                                    ,(False,normalT $ ptr void)]
@@ -3976,7 +4338,9 @@ llvm version
                 }]
      else [])++
     [Spec { specHeader = "llvm/Analysis/AliasAnalysis.h"
-          , specNS = [ClassName "llvm" [],ClassName "AliasAnalysis" []]
+          , specNS = if version<llvm3_7
+                     then [ClassName "llvm" [],ClassName "AliasAnalysis" []]
+                     else llvmNS
           , specName = "AliasResult"
           , specTemplateArgs = []
           , specType = EnumSpec (EnumNode "AliasResult" $
@@ -4382,7 +4746,9 @@ llvm version
                 }]
      else [])++
     (if version>=llvm2_9
-     then [Spec { specHeader = "llvm/Target/TargetLibraryInfo.h"
+     then [Spec { specHeader = if version<llvm3_7
+                               then "llvm/Target/TargetLibraryInfo.h"
+                               else "llvm/Analysis/TargetLibraryInfo.h"
                 , specNS = [ClassName "llvm" [],ClassName "LibFunc" []]
                 , specName = "Func"
                 , specTemplateArgs = []
@@ -5044,15 +5410,15 @@ llvm version
                               "newAAMDNodes")
                             ,(Getter "TBAA" (normalT $ ptr $ llvmType "MDNode") False,
                               "aaMDNodesGetTBAA")
-                            ,(Setter "TBAA" (normalT $ ptr $ llvmType "MDNode"),
+                            ,(Setter "TBAA" (normalT $ ptr $ llvmType "MDNode") (version>=llvm3_7),
                               "aaMDNodesSetTBAA")
                             ,(Getter "Scope" (normalT $ ptr $ llvmType "MDNode") False,
                               "aaMDNodesGetScope")
-                            ,(Setter "Scope" (normalT $ ptr $ llvmType "MDNode"),
+                            ,(Setter "Scope" (normalT $ ptr $ llvmType "MDNode") (version>=llvm3_7),
                               "aaMDNodesSetScope")
                             ,(Getter "NoAlias" (normalT $ ptr $ llvmType "MDNode") False,
                               "aaMDNodesGetNoAlias")
-                            ,(Setter "NoAlias" (normalT $ ptr $ llvmType "MDNode"),
+                            ,(Setter "NoAlias" (normalT $ ptr $ llvmType "MDNode") (version>=llvm3_7),
                               "aaMDNodesSetNoAlias")
                             ,(SizeOf,"aaMDNodesSizeOf")
                             ,(AlignOf,"aaMDNodesAlignOf")]
@@ -5086,10 +5452,10 @@ llvm version
                       "data ClonedCodeInfo = ClonedCodeInfo { containsCalls :: Bool, containsDynamicAllocas :: Bool }"
                       [(Constructor [],"newClonedCodeInfo")
                       ,(Getter "ContainsCalls" (normalT bool) False,"clonedCodeInfoGetContainsCalls")
-                      ,(Setter "ContainsCalls" (normalT bool),"clonedCodeInfoSetContainsCalls")
+                      ,(Setter "ContainsCalls" (normalT bool) False,"clonedCodeInfoSetContainsCalls")
                       ,(Getter "ContainsDynamicAllocas" (normalT bool) False,
                         "clonedCodeInfoGetContainsDynamicAllocas")
-                      ,(Setter "ContainsDynamicAllocas" (normalT bool),
+                      ,(Setter "ContainsDynamicAllocas" (normalT bool) False,
                         "clonedCodeInfoSetContainsDynamicAllocas")
                       ,(SizeOf,"clonedCodeInfoSizeOf")
                       ,(AlignOf,"clonedCodeInfoAlignOf")]

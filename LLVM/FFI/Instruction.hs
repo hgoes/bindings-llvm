@@ -132,7 +132,9 @@ module LLVM.FFI.Instruction
          -- ** Landing Pad Instruction
          LandingPadInst(),
          newLandingPadInst,
+#if HS_LLVM_VERSION<307
          landingPadInstGetPersonaliteFn,
+#endif
          landingPadInstIsCleanup,
          landingPadInstSetCleanup,
          landingPadInstGetNumClauses,
@@ -387,7 +389,11 @@ newPhiNode = newPhiNode_
 landingPadInstAddClause :: ValueC clause => Ptr LandingPadInst -> Ptr clause -> IO ()
 landingPadInstAddClause = landingPadInstAddClause_
 
+#if HS_LLVM_VERSION<307
 newLandingPadInst :: (TypeC tp,ValueC fn) => Ptr tp -> Ptr fn -> CUInt -> Ptr Twine -> IO (Ptr LandingPadInst)
+#else
+newLandingPadInst :: TypeC tp => Ptr tp -> CUInt -> Ptr Twine -> IO (Ptr LandingPadInst)
+#endif
 newLandingPadInst = newLandingPadInst_
 #endif
 
@@ -401,7 +407,9 @@ newInsertValueInst = newInsertValueInst_
 newInsertElementInst :: (ValueC vec,ValueC newEl,ValueC idx) => Ptr vec -> Ptr newEl -> Ptr idx -> Ptr Twine -> IO (Ptr InsertElementInst)
 newInsertElementInst = newInsertElementInst_
 
-#if HS_LLVM_VERSION>=300
+#if HS_LLVM_VERSION>=307
+newGetElementPtrInst :: (TypeC tp,ValueC ptr) => Ptr tp -> Ptr ptr -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr GetElementPtrInst)
+#elif HS_LLVM_VERSION>=300
 newGetElementPtrInst :: ValueC ptr => Ptr ptr -> Ptr (ArrayRef (Ptr Value)) -> Ptr Twine -> IO (Ptr GetElementPtrInst)
 #else
 newGetElementPtrInst :: ValueC ptr => Ptr ptr -> Ptr Value -> Ptr Twine -> IO (Ptr GetElementPtrInst)

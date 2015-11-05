@@ -4,19 +4,23 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#if HS_LLVM_VERSION<307
 extern char* passId_LoopInfo();
+#endif
 #if HS_LLVM_VERSION<306
 extern const char* passId_FindUsedTypes;
 #endif
-#if HS_LLVM_VERSION >= 209
+#if HS_LLVM_VERSION >= 209 && HS_LLVM_VERSION<307
 extern char* passId_TargetLibraryInfo();
 #endif
+#if HS_LLVM_VERSION < 307
 #if HS_LLVM_VERSION < 302
 extern char* passId_TargetData();
 #elif HS_LLVM_VERSION < 305
 extern char* passId_DataLayout();
 #else
 extern char* passId_DataLayoutPass();
+#endif
 #endif
 #if HS_LLVM_VERSION < 305
 extern char* passId_DominatorTree();

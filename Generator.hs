@@ -84,6 +84,7 @@ data FunSpec = Constructor { ftConArgs :: [(Bool,Type)]
                          }
              | Setter { ftSetVar :: String
                       , ftSetType :: Type
+                      , ftSetOverloaded :: Bool
                       }
              | Getter { ftGetVar :: String
                       , ftGetType :: Type
@@ -185,9 +186,6 @@ double = NamedType [] "double" [] False
 float = NamedType [] "float" [] False
 ptr = PtrType
 ref = RefType
-llvmType name = NamedType llvmNS name [] False
-
-llvmNS = [ClassName "llvm" []]
 
 toPtr :: Type -> Type
 toPtr (Type qual tp) = Type qual (ptr tp)
@@ -540,9 +538,12 @@ generateFFI mname header specs
                                                            else Nothing) $ toPtr $ specFullType cs],
                                       "IO "++(bracket $ toHaskellType True Nothing $ normalT void),
                                       cname)
-                                Setter { ftSetType = tp }
+                                Setter { ftSetType = tp
+                                       , ftSetOverloaded = isO }
                                   -> ([toHaskellType True Nothing $ toPtr $ specFullType cs,
-                                       toHaskellType True Nothing tp],
+                                       toHaskellType True (if isO
+                                                           then Just "t"
+                                                           else Nothing) tp],
                                       "IO "++(bracket $ toHaskellType True Nothing $ normalT void),
                                       cname)
                                 Getter { ftGetType = tp

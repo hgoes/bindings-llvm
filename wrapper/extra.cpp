@@ -19,7 +19,9 @@
 #include <llvm/Support/FileSystem.h>
 #endif
 #include <llvm/Bitcode/ReaderWriter.h>
-#if HS_LLVM_VERSION >= 209
+#if HS_LLVM_VERSION>=307
+#include <llvm/Analysis/TargetLibraryInfo.h>
+#elif HS_LLVM_VERSION >= 209
 #include <llvm/Target/TargetLibraryInfo.h>
 #endif
 #include <llvm/Analysis/AliasAnalysis.h>
@@ -36,20 +38,24 @@
 #include <string>
 
 extern "C" {
+#if HS_LLVM_VERSION<307
   char* passId_LoopInfo() { return &llvm::LoopInfo::ID; }
+#endif
   //char* passId_FindUsedTypes() { return &llvm::FindUsedTypes::ID; }
 #if HS_LLVM_VERSION<306
   const char* passId_FindUsedTypes = &llvm::FindUsedTypes::ID;
 #endif
-#if HS_LLVM_VERSION >= 209
+#if HS_LLVM_VERSION >= 209 && HS_LLVM_VERSION<307
   char* passId_TargetLibraryInfo() { return &llvm::TargetLibraryInfo::ID; }
 #endif
+#if HS_LLVM_VERSION < 307
 #if HS_LLVM_VERSION < 302
   char* passId_TargetData() { return &llvm::TargetData::ID; }
 #elif HS_LLVM_VERSION < 305
   char* passId_DataLayout() { return &llvm::DataLayout::ID; }
 #else
   char* passId_DataLayoutPass() { return &llvm::DataLayoutPass::ID; }
+#endif
 #endif
 #if HS_LLVM_VERSION < 305
   char* passId_DominatorTree() { return &llvm::DominatorTree::ID; }
