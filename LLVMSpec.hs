@@ -157,8 +157,10 @@ llvm version
                          ,("Value",normalT $ ptr $ llvmType "Value")
                          ,("CChar",constT $ ptr char)
                          ,("Word64",normalT uint64_t)
-                         ,("Constant",normalT $ ptr $ llvmType "Constant")
-                         ,("MDTuple",normalT $ ptr $ llvmType "MDTuple")]
+                         ,("Constant",normalT $ ptr $ llvmType "Constant")]++
+                         (if version>=llvm3_6
+                          then [("MDTuple",normalT $ ptr $ llvmType "MDTuple")]
+                          else [])
           ]
      else [])++
     concat [[Spec { specHeader = "llvm/ADT/ilist.h"
