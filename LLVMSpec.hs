@@ -3313,16 +3313,18 @@ llvm version
              , specNS = llvmNS
              , specName = "ScalarEvolution"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpec $
                           [(memberFun { ftReturnType = constT $ ptr $ llvmType "SCEV"
                                       , ftName = "getSCEV"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
-                                      },"scalarEvolutionGetSCEV_")
-                          ,(memberFun { ftReturnType = constT $ ptr $ llvmType "SCEV"
-                                      , ftName = "getExitCount"
-                                      , ftArgs = [(False,normalT $ ptr $ llvmType "Loop")
-                                                 ,(False,normalT $ ptr $ llvmType "BasicBlock")]
-                                      },"scalarEvolutionGetExitCount")]
+                                      },"scalarEvolutionGetSCEV_")]++
+                          (if version>=llvm3_0
+                           then [(memberFun { ftReturnType = constT $ ptr $ llvmType "SCEV"
+                                            , ftName = "getExitCount"
+                                            , ftArgs = [(False,normalT $ ptr $ llvmType "Loop")
+                                                       ,(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                            },"scalarEvolutionGetExitCount")]
+                           else [])
              }
        ,Spec { specHeader = "llvm/Analysis/ScalarEvolution.h"
              , specNS = llvmNS
