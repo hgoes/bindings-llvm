@@ -34,6 +34,8 @@ class LoopBaseC t where
   loopGetBlocks :: Ptr t -> IO (Ptr (Vector (Ptr (LoopBaseBlock t))))
   loopGetExitEdges :: Ptr t -> Ptr (SmallVector (Pair (Ptr BasicBlock) (Ptr BasicBlock))) -> IO ()
   loopGetNumBackEdges :: Ptr t -> IO CUInt
+  loopGetExitBlocks :: Ptr t -> Ptr (SmallVector (Ptr (LoopBaseBlock t))) -> IO ()
+  loopGetExitBlock :: Ptr t -> IO (Ptr (LoopBaseBlock t))
 
 loopExitEdgeList :: LoopBaseC t => Ptr t -> IO [(Ptr BasicBlock,Ptr BasicBlock)]
 loopExitEdgeList loop = do
@@ -60,6 +62,8 @@ instance LoopBaseC (LoopBase BasicBlock Loop) where
   loopGetBlocks = loopGetBlocks_
   loopGetExitEdges = loopGetExitEdges_
   loopGetNumBackEdges = loopGetNumBackEdges_
+  loopGetExitBlocks = loopGetExitBlocks_
+  loopGetExitBlock = loopGetExitBlock_
   
 instance LoopBaseC Loop where
   type LoopBaseBlock Loop = BasicBlock
@@ -73,7 +77,9 @@ instance LoopBaseC Loop where
   loopGetBlocks = loopGetBlocks_
   loopGetExitEdges = loopGetExitEdges_
   loopGetNumBackEdges = loopGetNumBackEdges_
-
+  loopGetExitBlocks = loopGetExitBlocks_
+  loopGetExitBlock = loopGetExitBlock_
+  
 class LoopInfoBaseC blk loop where
   loopInfoBaseBegin :: Ptr (LoopInfoBase blk loop) -> IO (Ptr (Const_iterator (Ptr loop)))
   loopInfoBaseEnd :: Ptr (LoopInfoBase blk loop) -> IO (Ptr (Const_iterator (Ptr loop)))

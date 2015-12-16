@@ -136,11 +136,22 @@ module LLVM.FFI.Pass
        ,DominatorTreeWrapperPass()
        ,dominatorTreeWrapperPassGetDomTree
 #endif
+       ,ScalarEvolution()
+       ,scalarEvolutionGetSCEV
+       ,scalarEvolutionGetExitCount
+       ,SCEV()
+       ,SCEVC()
+       ,scevGetType
+       ,SCEVConstant()
+       ,scevGetValue
+       ,SCEVCouldNotCompute()
        ) where
 
 import LLVM.FFI.Interface
 import LLVM.FFI.CPP
 import LLVM.FFI.Type
+import LLVM.FFI.OOP
+import LLVM.FFI.Value
 import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal.Alloc
@@ -187,6 +198,11 @@ instance PassC LoopInfo
 instance PassId LoopInfo where
   passId _ = passId_LoopInfo
 #endif
+instance PassC ScalarEvolution
+instance PassId ScalarEvolution where
+  passId _ = passId_ScalarEvolution
+foreign import capi _TO_STRING(extra.h passId_ScalarEvolution)
+  passId_ScalarEvolution :: Ptr CChar
 
 class ModulePassC t
 
@@ -209,6 +225,7 @@ instance FunctionPassC FunctionPass
 #if HS_LLVM_VERSION<307
 instance FunctionPassC LoopInfo
 #endif
+instance FunctionPassC ScalarEvolution
 
 #if HS_LLVM_VERSION < 302
 instance PassC TargetData
@@ -387,3 +404,15 @@ targetDataCallFrameTypeAlignment = targetDataCallFrameTypeAlignment_
 targetDataPrefTypeAlignment :: TypeC tp => Ptr TargetData -> Ptr tp -> IO CUInt
 targetDataPrefTypeAlignment = targetDataPrefTypeAlignment_
 #endif
+
+TYPE(SCEV)
+TYPE_LEAF(SCEVConstant)
+SUBTYPE(SCEV,SCEVConstant)
+TYPE_LEAF(SCEVCouldNotCompute)
+SUBTYPE(SCEV,SCEVCouldNotCompute)
+
+scevGetType :: SCEVC scev => Ptr scev -> IO (Ptr Type)
+scevGetType = scevGetType_
+
+scalarEvolutionGetSCEV :: ValueC v => Ptr ScalarEvolution -> Ptr v -> IO (Ptr SCEV)
+scalarEvolutionGetSCEV = scalarEvolutionGetSCEV_

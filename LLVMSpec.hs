@@ -1835,7 +1835,10 @@ llvm version
                                           else [])++
                                          (if version<llvm3_5
                                           then []
-                                          else [("FixedStackPseudoSourceValue","PseudoSourceValue")])
+                                          else [("FixedStackPseudoSourceValue","PseudoSourceValue")])++
+                                         [(to',"SCEV")
+                                         | to' <- ["SCEVConstant"
+                                                  ,"SCEVCouldNotCompute"]]
                           , let to_tp = normalT $ NamedType llvmNS to [] False
                                 from_tp = normalT $ NamedType llvmNS from [] False
                           ]
@@ -3306,6 +3309,46 @@ llvm version
                                       , ftArgs = [(False,normalT unsigned)]
                                       },"structLayoutElementOffsetInBits")]
              }
+       ,Spec { specHeader = "llvm/Analysis/ScalarEvolution.h"
+             , specNS = llvmNS
+             , specName = "ScalarEvolution"
+             , specTemplateArgs = []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = constT $ ptr $ llvmType "SCEV"
+                                      , ftName = "getSCEV"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
+                                      },"scalarEvolutionGetSCEV_")
+                          ,(memberFun { ftReturnType = constT $ ptr $ llvmType "SCEV"
+                                      , ftName = "getExitCount"
+                                      , ftArgs = [(False,normalT $ ptr $ llvmType "Loop")
+                                                 ,(False,normalT $ ptr $ llvmType "BasicBlock")]
+                                      },"scalarEvolutionGetExitCount")]
+             }
+       ,Spec { specHeader = "llvm/Analysis/ScalarEvolution.h"
+             , specNS = llvmNS
+             , specName = "SCEV"
+             , specTemplateArgs = []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Type"
+                                      , ftName = "getType"
+                                      , ftOverloaded = True
+                                      },"scevGetType_")]
+             }
+       ,Spec { specHeader = "llvm/Analysis/ScalarEvolutionExpressions.h"
+             , specNS = llvmNS
+             , specName = "SCEVConstant"
+             , specTemplateArgs = []
+             , specType = classSpec
+                          [(memberFun { ftReturnType = normalT $ ptr $ llvmType "ConstantInt"
+                                      , ftName = "getValue"
+                                      },"scevGetValue")]
+             }
+       ,Spec { specHeader = "llvm/Analysis/ScalarEvolution.h"
+             , specNS = llvmNS
+             , specName = "SCEVCouldNotCompute"
+             , specTemplateArgs = []
+             , specType = classSpec []
+             }
        ,Spec { specHeader = "llvm/PassSupport.h"
              , specNS = llvmNS
              , specName = "PassInfo"
@@ -3843,7 +3886,15 @@ llvm version
                         ,(memberFun { ftReturnType = normalT unsigned
                                     , ftName = "getNumBackEdges"
                                     , ftOverloaded = True
-                                    },"loopGetNumBackEdges_")]
+                                    },"loopGetNumBackEdges_")
+                        ,(memberFun { ftName = "getExitBlocks"
+                                    , ftArgs = [(False,normalT $ ref $ NamedType llvmNS "SmallVector"
+                                                          [toPtr blk
+                                                          ,TypeInt 16] False)]
+                                    , ftOverloaded = True },"loopGetExitBlocks_")
+                        ,(memberFun { ftReturnType = toPtr blk
+                                    , ftName = "getExitBlock"
+                                    , ftOverloaded = True },"loopGetExitBlock_")]
              }
      ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
            , specNS = llvmNS

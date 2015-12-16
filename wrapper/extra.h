@@ -28,6 +28,7 @@ extern char* passId_DominatorTree();
 extern char* passId_DominatorTreeWrapperPass();
 #endif
 extern char* passId_AliasAnalysis();
+extern char* passId_ScalarEvolution();
 
 extern int writeBitCodeToFile(void* m,const char* path);
 
