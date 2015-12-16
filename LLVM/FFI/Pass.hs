@@ -138,7 +138,9 @@ module LLVM.FFI.Pass
 #endif
        ,ScalarEvolution()
        ,scalarEvolutionGetSCEV
+#if HS_LLVM_VERSION>=300
        ,scalarEvolutionGetExitCount
+#endif
        ,SCEV()
        ,SCEVC()
        ,scevGetType
