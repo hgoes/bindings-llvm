@@ -3,6 +3,7 @@ module Main where
 import Distribution.Simple
 import Distribution.Simple.Setup
 import Distribution.Simple.LocalBuildInfo
+import Distribution.Simple.PreProcess
 import Distribution.PackageDescription
 import Distribution.Simple.Program
 import Distribution.Verbosity
@@ -34,14 +35,6 @@ adaptHooks hooks
           , buildHook = \pd lbi uh bf -> do
             createDirectoryIfMissing True (buildDir lbi </> "wrapper")
             createDirectoryIfMissing True (buildDir lbi </> "LLVM" </> "FFI")
-            version <- getLLVMVersion (configPrograms $ configFlags lbi)
-            modTime <- getModificationTime "LLVMSpec.hs"
-            writeWrapper "HS_LLVM_PROXY" (llvm version)
-              (buildDir lbi)
-              modTime
-              proxy_h
-              wrap_c
-              iface_m
             buildHook hooks
               (pd { library = case library pd of
                        Just lib -> Just $
@@ -51,12 +44,24 @@ adaptHooks hooks
                                                         }
                                        }
                   }) lbi uh bf
+          , hookedPreProcessors = ("llvm-spec",prep):hookedPreProcessors hooks
           }
   where
     proxy_h = "wrapper" </> "llvm_proxy.h"
     wrap_c = "wrapper" </> "llvm_wrap.cxx"
     iface_m = ["LLVM","FFI","Interface"]
     iface_name = concat $ intersperse "." iface_m
+    prep bi lbi = PreProcessor { platformIndependent = True
+                               , runPreProcessor = mkSimplePreProcessor $ \infile outfile verbosity -> do
+                                   version <- getLLVMVersion (configPrograms $ configFlags lbi)
+                                   modTime <- getModificationTime "LLVMSpec.hs"
+                                   writeWrapper "HS_LLVM_PROXY" (llvm version)
+                                     (buildDir lbi)
+                                     modTime
+                                     proxy_h
+                                     wrap_c
+                                     iface_m
+                               }
 
 main = defaultMainWithHooks $
        adaptHooks simpleUserHooks
