@@ -167,7 +167,7 @@ filterCFlags db flags = do
   (compiler,_) <- requireProgram normal cppProgram db
   let cc = locationPath $ programLocation compiler
   mapM (\flag -> do
-           let args = programDefaultArgs compiler ++ [flag,"-"] ++ programOverrideArgs compiler
+           let args = programDefaultArgs compiler ++ ["-E",flag,"-"] ++ programOverrideArgs compiler
                p = (proc cc args) { env = Nothing
                                   , std_in = CreatePipe
                                   , std_out = CreatePipe
