@@ -13,7 +13,7 @@ import System.Exit
 import System.IO
 import Data.Version
 import Text.ParserCombinators.ReadP
-import Data.List (find,intersperse)
+import Data.List (find,intersperse,(\\))
 import System.FilePath
 import System.Directory
 import Generator
@@ -44,7 +44,11 @@ adaptHooks hooks
                                                         }
                                        }
                   }) lbi uh bf
-          , hookedPreProcessors = ("llvm-spec",prep):hookedPreProcessors hooks
+          , hookedPreProcessors = let origHookedPreprocessors = hookedPreProcessors hooks
+                                      newHsc buildInfo localBuildInfo =
+                                        maybe ppHsc2hs id (lookup "hsc" origHookedPreprocessors) buildInfo' localBuildInfo
+                                        where buildInfo' = buildInfo { ccOptions = ccOptions buildInfo \\ ["-std=c++11"] }
+                                  in ("llvm-spec",prep):("hsc",newHsc):origHookedPreprocessors
           }
   where
     proxy_h = "wrapper" </> "llvm_proxy.h"
