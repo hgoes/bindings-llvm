@@ -6,6 +6,7 @@ import Distribution.Simple.LocalBuildInfo
 import Distribution.Simple.PreProcess
 import Distribution.PackageDescription
 import Distribution.Simple.Program
+import Distribution.Simple.Program.Db
 import Distribution.Verbosity
 import qualified Distribution.ModuleName as M
 import System.Process
@@ -19,6 +20,7 @@ import System.Directory
 import Generator
 import LLVMSpec
 import Data.Maybe (catMaybes)
+import Distribution.Compat.Semigroup
 
 llvmConfigProgram :: Program
 llvmConfigProgram = simpleProgram "llvm-config"
@@ -27,10 +29,13 @@ adaptHooks :: UserHooks -> UserHooks
 adaptHooks hooks
   = hooks { hookedPrograms = llvmConfigProgram:cppProgram:hookedPrograms hooks
           , confHook = \pd flags -> do
-            let db1 = userSpecifyPaths (configProgramPaths flags) (configPrograms flags)
+            let db0 = case getLast' (configPrograms_ flags) of
+                  Nothing -> defaultProgramDb
+                  Just db -> db
+                db1 = userSpecifyPaths (configProgramPaths flags) db0
                 db2 = userSpecifyArgss (configProgramArgs flags) db1
             db3 <- configureProgram normal llvmConfigProgram db2
-            lbi <- confHook hooks pd (flags { configPrograms = db3 })
+            lbi <- confHook hooks pd (flags { configPrograms_ = Last' $ Just db3 })
             adaptLocalBuildInfo lbi
           , buildHook = \pd lbi uh bf -> do
             createDirectoryIfMissing True (buildDir lbi </> "wrapper")
@@ -71,36 +76,41 @@ adaptLocalBuildInfo bi = do
   let db = configPrograms $ configFlags bi
   version <- getLLVMVersion db
   cflags <- getLLVMCFlags db >>= filterCFlags db
+  cppflags <- getLLVMCppFlags db
   ldflags <- getLLVMLDFlags version db
   libs <- getLLVMLibs db
   libdir <- getLLVMLibdir db
   incdir <- getLLVMIncludedir db
   return $ bi { localPkgDescr = adaptPackageDescription 
                                 (localPkgDescr bi)
-                                version cflags ldflags
+                                version cflags ldflags cppflags
                                 libs libdir incdir }
 
-adaptPackageDescription :: PackageDescription -> Version -> [String] -> [String] -> [String] -> String -> String -> PackageDescription
-adaptPackageDescription pkg vers cflags ldflags libs libdir incdir
+adaptPackageDescription :: PackageDescription -> Version -> [String] -> [String] -> [String] -> [String] -> String -> String -> PackageDescription
+adaptPackageDescription pkg vers cflags ldflags cppflags libs libdir incdir
   = case library pkg of
     Just lib 
       -> pkg { library = Just $ 
                          lib { libBuildInfo = adaptBuildInfo 
                                               (libBuildInfo lib) 
                                               vers cflags 
-                                              ldflags libs libdir incdir
+                                              ldflags cppflags
+                                              libs libdir incdir
                              }
              , testSuites = fmap (\ts -> ts { testBuildInfo = adaptBuildInfo
                                                               (testBuildInfo ts)
                                                               vers cflags
-                                                              ldflags libs libdir incdir
+                                                              ldflags cppflags
+                                                              libs libdir incdir
                                             }) (testSuites pkg)
              , description = (description pkg) ++ "\n%LLVM_VERSION="++show vers++"%"
              }
 
-adaptBuildInfo :: BuildInfo -> Version -> [String] -> [String] -> [String] -> String -> String -> BuildInfo
-adaptBuildInfo bi vers cflags ldflags libs libdir incdir
+adaptBuildInfo :: BuildInfo -> Version -> [String] -> [String] -> [String] -> [String] -> String -> String -> BuildInfo
+adaptBuildInfo bi vers cflags ldflags cppflags libs libdir incdir
   = bi { cppOptions = ["-DHS_LLVM_VERSION="++versionToDefine vers]++
+                      cppflags++
+                      ["-I/usr/include"]++
                       cppOptions bi
        , ccOptions = cflags++
                      {-(if vers >= Version [3,0,0] []
@@ -114,9 +124,12 @@ adaptBuildInfo bi vers cflags ldflags libs libdir incdir
        , extraLibDirs = libdir:extraLibDirs bi
        }
 
+runLLVMConfig :: ProgramConfiguration -> [String] -> IO String
+runLLVMConfig = getDbProgramOutput normal llvmConfigProgram
+
 getLLVMVersion :: ProgramConfiguration -> IO Version
 getLLVMVersion db = do
-  outp <- getDbProgramOutput normal llvmConfigProgram db ["--version"]
+  outp <- runLLVMConfig db ["--version"]
   let parses = readP_to_S parseVersion outp
   case find (\(vers,rest) -> rest == "\n" || rest == "svn\n") parses of
     Just (version,_) -> return version
@@ -124,12 +137,17 @@ getLLVMVersion db = do
 
 getLLVMCFlags :: ProgramConfiguration -> IO [String]
 getLLVMCFlags db = do
-  outp <- getDbProgramOutput normal llvmConfigProgram db ["--cxxflags"]
+  outp <- runLLVMConfig db ["--cxxflags"]
+  return $ words outp
+
+getLLVMCppFlags :: ProgramConfiguration -> IO [String]
+getLLVMCppFlags db = do
+  outp <- runLLVMConfig db ["--cppflags"]
   return $ words outp
 
 getLLVMLDFlags :: Version -> ProgramConfiguration -> IO [String]
 getLLVMLDFlags vers db = do
-  ldflags <- getDbProgramOutput normal llvmConfigProgram db ["--ldflags"]
+  ldflags <- runLLVMConfig db ["--ldflags"]
   syslibs <- if vers >= Version [3,5,0] []
              then getDbProgramOutput normal llvmConfigProgram db ["--system-libs"]
              else return ""
@@ -137,13 +155,13 @@ getLLVMLDFlags vers db = do
 
 getLLVMLibdir :: ProgramConfiguration -> IO String
 getLLVMLibdir db = do
-  outp <- getDbProgramOutput normal llvmConfigProgram db ["--libdir"]
+  outp <- runLLVMConfig db ["--libdir"]
   let [dir] = lines outp
   return dir
 
 getLLVMLibs :: ProgramConfiguration -> IO [String]
 getLLVMLibs db = do
-  outp <- getDbProgramOutput normal llvmConfigProgram db ["--libnames"]
+  outp <- runLLVMConfig db ["--libnames"]
   return $ fmap (\lib -> case dropExtension lib of
                     'l':'i':'b':name -> name
                     name -> name
@@ -151,7 +169,7 @@ getLLVMLibs db = do
 
 getLLVMIncludedir :: ProgramConfiguration -> IO String
 getLLVMIncludedir db = do
-  outp <- getDbProgramOutput normal llvmConfigProgram db ["--includedir"]
+  outp <- runLLVMConfig db ["--includedir"]
   let [dir] = lines outp
   return dir
 
