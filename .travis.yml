@@ -68,10 +68,9 @@ install:
   - cabal install cpphs
   - cabal install --only-dependencies
 script:
-  - ghc --make Setup.hs -o ./setup
-  - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="${COMPILER_OPTS}"
-  - ./setup build --verbose=2
-  - ./setup test
+  - cabal configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="${COMPILER_OPTS}"
+  - cabal build --verbose=2
+  - cabal test
 #cache:
 #  directories:
 #    - $HOME/.cabal
