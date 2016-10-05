@@ -53,7 +53,7 @@ matrix:
     #       sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
     #       packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
 before_install:
-  export PATH=$HOME/.cabal/bin:$PATH
+  - export PATH=$HOME/.cabal/bin:$PATH
 install:
   - cabal install cabal-install
   - cabal --version
