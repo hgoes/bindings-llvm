@@ -7,37 +7,37 @@ matrix:
     - env: LLVM_VERSION=2.8
       addons:
         apt:
-	  sources: ['hvr-ghc']
+          sources: ['hvr-ghc']
           packages: ['llvm-2.8-dev','cabal-install-1.24']
     - env: LLVM_VERSION=2.9
       addons:
         apt:
-	  sources: ['hvr-ghc']
+          sources: ['hvr-ghc']
           packages: ['llvm-2.9-dev','cabal-install-1.24']
     - env: LLVM_VERSION=3.0
       addons:
         apt:
-	  sources: ['hvr-ghc']
+          sources: ['hvr-ghc']
           packages: ['llvm-3.0-dev','cabal-install-1.24']
     - env: LLVM_VERSION=3.1
       addons:
         apt:
-	  sources: ['hvr-ghc']
+          sources: ['hvr-ghc']
           packages: ['llvm-3.1-dev','cabal-install-1.24']
     - env: LLVM_VERSION=3.2
       addons:
         apt:
-	  sources: ['hvr-ghc']
+          sources: ['hvr-ghc']
           packages: ['llvm-3.2-dev','cabal-install-1.24']
     - env: LLVM_VERSION=3.3
       addons:
         apt:
-	  sources: ['hvr-ghc']
+          sources: ['hvr-ghc']
           packages: ['llvm-3.3-dev','cabal-install-1.24']
     - env: LLVM_VERSION=3.4
       addons:
         apt:
-	  sources: ['hvr-ghc']
+          sources: ['hvr-ghc']
           packages: ['llvm-3.4-dev','cabal-install-1.24']
     - env: LLVM_VERSION=3.5 COMPILER_OPTS="-pgmc g++-4.9 -optc=-std=gnu++11"
       addons:
