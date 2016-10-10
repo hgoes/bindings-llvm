@@ -7,6 +7,10 @@ build-type:     Custom
 custom-setup
   setup-depends: base,Cabal,filepath,directory,time,process
 
+flag shared-llvm
+  description: Link against shared LLVM library
+  default: False
+
 library
   build-tools:    cpphs,llvm-config
   build-depends: base,tagged>=0.4,unix,containers

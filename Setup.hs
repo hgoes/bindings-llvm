@@ -36,7 +36,8 @@ adaptHooks hooks
                 db2 = userSpecifyArgss (configProgramArgs flags) db1
             db3 <- configureProgram normal llvmConfigProgram db2
             lbi <- confHook hooks pd (flags { configPrograms_ = Last' $ Just db3 })
-            adaptLocalBuildInfo lbi
+            let shared = elem (FlagName "shared-llvm",True) (configConfigurationsFlags flags)
+            adaptLocalBuildInfo shared lbi
           , buildHook = \pd lbi uh bf -> do
             createDirectoryIfMissing True (buildDir lbi </> "wrapper")
             createDirectoryIfMissing True (buildDir lbi </> "LLVM" </> "FFI")
@@ -71,14 +72,16 @@ adaptHooks hooks
 main = defaultMainWithHooks $
        adaptHooks simpleUserHooks
 
-adaptLocalBuildInfo :: LocalBuildInfo -> IO LocalBuildInfo
-adaptLocalBuildInfo bi = do
+adaptLocalBuildInfo :: Bool -> LocalBuildInfo -> IO LocalBuildInfo
+adaptLocalBuildInfo shared bi = do
   let db = configPrograms $ configFlags bi
   version <- getLLVMVersion db
   cflags <- getLLVMCFlags db >>= filterCFlags db
   cppflags <- getLLVMCppFlags db
   ldflags <- getLLVMLDFlags version db
-  libs <- getLLVMLibs db
+  libs <- if shared
+          then return ["LLVM-"++showVersion version]
+          else getLLVMLibs db
   libdir <- getLLVMLibdir db
   incdir <- getLLVMIncludedir db
   return $ bi { localPkgDescr = adaptPackageDescription 
