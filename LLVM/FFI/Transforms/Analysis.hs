@@ -1,8 +1,13 @@
 module LLVM.FFI.Transforms.Analysis
+#if HS_LLVM_VERSION>=308
+       (createAAEvalPass
+#else
        (createGlobalsModRefPass
        ,createAliasDebugger
        ,createAliasAnalysisCounterPass
        ,createAAEvalPass
+#endif
+#if HS_LLVM_VERSION<308
        ,createNoAAPass
        ,createBasicAliasAnalysisPass
        --,createLibCallAliasAnalysisPass
@@ -10,6 +15,7 @@ module LLVM.FFI.Transforms.Analysis
        ,createTypeBasedAliasAnalysisPass
 #if HS_LLVM_VERSION>=300
        ,createObjCARCAliasAnalysisPass
+#endif
 #endif
        ,createLazyValueInfoPass
 #if HS_LLVM_VERSION>=302

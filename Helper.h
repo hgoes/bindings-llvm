@@ -54,11 +54,6 @@ instance IListIteratorC name where {\
   iListIteratorPrev = listIterator##name##Prev ;\
   iListIteratorEq = listIterator##name##Eq ;\
   iListIteratorNEq = listIterator##name##NEq\
-} ;\
-\
-instance IListNodeC name where {\
-  iListNodeNext = listNode##name##Next ;\
-  iListNodePrev = listNode##name##Prev ;\
 }
 
 #if HS_LLVM_VERSION>=300

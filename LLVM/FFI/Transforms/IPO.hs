@@ -19,7 +19,12 @@ module LLVM.FFI.Transforms.IPO
        ,createSingleLoopExtractorPass
        ,createBlockExtractorPass
        ,createStripDeadPrototypesPass
+#if HS_LLVM_VERSION >= 308
+       ,createPostOrderFunctionAttrsPass
+       ,createReversePostOrderFunctionAttrsPass
+#else
        ,createFunctionAttrsPass
+#endif
        ,createMergeFunctionsPass
        ,createPartialInliningPass
 #if HS_LLVM_VERSION >= 303
