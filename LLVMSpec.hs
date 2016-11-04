@@ -261,6 +261,7 @@ llvm version
                                            , ftOverloaded = True
                                            },"vector"++tp++"End")
                                ,(Constructor [(False,toPtr rtp),(False,toPtr rtp)],"newVector"++tp)
+                               ,(Destructor True,"vector"++tp++"Delete")
                                ,(memberFun { ftName = "clear"
                                            },"vector"++tp++"Clear")
                                ,(memberFun { ftName = "push_back"
@@ -651,7 +652,9 @@ llvm version
              , specNS = llvmNS
              , specName = "Type"
              , specTemplateArgs = []
-             , specType = classSpec $
+             , specType = classSpecCustom
+                          "data Type = VoidType | HalfType | FloatType | DoubleType | X86_FP80Type | FP128Type | PPC_FP128Type | X86_MMXType | LabelType | MetadataType | IntType IntegerType | FunType FunctionType | CompType CompositeType deriving (Show,Eq,Ord)"
+                          $
                           [(memberFun { ftReturnType = normalT void
                                       , ftName = "dump"
                                       , ftOverloaded = True
@@ -695,7 +698,8 @@ llvm version
              , specNS = llvmNS
              , specName = "IntegerType"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom
+                          "newtype IntegerType = IntegerType { bitWidth :: CUInt } deriving (Eq,Ord,Show)"
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getBitWidth"
                                       },"getBitWidth_")
@@ -710,7 +714,8 @@ llvm version
              , specNS = llvmNS
              , specName = "CompositeType"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom
+                          "data CompositeType = StructType_ StructType | SequentialType SequentialType deriving (Eq,Ord,Show)"
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Type"
                                       , ftName = "getTypeAtIndex"
                                       , ftArgs = [(False,normalT unsigned)]
@@ -726,7 +731,8 @@ llvm version
              , specNS = llvmNS
              , specName = "SequentialType"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom
+                          "data SequentialType = ArrType ArrayType | PtrType PointerType | VecType VectorType deriving (Eq,Ord,Show)"
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Type"
                                       , ftName = "getElementType"
                                       , ftOverloaded = True
@@ -736,16 +742,24 @@ llvm version
              , specNS = llvmNS
              , specName = "ArrayType"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom
+                          "data ArrayType = ArrayType { elementType :: Type, numElements :: Word64 } deriving (Eq,Ord,Show)"
                           [(memberFun { ftReturnType = normalT uint64_t
                                       , ftName = "getNumElements"
-                                      },"arrayTypeGetNumElements_")]
+                                      },"arrayTypeGetNumElements_")
+                          ,(memberFun { ftStatic = True
+                                      , ftReturnType = normalT $ ptr $ llvmType "ArrayType"
+                                      , ftName = "get"
+                                      , ftArgs = [(True,normalT $ ptr $ llvmType "Type")
+                                                 ,(False,normalT uint64_t)]
+                                      },"arrayTypeGet_")]
              }
        ,Spec { specHeader = irInclude version "DerivedTypes.h"
              , specNS = llvmNS
              , specName = "PointerType"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom
+                          "data PointerType = PointerType { pointerType :: Type, addressSpace :: CUInt } deriving (Eq,Ord,Show)" 
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getAddressSpace"
                                       },"pointerTypeGetAddressSpace_")
@@ -760,7 +774,8 @@ llvm version
              , specNS = llvmNS
              , specName = "VectorType"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom
+                          "data VectorType = VectorType { vectorType :: Type, vectorNumElements :: CUInt } deriving (Eq,Ord,Show)"
                           [(memberFun { ftReturnType = normalT unsigned
                                       , ftName = "getNumElements"
                                       },"vectorTypeGetNumElements_")
@@ -776,7 +791,9 @@ llvm version
              , specNS = llvmNS
              , specName = "StructType"
              , specTemplateArgs = []
-             , specType = classSpec $
+             , specType = classSpecCustom
+                          "data StructType = StructType { packed :: Bool, structName :: Maybe String, structType :: [Type] } deriving (Eq,Ord,Show)"
+                          $
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isPacked"
                                       },"structTypeIsPacked")]++
@@ -821,7 +838,8 @@ llvm version
              , specNS = llvmNS
              , specName = "FunctionType"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpecCustom
+                          "data FunctionType = FunctionType { isVarArg :: Bool, parameters :: [Type], returnType :: Type } deriving (Eq,Ord,Show)"
                           [(memberFun { ftReturnType = normalT bool
                                       , ftName = "isVarArg"
                                       },"functionTypeIsVarArg")

@@ -3,6 +3,7 @@ module LLVM.FFI.CPP
        ,VectorC(..)
        ,Const_iterator()
        ,vectorToList
+       ,withVector
        ,vectorIteratorToList
        ,Pair(..)
        ,PairC(..)
@@ -12,8 +13,10 @@ module LLVM.FFI.CPP
 import LLVM.FFI.Interface
 import Foreign.Ptr
 import Foreign.C
+import Foreign.Storable
+import Foreign.Marshal.Array
 
-class VectorC c where
+class Storable c => VectorC c where
   vectorBegin :: Ptr (Vector c) -> IO (Ptr (Const_iterator c))
   vectorEnd :: Ptr (Vector c) -> IO (Ptr (Const_iterator c))
   vectorIteratorDeref :: Ptr (Const_iterator c) -> IO c
@@ -25,6 +28,7 @@ class VectorC c where
   vectorResize :: Ptr (Vector c) -> CUInt -> IO ()
   vectorIndex :: Ptr (Vector c) -> CSize -> IO (Ptr c)
   vectorSize :: Ptr (Vector c) -> IO CSize
+  vectorDelete :: Ptr (Vector c) -> IO ()
 
 vectorToList :: VectorC c => Ptr (Vector c) -> IO [c]
 vectorToList vec = do
@@ -42,6 +46,15 @@ vectorIteratorToList cur end = do
              nxt <- vectorIteratorNext cur
              vs <- vectorIteratorToList nxt end
              return (v:vs))
+
+withVector :: VectorC c => [c] -> (Ptr (Vector c) -> IO a) -> IO a
+withVector lst f = withArrayLen lst $
+                   \len arr -> do
+                     let end = advancePtr arr len
+                     vec <- newVector arr end
+                     res <- f vec
+                     vectorDelete vec
+                     return res
 
 class PairC a b where
   pairSize :: Pair a b -> CSize

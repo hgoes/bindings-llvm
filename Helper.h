@@ -96,7 +96,8 @@ instance VectorC (Ptr name) where {\
   vectorPushBack = vector##name##PushBack ; \
   vectorResize = vector##name##Resize ;\
   vectorIndex = vector##name##Index ;\
-  vectorSize = vector##name##Size\
+  vectorSize = vector##name##Size ;\
+  vectorDelete = vector##name##Delete\
 }
 
 #define SPECIALIZE_SMALLVECTOR(name)\
