@@ -1317,7 +1317,11 @@ llvm version
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isDeclaration"
                                       , ftOverloaded = True
-                                      },"globalValueIsDeclaration_")]
+                                      },"globalValueIsDeclaration_")
+                          ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Module"
+                                      , ftName = "getParent"
+                                      , ftOverloaded = True
+                                      },"globalValueGetParent_")]
              }
        ,Spec { specHeader = irInclude version "GlobalValue.h"
              , specNS = [ClassName "llvm" []

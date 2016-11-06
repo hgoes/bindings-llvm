@@ -45,6 +45,7 @@ module LLVM.FFI.Constant
         GlobalValueC(),
         LinkageTypes(..),
         globalValueIsDeclaration,
+        globalValueGetParent,
         GlobalAlias(),
         GlobalVariable(),
 #if HS_LLVM_VERSION>=302
@@ -107,6 +108,9 @@ newGlobalVariable tp isConst linkage init name tlmode addrSpace extInit
 
 globalValueIsDeclaration :: GlobalValueC v => Ptr v -> IO Bool
 globalValueIsDeclaration = globalValueIsDeclaration_
+
+globalValueGetParent :: GlobalValueC v => Ptr v -> IO (Ptr Module)
+globalValueGetParent = globalValueGetParent_
 
 constantExprGetOpcode :: ConstantExprC expr => Ptr expr -> IO OpType
 constantExprGetOpcode ptr = do
