@@ -54,6 +54,7 @@ module LLVM.FFI.Constant
         newGlobalVariable,
         globalVariableIsConstant,
         globalVariableIsThreadLocal,
+        globalVariableHasInitializer,
         globalVariableGetInitializer,
         UndefValue(),
 #if HS_LLVM_VERSION >= 303

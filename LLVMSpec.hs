@@ -1400,6 +1400,9 @@ llvm version
                           ,(memberFun { ftReturnType = normalT bool
                                       , ftName = "isThreadLocal"
                                       },"globalVariableIsThreadLocal")
+                          ,(memberFun { ftReturnType = normalT bool
+                                      , ftName = "hasInitializer"
+                                      },"globalVariableHasInitializer")
                           ,(memberFun { ftReturnType = normalT $ ptr $ llvmType "Constant"
                                       , ftName = "getInitializer"
                                       },"globalVariableGetInitializer")
