@@ -8,6 +8,7 @@ module LLVM.FFI
        ,module LLVM.FFI.Cloning
        ,module LLVM.FFI.CPP
        ,module LLVM.FFI.CPP.String
+       ,module LLVM.FFI.CPP.UniquePtr
        ,module LLVM.FFI.Constant
        ,module LLVM.FFI.Context
        ,module LLVM.FFI.DebugLoc
@@ -59,6 +60,7 @@ import LLVM.FFI.BasicBlock
 import LLVM.FFI.Cloning
 import LLVM.FFI.CPP
 import LLVM.FFI.CPP.String
+import LLVM.FFI.CPP.UniquePtr
 import LLVM.FFI.Constant
 import LLVM.FFI.Context
 import LLVM.FFI.DebugLoc
