@@ -13,7 +13,7 @@ flag shared-llvm
 
 library
   build-tools:    cpphs,llvm-config
-  build-depends: base,tagged>=0.4,unix,containers
+  build-depends: base,unix,containers
   includes:             
     wrapper/extra.h
     wrapper/HaskellPass.h
