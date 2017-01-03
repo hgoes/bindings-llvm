@@ -3871,7 +3871,36 @@ llvm version
              , specTemplateArgs = []
              , specType = classSpec
                           [(Constructor [],"newTwineEmpty")
-                          ,(Constructor [(False,constT $ ptr char)],"newTwineString_")
+                          ,(Constructor [(False,constT $ ptr char)],
+                            "newTwineCString")
+                          ,(Constructor [(False,constT $ ref $ NamedType
+                                                [ClassName "std" []] "string" [] False)],
+                            "newTwineCPPString")
+                          ,(Constructor [(False,constT $ ref $ llvmType "StringRef")],
+                            "newTwineStringRef")
+                          ,(Constructor [(False,normalT char)],
+                            "newTwineChar")
+                          ,(Constructor [(False,normalT uchar)],
+                            "newTwineUChar")
+                          ,(Constructor [(False,normalT schar)],
+                            "newTwineSChar")
+                          ,(Constructor [(False,normalT unsigned)],
+                            "newTwineUnsigned")
+                          ,(Constructor [(False,normalT int)],
+                            "newTwineInt")
+                          ,(Constructor [(False,constT $ ref long)],
+                            "newTwineLong")
+                          ,(Constructor [(False,constT $ ref ulong)],
+                            "newTwineULong")
+                          ,(Constructor [(False,constT $ ref longlong)],
+                            "newTwineLongLong")
+                          ,(Constructor [(False,constT $ ref ulonglong)],
+                            "newTwineULongLong")
+                          ,(Destructor False,"deleteTwine")
+                          ,(memberFun { ftReturnType = normalT $ llvmType "Twine"
+                                      , ftName = "concat"
+                                      , ftArgs = [(False,constT $ ref $ llvmType "Twine")]
+                                      },"twineConcat")
                           ]
              }
        ,Spec { specHeader = "llvm/Analysis/LoopInfo.h"
