@@ -185,7 +185,7 @@ versionToDefine v = branch (versionBranch v)
 
 filterCFlags :: ProgramConfiguration -> [String] -> IO [String]
 filterCFlags db flags = do
-  (compiler,_) <- requireProgram normal cppProgram db
+  (compiler,_) <- requireProgram normal gccProgram db
   let cc = locationPath $ programLocation compiler
   mapM (\flag -> do
            let args = programDefaultArgs compiler ++ ["-x","c++","-E",flag,"-"] ++ programOverrideArgs compiler
