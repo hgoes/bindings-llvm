@@ -2912,7 +2912,7 @@ llvm version
              , specNS = llvmNS
              , specName = "Use"
              , specTemplateArgs = []
-             , specType = classSpec
+             , specType = classSpec $
                           [(memberFun { ftReturnType = normalT $ ptr $ llvmType "Value"
                                       , ftName = "get"
                                       },"useGet")
@@ -2924,10 +2924,12 @@ llvm version
                                       },"useGetUser")
                           ,(memberFun { ftName = "set"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
-                                      },"useSet_")
-                          ,(memberFun { ftReturnType = normalT unsigned
-                                      , ftName = "getOperandNo"
-                                      },"useGetOperandNo")]
+                                      },"useSet_")]++
+                          (if version>=llvm3_5
+                           then [(memberFun { ftReturnType = normalT unsigned
+                                            , ftName = "getOperandNo"
+                                            },"useGetOperandNo")]
+                           else [])
                
              }]++
        [Spec { specHeader = if version<llvm3_5

@@ -4,7 +4,9 @@ module LLVM.FFI.Use
        ,useSet
        ,useGetUser
        ,useGetNext
+#if HS_LLVM_VERSION >= 305
        ,useGetOperandNo
+#endif
        ,useToList
        ) where
 
