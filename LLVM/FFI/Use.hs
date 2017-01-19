@@ -4,6 +4,7 @@ module LLVM.FFI.Use
        ,useSet
        ,useGetUser
        ,useGetNext
+       ,useGetOperandNo
        ,useToList
        ) where
 

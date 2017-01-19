@@ -1,6 +1,27 @@
 {-# OPTIONS -cpp -pgmPcpphs -optP--cpp #-}
 module LLVM.FFI.Value
        (Value(),ValueC(),
+        GetType(..),
+        deleteValue,
+        valueDump,
+        valueToString,
+        valueGetType,
+        hasName,
+        getName,
+        getNameString,
+        valueUseBegin,
+        valueUseEnd,
+#if HS_LLVM_VERSION<305
+        Value_use_iterator(),
+        ValueUseIteratorC(..),
+#else
+        Use_iterator(),
+        valueUseIteratorDeref,
+        valueUseIteratorEq,
+        valueUseIteratorNEq,
+        valueUseIteratorNext,
+#endif
+        valueUses,
         valueReplaceAllUsesWith,
         Argument(),
         createArgument,
@@ -19,27 +40,7 @@ module LLVM.FFI.Value
         inlineAsmGetAsmString,
         inlineAsmGetConstraintString,
         PseudoSourceValue(),
-        FixedStackPseudoSourceValue(),
-        GetType(..),
-        deleteValue,
-        valueDump,
-        valueToString,
-        valueGetType,
-        hasName,
-        getName,
-        getNameString,
-        valueUseBegin,
-        valueUseEnd,
-#if HS_LLVM_VERSION<305
-        Value_use_iterator(),
-        ValueUseIteratorC(..)
-#else
-        Use_iterator(),
-        valueUseIteratorDeref,
-        valueUseIteratorEq,
-        valueUseIteratorNEq,
-        valueUseIteratorNext
-#endif
+        FixedStackPseudoSourceValue()
        ) where
 
 import LLVM.FFI.Interface
@@ -53,6 +54,7 @@ import LLVM.FFI.ArrayRef
 
 import Foreign
 import Foreign.C
+import System.IO.Unsafe (unsafeInterleaveIO)
 
 createArgument :: TypeC tp => Ptr tp -> Ptr Twine -> Ptr Function -> IO (Ptr Argument)
 createArgument = createArgument_
@@ -181,3 +183,23 @@ inlineAsmGetDialect = fmap toAsmDialect . inlineAsmGetDialect_
 
 valueReplaceAllUsesWith :: (ValueC orig,ValueC repl) => Ptr orig -> Ptr repl -> IO ()
 valueReplaceAllUsesWith = valueReplaceAllUsesWith_
+
+#if HS_LLVM_VERSION < 305
+valueUses :: ValueC v => Ptr v -> IO [Ptr User]
+#else
+valueUses :: ValueC v => Ptr v -> IO [Ptr Use]
+#endif
+valueUses val = do
+  start <- valueUseBegin val
+  end <- valueUseEnd val
+  it end start
+  where
+    it end cur = do
+      isEnd <- valueUseIteratorEq cur end
+      if isEnd
+        then return []
+        else do
+        el <- valueUseIteratorDeref cur
+        nxt <- valueUseIteratorNext cur
+        els <- unsafeInterleaveIO $ it end nxt
+        return $ el:els

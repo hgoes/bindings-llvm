@@ -2924,7 +2924,10 @@ llvm version
                                       },"useGetUser")
                           ,(memberFun { ftName = "set"
                                       , ftArgs = [(True,normalT $ ptr $ llvmType "Value")]
-                                      },"useSet_")]
+                                      },"useSet_")
+                          ,(memberFun { ftReturnType = normalT unsigned
+                                      , ftName = "getOperandNo"
+                                      },"useGetOperandNo")]
                
              }]++
        [Spec { specHeader = if version<llvm3_5
@@ -5634,4 +5637,15 @@ llvm version
                                   , ftName = "empty"
                                   },"valueMapEmpty"++name)]
          }
-   | (keyT,valueT,name) <- [(constT $ ptr $ llvmType "Value",normalT $ llvmType "WeakVH","ValueToValue")] ]
+   | (keyT,valueT,name) <- [(constT $ ptr $ llvmType "Value",normalT $ llvmType "WeakVH","ValueToValue")] ]++
+   (if version>=llvm3_8
+     then [Spec { specHeader = "llvm/IR/SymbolTableListTraits.h"
+                , specNS = llvmNS
+                , specName = "SymbolTableList"
+                , specTemplateArgs = [rtp]
+                , specType = classSpec
+                             []
+                }
+          | tp <- ["Function"]
+          , let rtp = Type [] (NamedType llvmNS tp [] False)]
+     else [])
