@@ -346,7 +346,9 @@ generateWrapper inc_sym spec
   where
     generateWrapperFunction' :: Type -> String -> [(Type,String)] -> ([(Type,String)] -> ([String],String)) -> Bool -> ([String],[String])
     generateWrapperFunction' rtp name args body ignore
-      = let sig = renderType rtp'++" "++name++
+      = let sig = (if ignore
+                   then "void"
+                   else renderType rtp')++" "++name++
                   "("++(paramList $ fmap (\(tp,n,_) -> (tp,n)) args')++")"
             (rtp',outC,_) = toCType rtp
             (args',cmds) = unzip $ fmap (\(tp,name) -> let (tp',_,inC) = toCType tp
@@ -530,7 +532,8 @@ generateFFI mname header specs
                                           , ftOverloaded = isO 
                                           , ftPure = isP 
                                           , ftStatic = isS
-                                          , ftReturnType = rtp }
+                                          , ftReturnType = rtp
+                                          , ftIgnoreReturn = ign }
                                   -> ((if isS
                                        then id
                                        else ((toHaskellType True (if isO
@@ -542,7 +545,9 @@ generateFFI mname header specs
                                       (if isP
                                        then id
                                        else ("IO "++).bracket)
-                                      (toHaskellType True Nothing rtp),
+                                      (if ign
+                                       then "()"
+                                       else toHaskellType True Nothing rtp),
                                       cname)
                                 Constructor { ftConArgs = r }
                                   -> (fmap (\((isO',tp'),n) -> toHaskellType True (if isO'

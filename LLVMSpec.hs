@@ -2968,7 +2968,8 @@ llvm version
                                 ,(memberFun { ftReturnType = normalT unsigned
                                             , ftName = "getOperandNo"
                                             },"valueUseIterator"++tp++"GetOperandNo")]
-                           else [])
+                           else [])++
+                          [(Destructor False,"valueUseIterator"++tp++"Delete")]
              }
        | tp <- if version<llvm3_5
                then ["User"]

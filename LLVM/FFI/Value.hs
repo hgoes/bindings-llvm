@@ -20,6 +20,7 @@ module LLVM.FFI.Value
         valueUseIteratorEq,
         valueUseIteratorNEq,
         valueUseIteratorNext,
+        valueUseIteratorDelete,
 #endif
         valueUses,
         valueReplaceAllUsesWith,
@@ -149,9 +150,10 @@ class ValueUseIteratorC t where
   valueUseIteratorDeref :: Ptr (Value_use_iterator t) -> IO (Ptr t)
   valueUseIteratorEq :: Ptr (Value_use_iterator t) -> Ptr (Value_use_iterator t) -> IO Bool
   valueUseIteratorNEq :: Ptr (Value_use_iterator t) -> Ptr (Value_use_iterator t) -> IO Bool
-  valueUseIteratorNext :: Ptr (Value_use_iterator t) -> IO (Ptr (Value_use_iterator t))
+  valueUseIteratorNext :: Ptr (Value_use_iterator t) -> IO ()
   valueUseIteratorGetUse :: Ptr (Value_use_iterator t) -> IO (Ptr Use)
   valueUseIteratorGetOperandNo :: Ptr (Value_use_iterator t) -> IO CUInt
+  valueUseIteratorDelete :: Ptr (Value_use_iterator t) -> IO ()
 
 instance ValueUseIteratorC User where
   valueUseIteratorDeref = valueUseIteratorUserDeref
@@ -160,6 +162,7 @@ instance ValueUseIteratorC User where
   valueUseIteratorNext = valueUseIteratorUserNext
   valueUseIteratorGetUse = valueUseIteratorUserGetUse
   valueUseIteratorGetOperandNo = valueUseIteratorUserGetOperandNo
+  valueUseIteratorDelete = valueUseIteratorUserDelete
 #else
 
 valueUseIteratorDeref :: Ptr Use_iterator -> IO (Ptr Use)
@@ -171,8 +174,11 @@ valueUseIteratorEq = valueUseIteratorUseEq
 valueUseIteratorNEq :: Ptr Use_iterator -> Ptr Use_iterator -> IO Bool
 valueUseIteratorNEq = valueUseIteratorUseNEq
 
-valueUseIteratorNext :: Ptr Use_iterator -> IO (Ptr Use_iterator)
+valueUseIteratorNext :: Ptr Use_iterator -> IO ()
 valueUseIteratorNext = valueUseIteratorUseNext
+
+valueUseIteratorDelete :: Ptr Use_iterator -> IO ()
+valueUseIteratorDelete = valueUseIteratorUseDelete
 
 #endif
 
@@ -192,14 +198,17 @@ valueUses :: ValueC v => Ptr v -> IO [Ptr Use]
 valueUses val = do
   start <- valueUseBegin val
   end <- valueUseEnd val
-  it end start
+  res <- it start end
+  valueUseIteratorDelete start
+  valueUseIteratorDelete end
+  return res
   where
-    it end cur = do
+    it cur end = do
       isEnd <- valueUseIteratorEq cur end
       if isEnd
         then return []
         else do
         el <- valueUseIteratorDeref cur
-        nxt <- valueUseIteratorNext cur
-        els <- unsafeInterleaveIO $ it end nxt
+        valueUseIteratorNext cur
+        els <- it cur end
         return $ el:els
