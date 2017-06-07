@@ -90,7 +90,7 @@ adaptLocalBuildInfo shared bi = do
   incdir <- getLLVMIncludedir db
   return $ bi { localPkgDescr = adaptPackageDescription 
                                 (localPkgDescr bi)
-                                version cflags ldflags cppflags
+                                version ("-x":"c++":cflags) ldflags cppflags
                                 libs libdir incdir }
 
 adaptPackageDescription :: PackageDescription -> Version -> [String] -> [String] -> [String] -> [String] -> String -> String -> PackageDescription
