@@ -18,7 +18,7 @@ then
     echo "llvm already installed"
 else
     curl --location ${URL} > llvm.tar.${END}
-    tar -xf llvm.tar.${END} --strip-components 1 --one-top-level=${HOME}/.local
+    tar -xf llvm.tar.${END} --strip-components 1 -C ${HOME}/.local
     llvm-config --version
     rm llvm.tar.${END}
 fi
