@@ -9,6 +9,30 @@ case $TRAVIS_OS_NAME in
 	    2.9)
 		FILE='2.9/clang+llvm-2.9-x86_64-apple-darwin10.tar.gz'
 		;;
+	    3.0)
+		FILE='3.0/clang+llvm-3.0-x86_64-apple-darwin11.tar.gz'
+		;;
+	    3.1)
+		FILE='3.1/clang+llvm-3.1-x86_64-apple-darwin11.tar.gz'
+		;;
+	    3.2)
+		FILE='3.2/clang+llvm-3.2-x86_64-apple-darwin11.tar.gz'
+		;;
+	    3.3)
+		FILE='3.3/clang+llvm-3.3-x86_64-apple-darwin12.tar.gz'
+		;;
+	    3.4)
+		FILE='3.4.2/clang+llvm-3.4.2-x86_64-apple-darwin10.9.xz'
+		;;
+	    3.5)
+		FILE='3.5.2/clang+llvm-3.5.2-x86_64-apple-darwin.tar.xz'
+		;;
+	    3.6)
+		FILE='3.6.2/clang+llvm-3.6.2-x86_64-apple-darwin.tar.xz'
+		;;
+	    3.7)
+		FILE='3.7.0/clang+llvm-3.7.0-x86_64-apple-darwin.tar.xz'
+		;;
 	esac
 	;;
     "linux")
