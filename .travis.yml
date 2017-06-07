@@ -52,6 +52,9 @@ matrix:
     #     apt:
     #       sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
     #       packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
+os:
+  - linux
+  - osx
 install:
   #- cabal install cabal-install
   #- cabal --version
