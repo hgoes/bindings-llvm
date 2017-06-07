@@ -81,5 +81,5 @@ install:
   - sh tools/install-llvm.sh
 script:
   - stack setup
-  - stack build --ghc-options="${COMPILER_OPTS}" --cabal-verbose --with-gcc=${HOME}/.local/bin/clang++
+  - stack build --ghc-options="${COMPILER_OPTS}" --cabal-verbose $(if [ ${TRAVIS_OS_NAME} = 'osx' ]; then echo "--with-gcc=${HOME}/.local/bin/clang++"; fi)
 
