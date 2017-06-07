@@ -5,8 +5,7 @@ module LLVM.FFI.IPList
         ipListToList,
         ipListToLazyList,
         Ilist_iterator(),
-        IListIteratorC(..),
-        IListNodeC(..)
+        IListIteratorC(..)
        ) where
 
 import LLVM.FFI.Interface
@@ -38,10 +37,6 @@ class IListIteratorC a where
   iListIteratorNEq :: Ptr (Ilist_iterator a)
                       -> Ptr (Ilist_iterator a)
                       -> IO Bool
-
-class IListNodeC a where
-  iListNodeNext :: Ptr a -> IO (Ptr a)
-  iListNodePrev :: Ptr a -> IO (Ptr a)
 
 ipListToList :: (IPListC a,IListIteratorC a) 
                 => Ptr (Iplist a) -> IO [Ptr a]

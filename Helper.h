@@ -54,11 +54,6 @@ instance IListIteratorC name where {\
   iListIteratorPrev = listIterator##name##Prev ;\
   iListIteratorEq = listIterator##name##Eq ;\
   iListIteratorNEq = listIterator##name##NEq\
-} ;\
-\
-instance IListNodeC name where {\
-  iListNodeNext = listNode##name##Next ;\
-  iListNodePrev = listNode##name##Prev ;\
 }
 
 #if HS_LLVM_VERSION>=300
@@ -101,7 +96,8 @@ instance VectorC (Ptr name) where {\
   vectorPushBack = vector##name##PushBack ; \
   vectorResize = vector##name##Resize ;\
   vectorIndex = vector##name##Index ;\
-  vectorSize = vector##name##Size\
+  vectorSize = vector##name##Size ;\
+  vectorDelete = vector##name##Delete\
 }
 
 #define SPECIALIZE_SMALLVECTOR(name)\

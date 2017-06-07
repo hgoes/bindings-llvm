@@ -25,7 +25,6 @@ module LLVM.FFI.AliasAnalysis
        ,AAResultsC()
        ,newAAResults
        ,deleteAAResults
-       ,aaResultsGetTargetLibraryInfo
        ,aaResultsAlias
 #endif
        ,AliasResult(..)
@@ -177,8 +176,10 @@ instance AAResultsC AAResults
 deleteAAResults :: AAResultsC t => Ptr t -> IO ()
 deleteAAResults = deleteAAResults_
 
+#if HS_LLVM_VERSION < 308
 aaResultsGetTargetLibraryInfo :: AAResultsC t => Ptr t -> IO (Ptr TargetLibraryInfo)
 aaResultsGetTargetLibraryInfo = aaResultsGetTargetLibraryInfo_
+#endif
 
 aaResultsAlias :: AAResultsC t => Ptr t
                -> Ptr MemoryLocation -> Ptr MemoryLocation

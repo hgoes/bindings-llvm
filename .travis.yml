@@ -57,14 +57,16 @@ matrix:
     #     apt:
     #       sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
     #       packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
+before_install:
+  - export PATH=$HOME/.cabal/bin:$PATH
 install:
-  #- cabal install cabal-install
-  #- cabal --version
+  - cabal install cabal-install
+  - cabal --version
   - llvm-config-${LLVM_VERSION} --version
   - cabal install cpphs
   - cabal install --only-dependencies
 script:
-  - ghc --make Setup.hs -o ./setup
+  - ghc --make Setup.hs -o setup
   - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="${COMPILER_OPTS}"
   - ./setup build --verbose=2
   - ./setup test

@@ -173,6 +173,8 @@ constT :: TypeC -> Type
 constT = Type [QConst]
 
 char = NamedType [] "char" [] False
+uchar = NamedType [] "unsigned char" [] False
+schar = NamedType [] "signed char" [] False
 void = NamedType [] "void" [] False
 size_t = NamedType [] "size_t" [] False
 bool = NamedType [] "bool" [] False
@@ -184,6 +186,10 @@ uint8_t = NamedType [] "uint8_t" [] False
 int64_t = NamedType [] "int64_t" [] False
 double = NamedType [] "double" [] False
 float = NamedType [] "float" [] False
+long = NamedType [] "long" [] False
+ulong = NamedType [] "unsigned long" [] False
+longlong = NamedType [] "long long" [] False
+ulonglong = NamedType [] "unsigned long long" [] False
 ptr = PtrType
 ref = RefType
 
@@ -205,6 +211,8 @@ isCType :: TypeC -> Bool
 isCType (NamedType [] name [] _) = case name of
   "void" -> True
   "char" -> True
+  "unsigned char" -> True
+  "signed char" -> True
   "size_t" -> True
   "int" -> True
   "int64_t" -> True
@@ -215,6 +223,10 @@ isCType (NamedType [] name [] _) = case name of
   "signed" -> True
   "double" -> True
   "float" -> True
+  "long" -> True
+  "unsigned long" -> True
+  "long long" -> True
+  "unsigned long long" -> True
   _ -> False
 isCType (PtrType tp) = isCType tp
 isCType _ = False
@@ -256,6 +268,8 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
     toHSType isP (NamedType [] name [] iface) = case name of
       "void" -> "()"
       "char" -> "CChar"
+      "unsigned char" -> "CUChar"
+      "signed char" -> "CSChar"
       "size_t" -> "CSize"
       "int" -> "CInt"
       "int64_t" -> "Int64"
@@ -266,6 +280,10 @@ toHaskellType addP Nothing (Type q c) = toHSType (not addP) c
       "signed" -> "CInt"
       "double" -> "CDouble"
       "float" -> "CFloat"
+      "long" -> "CLong"
+      "unsigned long" -> "CULong"
+      "long long" -> "CLLong"
+      "unsigned long long" -> "CULLong"
       _ -> (if isP
             then id 
             else ("Ptr "++).bracket
@@ -328,7 +346,9 @@ generateWrapper inc_sym spec
   where
     generateWrapperFunction' :: Type -> String -> [(Type,String)] -> ([(Type,String)] -> ([String],String)) -> Bool -> ([String],[String])
     generateWrapperFunction' rtp name args body ignore
-      = let sig = renderType rtp'++" "++name++
+      = let sig = (if ignore
+                   then "void"
+                   else renderType rtp')++" "++name++
                   "("++(paramList $ fmap (\(tp,n,_) -> (tp,n)) args')++")"
             (rtp',outC,_) = toCType rtp
             (args',cmds) = unzip $ fmap (\(tp,name) -> let (tp',_,inC) = toCType tp
@@ -512,7 +532,8 @@ generateFFI mname header specs
                                           , ftOverloaded = isO 
                                           , ftPure = isP 
                                           , ftStatic = isS
-                                          , ftReturnType = rtp }
+                                          , ftReturnType = rtp
+                                          , ftIgnoreReturn = ign }
                                   -> ((if isS
                                        then id
                                        else ((toHaskellType True (if isO
@@ -524,7 +545,9 @@ generateFFI mname header specs
                                       (if isP
                                        then id
                                        else ("IO "++).bracket)
-                                      (toHaskellType True Nothing rtp),
+                                      (if ign
+                                       then "()"
+                                       else toHaskellType True Nothing rtp),
                                       cname)
                                 Constructor { ftConArgs = r }
                                   -> (fmap (\((isO',tp'),n) -> toHaskellType True (if isO'

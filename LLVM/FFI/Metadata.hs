@@ -79,7 +79,11 @@ module LLVM.FFI.Metadata
 #if HS_LLVM_VERSION>=308
         diSubprogramGetIsOptimized,
 #endif
+#if HS_LLVM_VERSION>=309
+        diSubprogramGetUnit,
+#elif HS_LLVM_VERSION<308
         diSubprogramGetFunction,
+#endif
         diSubprogramGetTemplateParams,
         diSubprogramGetDeclaration,
         diSubprogramGetVariables,

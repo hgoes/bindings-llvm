@@ -34,6 +34,7 @@
 #if HS_LLVM_VERSION>=305
 #include <llvm/IR/Dominators.h>
 #endif
+#include <llvm/Analysis/ScalarEvolution.h>
 
 #include <string>
 
@@ -63,6 +64,7 @@ extern "C" {
   char* passId_DominatorTreeWrapperPass() { return &llvm::DominatorTreeWrapperPass::ID; }
 #endif
   char* passId_AliasAnalysis() { return &llvm::AliasAnalysis::ID; }
+  char* passId_ScalarEvolution() { return &llvm::ScalarEvolution::ID; }
   
   int writeBitCodeToFile(void* m,const char* path) {
 #if HS_LLVM_VERSION < 306

@@ -1,22 +1,29 @@
 name:           bindings-llvm
 version:        0.1
 author:         Henning Günther
-cabal-version:  >= 1.8
+cabal-version:  >= 1.24
 build-type:     Custom
+
+custom-setup
+  setup-depends: base,Cabal,filepath,directory,time,process
+
+flag shared-llvm
+  description: Link against shared LLVM library
+  default: False
 
 library
   build-tools:    cpphs,llvm-config
-  build-depends: base,tagged>=0.4,unix,containers
+  build-depends: base,unix,containers
   includes:             
     wrapper/extra.h
     wrapper/HaskellPass.h
   include-dirs:         wrapper .
-  extra-libraries:      stdc++,tinfo,z
+  extra-libraries:      stdc++,z
   c-sources:
     wrapper/extra.cpp
     wrapper/HaskellPass.cpp
   ghc-options: -cpp -pgmPcpphs -optP--cpp
-  extensions:
+  default-extensions:
     ForeignFunctionInterface
     CApiFFI
     MultiParamTypeClasses
@@ -24,6 +31,8 @@ library
     TypeFamilies
     DeriveDataTypeable
     DoAndIfThenElse
+    ViewPatterns
+  default-language: Haskell2010
   exposed-modules:
     LLVM.FFI
     LLVM.FFI.StringRef
