@@ -8,6 +8,11 @@ matrix:
       addons:
         apt:
           packages: ['llvm-2.8-dev']
+    - env: LLVM_VERSION=2.8
+      os: osx
+      addons:
+        apt:
+          packages: ['llvm-2.8-dev']
     - env: LLVM_VERSION=2.9
       addons:
         apt:
@@ -52,9 +57,6 @@ matrix:
     #     apt:
     #       sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
     #       packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
-os:
-  - linux
-  - osx
 install:
   #- cabal install cabal-install
   #- cabal --version
