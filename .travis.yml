@@ -1,5 +1,9 @@
-language: haskell
-ghc: 7.8
+language: c
+sudo: false
+cache:
+  directories:
+  - $HOME/.local/bin
+  - $HOME/.stack
 matrix:
   exclude:
     - ghc: 7.8
@@ -7,65 +11,75 @@ matrix:
     - env: LLVM_VERSION=2.8
       addons:
         apt:
-          packages: ['llvm-2.8-dev']
+          packages: ['llvm-2.8-dev','libgmp-dev']
+    #- env: LLVM_VERSION=2.8
+    #  os: osx
     - env: LLVM_VERSION=2.9
       addons:
         apt:
-          packages: ['llvm-2.9-dev']
+          packages: ['llvm-2.9-dev','libgmp-dev']
+    #- env: LLVM_VERSION=2.9
+    #  os: osx
     - env: LLVM_VERSION=3.0
       addons:
         apt:
-          packages: ['llvm-3.0-dev']
+          packages: ['llvm-3.0-dev','libgmp-dev']
+    #- env: LLVM_VERSION=3.0
+    #  os: osx
     - env: LLVM_VERSION=3.1
       addons:
         apt:
-          packages: ['llvm-3.1-dev']
+          packages: ['llvm-3.1-dev','libgmp-dev']
+    #- env: LLVM_VERSION=3.1
+    #  os: osx
     - env: LLVM_VERSION=3.2
       addons:
         apt:
-          packages: ['llvm-3.2-dev']
+          packages: ['llvm-3.2-dev','libgmp-dev']
+    #- env: LLVM_VERSION=3.2
+    #  os: osx
     - env: LLVM_VERSION=3.3
       addons:
         apt:
-          packages: ['llvm-3.3-dev']
+          packages: ['llvm-3.3-dev','libgmp-dev']
+    #- env: LLVM_VERSION=3.3
+    #  os: osx
     - env: LLVM_VERSION=3.4
       addons:
         apt:
-          packages: ['llvm-3.4-dev']
+          packages: ['llvm-3.4-dev','libgmp-dev']
+    #- env: LLVM_VERSION=3.4
+    #  os: osx
     - env: LLVM_VERSION=3.5 COMPILER_OPTS="-pgmc g++-4.9 -optc=-std=gnu++11"
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.5']
-          packages: ['g++-4.9','libedit-dev','llvm-3.5-dev']
+          packages: ['g++-4.9','libedit-dev','llvm-3.5-dev','libgmp-dev']
+    #- env: LLVM_VERSION=3.5
+    #  os: osx
     - env: LLVM_VERSION=3.6 COMPILER_OPTS="-pgmc g++-4.9 -optc=-std=gnu++11"
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.6']
-          packages: ['g++-4.9','libedit-dev','llvm-3.6-dev']
+          packages: ['g++-4.9','libedit-dev','llvm-3.6-dev','libgmp-dev']
+    - env: LLVM_VERSION=3.6
+      os: osx
     - env: LLVM_VERSION=3.7 COMPILER_OPTS="-pgmc g++-4.9 -optc=-std=gnu++11"
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise-3.7']
-          packages: ['g++-4.9','libedit-dev','llvm-3.7-dev']
+          packages: ['g++-4.9','libedit-dev','llvm-3.7-dev','libgmp-dev']
+    - env: LLVM_VERSION=3.7
+      os: osx
     # - env: LLVM_VERSION=3.8 COMPILER_OPTS="-pgmc g++-4.9 -optc=-std=gnu++11"
     #   addons:
     #     apt:
     #       sources: ['ubuntu-toolchain-r-test','llvm-toolchain-precise']
     #       packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
-before_install:
-  - export PATH=$HOME/.cabal/bin:$PATH
 install:
-  - cabal install cabal-install
-  - cabal --version
-  - llvm-config-${LLVM_VERSION} --version
-  - cabal install cpphs
-  - cabal install --only-dependencies
+  - sh tools/install-stack.sh
+  - sh tools/install-llvm.sh
 script:
-  - ghc --make Setup.hs -o setup
-  - ./setup configure --user --enable-tests --verbose=2 --with-llvm-config=llvm-config-${LLVM_VERSION} --ghc-options="${COMPILER_OPTS}"
-  - ./setup build --verbose=2
-  - ./setup test
-#cache:
-#  directories:
-#    - $HOME/.cabal
-sudo: false
+  - stack setup
+  - stack build --ghc-options="${COMPILER_OPTS}" --cabal-verbose $(if [ ${TRAVIS_OS_NAME} = 'osx' ]; then echo "--with-gcc=${HOME}/.local/bin/clang++"; fi)
+
