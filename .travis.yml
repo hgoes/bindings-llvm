@@ -67,3 +67,4 @@ before_install:
 install:
   - stack setup
   - stack build --ghc-options="${COMPILER_OPTS}"
+after_success:
