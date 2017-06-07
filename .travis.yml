@@ -81,5 +81,5 @@ install:
   - sh tools/install-llvm.sh
 script:
   - stack setup
-  - stack build --ghc-options="${COMPILER_OPTS}" --cabal-verbose --with-gcc=clang++
+  - stack build --ghc-options="${COMPILER_OPTS}" --cabal-verbose --with-gcc=${HOME}/.local/bin/clang++
 
