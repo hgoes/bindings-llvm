@@ -63,6 +63,7 @@ matrix:
     #       packages: ['g++-4.9','libedit-dev','llvm-3.8-dev']
 before_install:
   - sh tools/install-stack.sh
+  - mkdir -p .local/bin
   - ln -s $(which llvm-config-${LLVM_VERSION}) .local/bin/llvm-config
 install:
   - stack setup
