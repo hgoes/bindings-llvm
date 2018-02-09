@@ -5,7 +5,7 @@ cabal-version:  >= 1.24
 build-type:     Custom
 
 custom-setup
-  setup-depends: base,Cabal,filepath,directory,time,process
+  setup-depends: base,Cabal >= 1.24,filepath,directory,time,process
 
 flag shared-llvm
   description: Link against shared LLVM library
